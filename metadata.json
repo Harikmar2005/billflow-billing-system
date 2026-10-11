@@ -1,0 +1,7 @@
+{
+  "name": "BillFlow — Smart Billing Software for India",
+  "description": "GST-compliant smart billing, invoice management, customer ledger, inventory tracking, and sales intelligence application for Indian businesses.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+

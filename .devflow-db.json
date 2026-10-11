@@ -1,0 +1,617 @@
+{
+  "projects": [
+    {
+      "id": "proj-1",
+      "name": "HyperScale Gateway",
+      "key": "HSG",
+      "description": "Distributed API gateway with dynamic rate-limiting, JWT validation, and gRPC routing layer.",
+      "repositoryUrl": "https://github.com/devflow/hyperscale-gateway",
+      "branch": "main",
+      "technologies": [
+        "TypeScript",
+        "Go",
+        "Redis",
+        "Docker",
+        "Envoy"
+      ],
+      "status": "active",
+      "health": "healthy",
+      "deadline": "2026-11-15",
+      "stars": 342,
+      "createdAt": "2026-09-11T10:22:06.386Z",
+      "updatedAt": "2026-10-11T10:22:06.386Z"
+    },
+    {
+      "id": "proj-2",
+      "name": "NeuralSearch Indexer",
+      "key": "NSI",
+      "description": "Semantic vector search engine with hybrid BM25 re-ranking and sub-10ms query embedding cache.",
+      "repositoryUrl": "https://github.com/devflow/neuralsearch-indexer",
+      "branch": "v2.1-dev",
+      "technologies": [
+        "Python",
+        "FastAPI",
+        "Qdrant",
+        "PyTorch",
+        "ONNX"
+      ],
+      "status": "active",
+      "health": "at_risk",
+      "deadline": "2026-10-30",
+      "stars": 512,
+      "createdAt": "2026-08-27T10:22:06.386Z",
+      "updatedAt": "2026-10-11T10:22:06.386Z"
+    },
+    {
+      "id": "proj-3",
+      "name": "CloudPulse Observability",
+      "key": "CPO",
+      "description": "High-throughput telemetry ingestion pipeline processing OpenTelemetry spans, metrics, and logs.",
+      "repositoryUrl": "https://github.com/devflow/cloudpulse",
+      "branch": "main",
+      "technologies": [
+        "Rust",
+        "Kafka",
+        "ClickHouse",
+        "React",
+        "Grafana"
+      ],
+      "status": "planning",
+      "health": "healthy",
+      "deadline": "2026-12-01",
+      "stars": 189,
+      "createdAt": "2026-09-26T10:22:06.386Z",
+      "updatedAt": "2026-10-11T10:22:06.386Z"
+    },
+    {
+      "id": "proj-4",
+      "name": "Legacy Auth Proxy",
+      "key": "LAP",
+      "description": "OAuth 2.0 token translation proxy for migration between legacy identity provider and modern IdP.",
+      "repositoryUrl": "https://github.com/devflow/legacy-auth-proxy",
+      "branch": "master",
+      "technologies": [
+        "Node.js",
+        "Express",
+        "PostgreSQL"
+      ],
+      "status": "archived",
+      "health": "healthy",
+      "deadline": "2026-08-01",
+      "stars": 45,
+      "createdAt": "2026-06-13T10:22:06.386Z",
+      "updatedAt": "2026-10-11T10:22:06.386Z"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "task-1",
+      "projectId": "proj-1",
+      "title": "Implement token bucket rate limiter with Redis cluster fallback",
+      "description": "Ensure smooth degradation when Redis cluster node fails during peak traffic.",
+      "status": "in_progress",
+      "priority": "urgent",
+      "assignee": "Alex Chen (Staff Infra)",
+      "tags": [
+        "reliability",
+        "redis",
+        "networking"
+      ],
+      "dueDate": "2026-10-18",
+      "createdAt": "2026-10-06T10:22:06.386Z",
+      "updatedAt": "2026-10-11T10:22:06.386Z"
+    },
+    {
+      "id": "task-2",
+      "projectId": "proj-1",
+      "title": "Add TLS termination benchmarks for HTTP/3 QUIC listener",
+      "description": "Measure handshake latency improvements over standard TLS 1.3 TCP.",
+      "status": "todo",
+      "priority": "medium",
+      "assignee": "Sarah Lin (SecEng)",
+      "tags": [
+        "benchmarks",
+        "quic",
+        "security"
+      ],
+      "dueDate": "2026-10-24",
+      "createdAt": "2026-10-08T10:22:06.386Z",
+      "updatedAt": "2026-10-11T10:22:06.386Z"
+    },
+    {
+      "id": "task-3",
+      "projectId": "proj-1",
+      "title": "Migrate configuration schema to strict Proto3 definitions",
+      "description": "Eliminate runtime type parsing bottlenecks in gateway route definitions.",
+      "status": "completed",
+      "priority": "high",
+      "assignee": "Alex Chen (Staff Infra)",
+      "tags": [
+        "protobuf",
+        "refactoring"
+      ],
+      "dueDate": "2026-10-10",
+      "createdAt": "2026-09-29T10:22:06.386Z",
+      "updatedAt": "2026-10-11T10:22:06.386Z"
+    },
+    {
+      "id": "task-4",
+      "projectId": "proj-2",
+      "title": "Profile ONNX Runtime memory leaks under continuous batching",
+      "description": "Identify GPU memory fragmentation when processing variable length embeddings.",
+      "status": "in_progress",
+      "priority": "urgent",
+      "assignee": "David K. (MLOps)",
+      "tags": [
+        "ml",
+        "memory",
+        "performance"
+      ],
+      "dueDate": "2026-10-15",
+      "createdAt": "2026-10-07T10:22:06.386Z",
+      "updatedAt": "2026-10-11T10:22:06.386Z"
+    },
+    {
+      "id": "task-5",
+      "projectId": "proj-2",
+      "title": "Build automated regression dataset for hybrid ranking search",
+      "description": "Prepare ground-truth test queries for NDCG@10 validation.",
+      "status": "todo",
+      "priority": "high",
+      "assignee": "Elena Rostova (Search Eng)",
+      "tags": [
+        "datasets",
+        "testing",
+        "ranking"
+      ],
+      "dueDate": "2026-10-28",
+      "createdAt": "2026-10-09T10:22:06.386Z",
+      "updatedAt": "2026-10-11T10:22:06.386Z"
+    },
+    {
+      "id": "task-6",
+      "projectId": "proj-3",
+      "title": "Design Kafka partition key strategy for tenant-isolated spans",
+      "description": "Prevent hot partition skew when large enterprise accounts send spike telemetry.",
+      "status": "todo",
+      "priority": "high",
+      "assignee": "Marcus Vance (Principal Architect)",
+      "tags": [
+        "architecture",
+        "kafka",
+        "distributed"
+      ],
+      "dueDate": "2026-11-05",
+      "createdAt": "2026-10-05T10:22:06.386Z",
+      "updatedAt": "2026-10-11T10:22:06.386Z"
+    }
+  ],
+  "issues": [
+    {
+      "id": "issue-1",
+      "projectId": "proj-2",
+      "title": "Memory leak in embedding worker thread pool",
+      "description": "Workers retain tensor references after batch inference completes, leading to OOM crash every ~6 hours under heavy query volume.",
+      "category": "performance",
+      "severity": "critical",
+      "priority": "urgent",
+      "status": "open",
+      "reporter": "Telemetry Alert (OOM Bot)",
+      "filePath": "src/embeddings/worker_pool.py",
+      "line": 142,
+      "createdAt": "2026-10-09T10:22:06.386Z"
+    },
+    {
+      "id": "issue-2",
+      "projectId": "proj-1",
+      "title": "Unvalidated redirect in custom OAuth callback URL parser",
+      "description": "Missing strict domain whitelist check allows open redirect if user passes malicious return_to param with slash variations.",
+      "category": "security",
+      "severity": "high",
+      "priority": "high",
+      "status": "in_investigation",
+      "reporter": "SecAudit Bot",
+      "filePath": "src/auth/redirect_handler.ts",
+      "line": 88,
+      "createdAt": "2026-10-06T10:22:06.386Z"
+    },
+    {
+      "id": "issue-3",
+      "projectId": "proj-1",
+      "title": "Race condition on cache invalidation in distributed token store",
+      "description": "Simultaneous revoke and refresh calls for same user token can cause revoked token to remain cached for TTL duration.",
+      "category": "bug",
+      "severity": "medium",
+      "priority": "medium",
+      "status": "resolved",
+      "reporter": "Sarah Lin (SecEng)",
+      "filePath": "src/tokens/redis_store.go",
+      "line": 215,
+      "resolutionNotes": "Applied Redis Lua atomic script for CAS (compare-and-swap) during token state transition.",
+      "createdAt": "2026-10-01T10:22:06.386Z",
+      "resolvedAt": "2026-10-10T10:22:06.386Z"
+    },
+    {
+      "id": "issue-4",
+      "projectId": "proj-2",
+      "title": "High cyclomatic complexity in BM25 scoring fallback module",
+      "description": "Nested conditionals and duplicated tokenization logic across 4 functions reduce maintainability and test coverage.",
+      "category": "maintainability",
+      "severity": "low",
+      "priority": "low",
+      "status": "open",
+      "reporter": "Elena Rostova",
+      "filePath": "src/ranking/bm25_calculator.py",
+      "line": 54,
+      "createdAt": "2026-10-03T10:22:06.386Z"
+    },
+    {
+      "id": "issue-5",
+      "projectId": "proj-3",
+      "title": "Single point of failure in ClickHouse write coordinator",
+      "description": "Schema currently relies on single ingest coordinator instance without standby leader election.",
+      "category": "architecture",
+      "severity": "high",
+      "priority": "high",
+      "status": "open",
+      "reporter": "Marcus Vance",
+      "filePath": "infra/helm/clickhouse-cluster.yaml",
+      "line": 32,
+      "createdAt": "2026-10-10T10:22:06.386Z"
+    }
+  ],
+  "architecture": {
+    "proj-1": {
+      "id": "arch-proj-1",
+      "projectId": "proj-1",
+      "name": "HyperScale Gateway Core Topology",
+      "description": "Edge reverse proxy and ingress routing pipeline",
+      "nodes": [
+        {
+          "id": "node-client",
+          "type": "default",
+          "position": {
+            "x": 50,
+            "y": 150
+          },
+          "data": {
+            "label": "Web & Mobile Clients",
+            "type": "frontend",
+            "technology": "HTTPS / HTTP3",
+            "status": "healthy"
+          }
+        },
+        {
+          "id": "node-edge",
+          "type": "default",
+          "position": {
+            "x": 300,
+            "y": 150
+          },
+          "data": {
+            "label": "Envoy Edge Proxy",
+            "type": "gateway",
+            "technology": "Envoy / C++",
+            "status": "healthy",
+            "description": "TLS Termination & DDoS shield"
+          }
+        },
+        {
+          "id": "node-auth",
+          "type": "default",
+          "position": {
+            "x": 550,
+            "y": 50
+          },
+          "data": {
+            "label": "Auth & JWT Service",
+            "type": "auth",
+            "technology": "Go / gRPC",
+            "status": "healthy",
+            "description": "Session validation & RBAC"
+          }
+        },
+        {
+          "id": "node-redis",
+          "type": "default",
+          "position": {
+            "x": 800,
+            "y": 50
+          },
+          "data": {
+            "label": "Redis Rate Limiter",
+            "type": "cache",
+            "technology": "Redis Cluster 7",
+            "status": "healthy",
+            "description": "Sliding window rate limit"
+          }
+        },
+        {
+          "id": "node-router",
+          "type": "default",
+          "position": {
+            "x": 550,
+            "y": 260
+          },
+          "data": {
+            "label": "Dynamic Routing Mesh",
+            "type": "service",
+            "technology": "TypeScript Node 22",
+            "status": "healthy",
+            "description": "Upstream microservice dispatch"
+          }
+        },
+        {
+          "id": "node-upstream",
+          "type": "default",
+          "position": {
+            "x": 800,
+            "y": 260
+          },
+          "data": {
+            "label": "Internal Services",
+            "type": "service",
+            "technology": "Kubernetes VPC",
+            "status": "healthy",
+            "description": "Billing, Analytics, Users"
+          }
+        }
+      ],
+      "edges": [
+        {
+          "id": "e1",
+          "source": "node-client",
+          "target": "node-edge",
+          "label": "TLS 1.3",
+          "animated": true
+        },
+        {
+          "id": "e2",
+          "source": "node-edge",
+          "target": "node-auth",
+          "label": "Check Auth (gRPC)",
+          "animated": true
+        },
+        {
+          "id": "e3",
+          "source": "node-auth",
+          "target": "node-redis",
+          "label": "Token Bucket",
+          "animated": false
+        },
+        {
+          "id": "e4",
+          "source": "node-edge",
+          "target": "node-router",
+          "label": "Authorized Request",
+          "animated": true
+        },
+        {
+          "id": "e5",
+          "source": "node-router",
+          "target": "node-upstream",
+          "label": "Upstream Proxy",
+          "animated": true
+        }
+      ],
+      "updatedAt": "2026-10-11T10:22:06.386Z"
+    },
+    "proj-2": {
+      "id": "arch-proj-2",
+      "projectId": "proj-2",
+      "name": "NeuralSearch Pipeline Topology",
+      "description": "Query embedding, vector retrieval, and reranking graph",
+      "nodes": [
+        {
+          "id": "n-api",
+          "type": "default",
+          "position": {
+            "x": 80,
+            "y": 150
+          },
+          "data": {
+            "label": "Search Query API",
+            "type": "gateway",
+            "technology": "FastAPI / Python 3.11",
+            "status": "healthy"
+          }
+        },
+        {
+          "id": "n-embed",
+          "type": "default",
+          "position": {
+            "x": 340,
+            "y": 80
+          },
+          "data": {
+            "label": "ONNX Embedding Engine",
+            "type": "service",
+            "technology": "PyTorch / ONNX",
+            "status": "degraded",
+            "description": "Vector generation with memory leak"
+          }
+        },
+        {
+          "id": "n-qdrant",
+          "type": "default",
+          "position": {
+            "x": 600,
+            "y": 80
+          },
+          "data": {
+            "label": "Qdrant Vector DB",
+            "type": "database",
+            "technology": "Qdrant Cluster (HNSW)",
+            "status": "healthy",
+            "description": "Approximate Nearest Neighbor"
+          }
+        },
+        {
+          "id": "n-bm25",
+          "type": "default",
+          "position": {
+            "x": 340,
+            "y": 240
+          },
+          "data": {
+            "label": "BM25 Keyword Index",
+            "type": "database",
+            "technology": "Lucene / Tantivy",
+            "status": "healthy",
+            "description": "Lexical sparse scoring"
+          }
+        },
+        {
+          "id": "n-rerank",
+          "type": "default",
+          "position": {
+            "x": 600,
+            "y": 240
+          },
+          "data": {
+            "label": "Cross-Encoder Reranker",
+            "type": "service",
+            "technology": "FastAPI / BGE-Reranker",
+            "status": "healthy"
+          }
+        }
+      ],
+      "edges": [
+        {
+          "id": "e2-1",
+          "source": "n-api",
+          "target": "n-embed",
+          "label": "Query Text",
+          "animated": true
+        },
+        {
+          "id": "e2-2",
+          "source": "n-api",
+          "target": "n-bm25",
+          "label": "Sparse Query",
+          "animated": true
+        },
+        {
+          "id": "e2-3",
+          "source": "n-embed",
+          "target": "n-qdrant",
+          "label": "Dense Vectors (768d)",
+          "animated": true
+        },
+        {
+          "id": "e2-4",
+          "source": "n-qdrant",
+          "target": "n-rerank",
+          "label": "Top 100 ANN",
+          "animated": true
+        },
+        {
+          "id": "e2-5",
+          "source": "n-bm25",
+          "target": "n-rerank",
+          "label": "Top 100 BM25",
+          "animated": true
+        }
+      ],
+      "updatedAt": "2026-10-11T10:22:06.386Z"
+    }
+  },
+  "analyses": [
+    {
+      "id": "ana-1",
+      "projectId": "proj-1",
+      "fileName": "redirect_handler.ts",
+      "language": "typescript",
+      "codeSnippet": "export function handleOAuthCallback(req: Request, res: Response) {\n  const returnTo = req.query.return_to as string || '/dashboard';\n  // Potential open redirect vulnerability:\n  if (returnTo.startsWith('/')) {\n    res.redirect(returnTo);\n  } else {\n    res.redirect('/error');\n  }\n}",
+      "summary": "OAuth callback redirect logic with insufficient domain validation",
+      "explanation": "The code checks if return_to starts with a single slash, but fails to prevent protocol-relative URLs (e.g. //attacker.com) or backslash traversal variations on certain clients.",
+      "bugs": [
+        {
+          "title": "Protocol-relative redirect bypass",
+          "severity": "high",
+          "line": 4,
+          "description": "URL like `//attacker.com` begins with `/` and passes the validation, causing the browser to navigate to an external origin.",
+          "suggestion": "Enforce regex `^\\/(?!\\/)[a-zA-Z0-9_\\-\\/?=&]*$` or parse with URL constructor ensuring origin is strictly identical."
+        }
+      ],
+      "maintainability": [
+        {
+          "area": "Validation decoupling",
+          "score": 72,
+          "observation": "Validation logic is embedded directly inside the Express route handler rather than a sanitized middleware.",
+          "suggestion": "Extract to `validateSafeRedirectTarget(url: string): string`."
+        }
+      ],
+      "securityConcerns": [
+        {
+          "title": "CWE-601: URL Redirection to Untrusted Site (Open Redirect)",
+          "riskLevel": "high",
+          "description": "Attackers can exploit this parameter in phishing campaigns targeting trusted user tokens.",
+          "mitigation": "Use an explicit whitelist of allowed relative paths or verify URL origin against host header."
+        }
+      ],
+      "improvements": [
+        {
+          "title": "Safe relative URL sanitizer",
+          "reason": "Eliminates open redirect vulnerabilities completely.",
+          "beforeSnippet": "if (returnTo.startsWith('/')) {\n  res.redirect(returnTo);\n}",
+          "afterSnippet": "const safePath = (returnTo.startsWith('/') && !returnTo.startsWith('//') && !returnTo.includes('\\\\')) ? returnTo : '/dashboard';\nres.redirect(safePath);"
+        }
+      ],
+      "unitTestSuggestions": [
+        {
+          "testName": "should reject protocol-relative evil URLs",
+          "framework": "Vitest / Jest",
+          "description": "Verify //evil.com is redirected to /dashboard fallback",
+          "testCode": "it('rejects protocol relative URLs', () => {\n  const res = mockRes();\n  handleOAuthCallback({ query: { return_to: '//evil.com' } } as any, res);\n  expect(res.redirect).toHaveBeenCalledWith('/dashboard');\n});"
+        }
+      ],
+      "overallScore": 68,
+      "analyzedAt": "2026-10-09T10:22:06.386Z",
+      "modelUsed": "gemini-3.8-flash",
+      "verifiedStatus": "ai_inferred"
+    }
+  ],
+  "activities": [
+    {
+      "id": "act-1",
+      "projectId": "proj-1",
+      "projectName": "HyperScale Gateway",
+      "type": "issue_resolved",
+      "title": "Resolved Issue #3",
+      "description": "Fixed race condition in token invalidation with Redis atomic script",
+      "timestamp": "2026-10-10T10:22:06.386Z",
+      "author": "Sarah Lin"
+    },
+    {
+      "id": "act-2",
+      "projectId": "proj-2",
+      "projectName": "NeuralSearch Indexer",
+      "type": "issue_reported",
+      "title": "Reported Issue #1",
+      "description": "Memory leak in embedding worker thread pool during continuous batching",
+      "timestamp": "2026-10-09T10:22:06.386Z",
+      "author": "Telemetry Alert"
+    },
+    {
+      "id": "act-3",
+      "projectId": "proj-1",
+      "projectName": "HyperScale Gateway",
+      "type": "analysis_completed",
+      "title": "Security Analysis Run",
+      "description": "Identified open redirect vulnerability in redirect_handler.ts",
+      "timestamp": "2026-10-09T10:22:06.386Z",
+      "author": "DevFlow AI Engine"
+    },
+    {
+      "id": "act-4",
+      "projectId": "proj-1",
+      "projectName": "HyperScale Gateway",
+      "type": "task_updated",
+      "title": "Completed Task #3",
+      "description": "Migrated configuration schema to strict Proto3 definitions",
+      "timestamp": "2026-10-08T10:22:06.386Z",
+      "author": "Alex Chen"
+    }
+  ]
+}
