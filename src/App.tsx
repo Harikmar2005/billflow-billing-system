@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BillingProvider, useBilling } from './context/BillingContext';
 import { Navbar } from './components/layout/Navbar';
 import { Sidebar } from './components/layout/Sidebar';
 import { ToastContainer } from './components/common/ToastContainer';
+import { CookieConsentBanner } from './components/common/CookieConsentBanner';
+import { analytics } from './utils/analytics';
 
 // Main Views
 import { DashboardView } from './components/dashboard/DashboardView';
@@ -15,6 +17,10 @@ import { ExpensesView } from './components/expenses/ExpensesView';
 import { ReportsView } from './components/reports/ReportsView';
 import { SettingsView } from './components/settings/SettingsView';
 import { AiAssistantView } from './components/assistant/AiAssistantView';
+import { PrivacyPolicyView } from './components/legal/PrivacyPolicyView';
+import { TermsConditionsView } from './components/legal/TermsConditionsView';
+import { AnalyticsView } from './components/analytics/AnalyticsView';
+import { NotFoundView } from './components/common/NotFoundView';
 
 // Modals
 import { CustomerModal } from './components/modals/CustomerModal';
@@ -26,10 +32,12 @@ import { CancelInvoiceModal } from './components/modals/CancelInvoiceModal';
 import { InvoicePreviewModal } from './components/invoices/InvoicePreviewModal';
 
 import { Customer, Product, Invoice } from './types';
+import { Shield, Lock } from 'lucide-react';
 
 const BillingApp: React.FC = () => {
   const {
     currentView,
+    setCurrentView,
     loading,
     error,
     refreshAllData,
@@ -37,6 +45,23 @@ const BillingApp: React.FC = () => {
     setPreviewInvoice,
     invoices,
   } = useBilling();
+
+  // Track page view event on navigation
+  useEffect(() => {
+    analytics.track(`View: ${currentView}`, 'navigation');
+  }, [currentView]);
+
+  // Global Keyboard Shortcut: Ctrl+N or Cmd+N to create new invoice (Clear CTA)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'n') {
+        e.preventDefault();
+        setCurrentView('create-invoice');
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [setCurrentView]);
 
   // Modals state
   const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
@@ -164,8 +189,60 @@ const BillingApp: React.FC = () => {
           {currentView === 'settings' && <SettingsView />}
 
           {currentView === 'ai-assistant' && <AiAssistantView />}
+
+          {currentView === 'privacy-policy' && <PrivacyPolicyView />}
+
+          {currentView === 'terms-conditions' && <TermsConditionsView />}
+
+          {currentView === 'analytics' && <AnalyticsView />}
+
+          {currentView === 'not-found' && <NotFoundView />}
+
+          {/* App Footer */}
+          <footer className="mt-12 pt-6 border-t border-slate-200 dark:border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500 dark:text-slate-400 no-print">
+            <div className="flex items-center gap-2">
+              <span className="font-semibold text-slate-800 dark:text-slate-200">BillFlow India</span>
+              <span>•</span>
+              <span className="flex items-center gap-1 text-teal-600 dark:text-teal-400">
+                <Lock className="w-3 h-3" />
+                <span>HTTPS Enforced</span>
+              </span>
+              <span>•</span>
+              <span className="text-slate-400">GST Rule Compliant</span>
+            </div>
+
+            <div className="flex items-center gap-4 text-[11px] font-medium">
+              <button
+                onClick={() => setCurrentView('privacy-policy')}
+                className="hover:text-teal-600 dark:hover:text-teal-400 hover:underline transition-colors"
+              >
+                Privacy Policy
+              </button>
+              <button
+                onClick={() => setCurrentView('terms-conditions')}
+                className="hover:text-teal-600 dark:hover:text-teal-400 hover:underline transition-colors"
+              >
+                Terms &amp; Conditions
+              </button>
+              <button
+                onClick={() => setCurrentView('analytics')}
+                className="hover:text-teal-600 dark:hover:text-teal-400 hover:underline transition-colors"
+              >
+                Privacy Analytics
+              </button>
+              <button
+                onClick={() => setCurrentView('create-invoice')}
+                className="text-teal-600 dark:text-teal-400 font-semibold hover:underline"
+              >
+                + New Invoice
+              </button>
+            </div>
+          </footer>
         </main>
       </div>
+
+      {/* Cookie Consent Banner */}
+      <CookieConsentBanner />
 
       {/* Global Modals */}
       <CustomerModal

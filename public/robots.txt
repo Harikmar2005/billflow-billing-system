@@ -1,0 +1,6 @@
+# robots.txt for BillFlow
+User-agent: *
+Allow: /
+Disallow: /api/
+
+Sitemap: https://ais-pre-ipp6dwnevzz7czxo7wvn6o-714881716276.asia-southeast1.run.app/sitemap.xml

@@ -270,4 +270,152 @@ console.log('7. Testing INR & Date Formatting...');
   console.log('   ✓ Indian numbering and date formatting verified');
 }
 
-console.log('\n--- ALL 7 BILLFLOW FINANCIAL CALCULATION TESTS PASSED SUCCESSFULLY! ---');
+// 8. Product Search & Multi-Item Invoice Population Test
+console.log('8. Testing Product Search, Selection, and Multi-Item Invoice Integration...');
+{
+  // Sample catalogue with diverse products
+  const mockCatalogue = [
+    {
+      id: 'prod-101',
+      name: 'Gigabit Managed Switch 24-Port',
+      sku: 'SW-24G',
+      hsnSacCode: '8517',
+      sellingPrice: 18500,
+      unit: 'Pcs',
+      gstRate: 18,
+      stockQuantity: 12,
+      type: 'product' as const,
+      description: 'Layer 2 managed switch with 2 SFP fiber uplinks',
+    },
+    {
+      id: 'prod-102',
+      name: 'Cat6 Pure Copper UTP Cable Roll (305m)',
+      sku: 'CAB-CAT6-305',
+      hsnSacCode: '8544',
+      sellingPrice: 7200,
+      unit: 'Box',
+      gstRate: 18,
+      stockQuantity: 25,
+      type: 'product' as const,
+      description: 'Solid copper 23AWG network cable',
+    },
+    {
+      id: 'prod-103',
+      name: 'Onsite Server Setup & Firewall Audit',
+      sku: 'SRV-SEC-01',
+      hsnSacCode: '998313',
+      sellingPrice: 15000,
+      unit: 'Set',
+      gstRate: 18,
+      stockQuantity: 0,
+      type: 'service' as const,
+      description: 'Onsite firewall and gateway configuration service',
+    },
+  ];
+
+  // Search function mimicking search modal
+  const searchCatalogue = (query: string) => {
+    const q = query.toLowerCase();
+    return mockCatalogue.filter(
+      (p) =>
+        p.name.toLowerCase().includes(q) ||
+        p.sku.toLowerCase().includes(q) ||
+        p.hsnSacCode.includes(q) ||
+        p.description.toLowerCase().includes(q)
+    );
+  };
+
+  // Test search by partial name
+  const matchByName = searchCatalogue('Switch');
+  assertEqual(matchByName.length, 1, 'Search by name "Switch" finds 1 product');
+  assertEqual(matchByName[0].id, 'prod-101', 'Found correct switch product');
+
+  // Test search by SKU
+  const matchBySku = searchCatalogue('CAB-CAT6');
+  assertEqual(matchBySku.length, 1, 'Search by SKU "CAB-CAT6" finds 1 product');
+  assertEqual(matchBySku[0].sku, 'CAB-CAT6-305', 'Found correct cable product');
+
+  // Test search by HSN code
+  const matchByHsn = searchCatalogue('998313');
+  assertEqual(matchByHsn.length, 1, 'Search by HSN "998313" finds service');
+  assertEqual(matchByHsn[0].id, 'prod-103', 'Found correct service');
+
+  // Populate multiple invoice line items from search results
+  const isInterState = false;
+  const items: InvoiceLineItem[] = [];
+
+  // Item 1: 2 units of Gigabit Managed Switch
+  const switchProd = matchByName[0];
+  const item1Calc = calculateLineItem(2, switchProd.sellingPrice, 5, switchProd.gstRate, false, isInterState);
+  items.push({
+    id: 'item-1',
+    productId: switchProd.id,
+    productName: switchProd.name,
+    type: switchProd.type,
+    hsnSac: switchProd.hsnSacCode,
+    quantity: 2,
+    unit: switchProd.unit,
+    unitPrice: switchProd.sellingPrice,
+    discountPercent: 5,
+    gstRate: switchProd.gstRate,
+    isTaxInclusive: false,
+    ...item1Calc,
+  });
+
+  // Item 2: 4 boxes of Cat6 Cable
+  const cableProd = matchBySku[0];
+  const item2Calc = calculateLineItem(4, cableProd.sellingPrice, 0, cableProd.gstRate, false, isInterState);
+  items.push({
+    id: 'item-2',
+    productId: cableProd.id,
+    productName: cableProd.name,
+    type: cableProd.type,
+    hsnSac: cableProd.hsnSacCode,
+    quantity: 4,
+    unit: cableProd.unit,
+    unitPrice: cableProd.sellingPrice,
+    discountPercent: 0,
+    gstRate: cableProd.gstRate,
+    isTaxInclusive: false,
+    ...item2Calc,
+  });
+
+  // Item 3: 1 Service of Onsite Server Setup
+  const srvProd = matchByHsn[0];
+  const item3Calc = calculateLineItem(1, srvProd.sellingPrice, 0, srvProd.gstRate, false, isInterState);
+  items.push({
+    id: 'item-3',
+    productId: srvProd.id,
+    productName: srvProd.name,
+    type: srvProd.type,
+    hsnSac: srvProd.hsnSacCode,
+    quantity: 1,
+    unit: srvProd.unit,
+    unitPrice: srvProd.sellingPrice,
+    discountPercent: 0,
+    gstRate: srvProd.gstRate,
+    isTaxInclusive: false,
+    ...item3Calc,
+  });
+
+  // Verify invoice summary with all 3 populated items
+  assertEqual(items.length, 3, 'Invoice has 3 line items');
+  const summary = calculateInvoiceSummary(items, isInterState);
+
+  // Subtotal = (2 * 18500) + (4 * 7200) + (1 * 15000) = 37000 + 28800 + 15000 = 80800
+  assertEqual(summary.subtotal, 80800, 'Subtotal before discounts');
+  // Discount = 5% of 37000 = 1850
+  assertEqual(summary.totalDiscount, 1850, 'Total discount');
+  // Taxable amount = 80800 - 1850 = 78950
+  assertEqual(summary.totalTaxableAmount, 78950, 'Taxable amount');
+  // 18% GST (Intra-state: 9% CGST + 9% SGST) on 78950 = 14211
+  assertEqual(summary.totalCgst, 7105.5, 'CGST 9%');
+  assertEqual(summary.totalSgst, 7105.5, 'SGST 9%');
+  assertEqual(summary.totalTax, 14211, 'Total tax');
+  // Total payable = 78950 + 14211 = 93161
+  assertEqual(summary.totalAmount, 93161, 'Grand total payable amount');
+
+  console.log('   ✓ Product search, selection, and multi-item invoice integration verified');
+}
+
+console.log('\n--- ALL 8 BILLFLOW FINANCIAL & PRODUCT SEARCH TESTS PASSED SUCCESSFULLY! ---');

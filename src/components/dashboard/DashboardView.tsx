@@ -84,14 +84,18 @@ export const DashboardView: React.FC = () => {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setCurrentView('create-invoice')}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-md bg-teal-600 hover:bg-teal-700 text-white font-semibold shadow-sm transition-all"
+            className="flex items-center gap-1.5 px-3.5 py-2 text-xs rounded-lg bg-teal-600 hover:bg-teal-500 text-white font-bold shadow-md shadow-teal-600/25 ring-1 ring-teal-400/40 active:scale-95 transition-all"
+            title="Create New GST Tax Invoice (Ctrl+N)"
           >
-            <Plus className="w-3.5 h-3.5" />
+            <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
             <span>New Tax Invoice</span>
+            <kbd className="hidden sm:inline-block ml-1 px-1.5 py-0.2 text-[9px] font-mono bg-teal-700/80 text-teal-100 rounded border border-teal-500/40">
+              Ctrl+N
+            </kbd>
           </button>
           <button
             onClick={() => setCurrentView('reports')}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 font-medium transition-colors"
+            className="flex items-center gap-1.5 px-3 py-2 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/80 font-medium transition-colors"
           >
             <FileText className="w-3.5 h-3.5 text-teal-600" />
             <span>GSTR-1 Summary</span>

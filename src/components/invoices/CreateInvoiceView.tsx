@@ -25,8 +25,11 @@ import {
   Eye,
   FileSpreadsheet,
   Truck,
-  FileText
+  FileText,
+  Search,
 } from 'lucide-react';
+import { ProductSearchModal } from '../modals/ProductSearchModal';
+import { analytics } from '../../utils/analytics';
 
 interface CreateInvoiceViewProps {
   onOpenNewCustomerModal: () => void;
@@ -81,6 +84,7 @@ export const CreateInvoiceView: React.FC<CreateInvoiceViewProps> = ({
   const [immediatePayment, setImmediatePayment] = useState<number>(0);
   const [immediatePaymentMethod, setImmediatePaymentMethod] = useState<string>('upi');
   const [paymentRef, setPaymentRef] = useState<string>('');
+  const [honeypot, setHoneypot] = useState<string>('');
 
   // Line Items
   const [items, setItems] = useState<InvoiceLineItem[]>([
@@ -109,6 +113,53 @@ export const CreateInvoiceView: React.FC<CreateInvoiceViewProps> = ({
   ]);
 
   const [submitting, setSubmitting] = useState<boolean>(false);
+
+  // Product Search Modal state
+  const [isProductSearchOpen, setIsProductSearchOpen] = useState<boolean>(false);
+  const [activeSearchRowIndex, setActiveSearchRowIndex] = useState<number | null>(null);
+
+  const handleOpenProductSearch = (index: number) => {
+    setActiveSearchRowIndex(index);
+    setIsProductSearchOpen(true);
+  };
+
+  const handleSelectProductFromModal = (prod: Product) => {
+    if (activeSearchRowIndex === null || !items[activeSearchRowIndex]) return;
+    const targetIdx = activeSearchRowIndex;
+    const updated = [...items];
+    const target = { ...updated[targetIdx] };
+
+    target.productId = prod.id;
+    target.productName = prod.name;
+    target.type = prod.type;
+    target.hsnSac = prod.hsnSacCode;
+    target.unitPrice = prod.sellingPrice;
+    target.unit = prod.unit;
+    target.gstRate = prod.gstRate;
+
+    const calc = calculateLineItem(
+      target.quantity,
+      target.unitPrice,
+      target.discountPercent,
+      target.gstRate,
+      target.isTaxInclusive,
+      isInterState
+    );
+
+    updated[targetIdx] = { ...target, ...calc };
+    setItems(updated);
+    setIsProductSearchOpen(false);
+    setActiveSearchRowIndex(null);
+
+    // Return focus to the invoice quantity field
+    setTimeout(() => {
+      const qtyInput = document.getElementById(`item-qty-${targetIdx}`) as HTMLInputElement | null;
+      if (qtyInput) {
+        qtyInput.focus();
+        qtyInput.select();
+      }
+    }, 50);
+  };
 
   // When customer changes, update place of supply & inter-state tax logic
   const handleCustomerChange = (custId: string) => {
@@ -290,6 +341,11 @@ export const CreateInvoiceView: React.FC<CreateInvoiceViewProps> = ({
   };
 
   const handleSubmit = async (asDraft: boolean = false) => {
+    if (honeypot.trim()) {
+      console.warn('[SPAM SHIELD] Automated bot submission rejected via honeypot');
+      return;
+    }
+
     const customer = customers.find((c) => c.id === selectedCustomerId);
     if (!customer) {
       addToast('Please select a customer or create a new one first.', 'error');
@@ -348,6 +404,12 @@ export const CreateInvoiceView: React.FC<CreateInvoiceViewProps> = ({
       };
 
       const created = await createInvoice(invoicePayload as any);
+      // Track invoice generation event
+      analytics.track(`Invoice Created: ${invoiceNumber}`, 'invoice', {
+        invoiceNumber,
+        totalAmount: roundedTotal,
+        customerName: customer.name,
+      });
       // Open preview modal
       setPreviewInvoice(created);
       setCurrentView('invoices');
@@ -362,6 +424,18 @@ export const CreateInvoiceView: React.FC<CreateInvoiceViewProps> = ({
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-12">
+      {/* Bot / Spam honeypot trap */}
+      <div className="hidden" aria-hidden="true" tabIndex={-1}>
+        <input
+          type="text"
+          name="website_url_trap"
+          value={honeypot}
+          onChange={(e) => setHoneypot(e.target.value)}
+          tabIndex={-1}
+          autoComplete="off"
+        />
+      </div>
+
       {/* Top Bar with Back and Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-200 dark:border-slate-800">
         <div className="flex items-center gap-3">
@@ -448,7 +522,7 @@ export const CreateInvoiceView: React.FC<CreateInvoiceViewProps> = ({
               onChange={(e) => handleCustomerChange(e.target.value)}
               className="w-full px-2.5 py-1.5 rounded-md border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-medium"
             >
-              {customers.map((c) => (
+              {customers.filter((c) => !c.isArchived).map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name} {c.gstin ? `(${c.gstin})` : ''}
                 </option>
@@ -628,7 +702,7 @@ export const CreateInvoiceView: React.FC<CreateInvoiceViewProps> = ({
           <table className="w-full text-left text-xs">
             <thead>
               <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-500 font-semibold font-mono text-[11px]">
-                <th className="py-2 px-2 w-64">ITEM & DESCRIPTION</th>
+                <th className="py-2 px-2 w-72 min-w-[280px]">ITEM & DESCRIPTION</th>
                 <th className="py-2 px-2 w-20">HSN/SAC</th>
                 <th className="py-2 px-2 w-20">QTY</th>
                 <th className="py-2 px-2 w-20">UNIT</th>
@@ -645,25 +719,37 @@ export const CreateInvoiceView: React.FC<CreateInvoiceViewProps> = ({
                 <tr key={item.id} className="align-top">
                   {/* Item / Product Selector */}
                   <td className="py-2 px-2 font-sans">
-                    <div className="space-y-1">
-                      <select
-                        value={item.productId}
-                        onChange={(e) => handleItemChange(idx, 'productId', e.target.value)}
-                        className="w-full px-2 py-1 text-xs rounded border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 font-medium"
-                      >
-                        <option value="">-- Choose from Catalog or Enter Custom --</option>
-                        {products.map((p) => (
-                          <option key={p.id} value={p.id}>
-                            {p.name} (Stock: {p.type === 'service' ? 'Service' : p.stockQuantity})
-                          </option>
-                        ))}
-                      </select>
+                    <div className="space-y-1.5">
+                      <div className="flex items-center gap-1.5">
+                        <select
+                          value={item.productId}
+                          onChange={(e) => handleItemChange(idx, 'productId', e.target.value)}
+                          className="flex-1 min-w-0 px-2 py-1 text-xs rounded border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-medium focus:outline-hidden focus:ring-1 focus:ring-teal-500"
+                        >
+                          <option value="">-- Choose from Catalog or Enter Custom --</option>
+                          {products.map((p) => (
+                            <option key={p.id} value={p.id}>
+                              {p.name} (Stock: {p.type === 'service' ? 'Service' : p.stockQuantity})
+                            </option>
+                          ))}
+                        </select>
+                        <button
+                          type="button"
+                          onClick={() => handleOpenProductSearch(idx)}
+                          title="Search Products"
+                          aria-label="Search Products"
+                          className="px-2.5 py-1 flex items-center justify-center gap-1 text-xs font-semibold rounded bg-teal-600 hover:bg-teal-500 text-white border border-teal-500 shadow-xs shrink-0 transition-colors focus:outline-hidden focus:ring-1 focus:ring-teal-400 active:scale-95 cursor-pointer"
+                        >
+                          <Search className="w-3.5 h-3.5" />
+                          <span className="hidden sm:inline">Search</span>
+                        </button>
+                      </div>
                       <input
                         type="text"
                         placeholder="Item name / Custom title"
                         value={item.productName}
                         onChange={(e) => handleItemChange(idx, 'productName', e.target.value)}
-                        className="w-full px-2 py-1 text-xs rounded border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900"
+                        className="w-full px-2 py-1 text-xs rounded border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder:text-slate-400"
                       />
                     </div>
                   </td>
@@ -682,6 +768,7 @@ export const CreateInvoiceView: React.FC<CreateInvoiceViewProps> = ({
                   {/* Quantity */}
                   <td className="py-2 px-2">
                     <input
+                      id={`item-qty-${idx}`}
                       type="number"
                       min="1"
                       step="any"
@@ -981,6 +1068,23 @@ export const CreateInvoiceView: React.FC<CreateInvoiceViewProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Product Search Modal */}
+      <ProductSearchModal
+        isOpen={isProductSearchOpen}
+        onClose={() => {
+          setIsProductSearchOpen(false);
+          setActiveSearchRowIndex(null);
+        }}
+        onSelectProduct={handleSelectProductFromModal}
+        products={products}
+        currentProductId={
+          activeSearchRowIndex !== null && items[activeSearchRowIndex]
+            ? items[activeSearchRowIndex].productId
+            : undefined
+        }
+        rowIndex={activeSearchRowIndex !== null ? activeSearchRowIndex : undefined}
+      />
     </div>
   );
 };

@@ -28,8 +28,12 @@ export const ProductModal: React.FC<ProductModalProps> = ({
   const [lowStockThreshold, setLowStockThreshold] = useState<number>(5);
   const [description, setDescription] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [honeypot, setHoneypot] = useState('');
 
   useEffect(() => {
+    setErrors({});
+    setHoneypot('');
     if (productToEdit) {
       setName(productToEdit.name);
       setType(productToEdit.type || 'product');
@@ -61,14 +65,42 @@ export const ProductModal: React.FC<ProductModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) {
-      addToast('Item / Service name is required', 'error');
+
+    if (honeypot.trim()) {
+      console.warn('Bot detected via honeypot');
+      onClose();
       return;
     }
-    if (sellingPrice < 0) {
-      addToast('Selling price cannot be negative', 'error');
+
+    const newErrors: Record<string, string> = {};
+
+    if (!name.trim() || name.trim().length < 2) {
+      newErrors.name = 'Item or service name must be at least 2 characters long';
+    }
+
+    if (isNaN(Number(sellingPrice)) || Number(sellingPrice) < 0) {
+      newErrors.sellingPrice = 'Selling price must be a valid positive number';
+    }
+
+    if (isNaN(Number(purchasePrice)) || Number(purchasePrice) < 0) {
+      newErrors.purchasePrice = 'Purchase price cannot be negative';
+    }
+
+    if (type === 'product' && (isNaN(Number(stockQuantity)) || Number(stockQuantity) < 0)) {
+      newErrors.stockQuantity = 'Stock quantity cannot be negative';
+    }
+
+    if (hsnSacCode.trim() && !/^[0-9a-zA-Z]{2,10}$/.test(hsnSacCode.trim())) {
+      newErrors.hsnSacCode = 'HSN/SAC code should be 2 to 8 alphanumeric characters';
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      addToast(Object.values(newErrors)[0], 'error');
       return;
     }
+
+    setErrors({});
 
     try {
       setSubmitting(true);
@@ -131,6 +163,18 @@ export const ProductModal: React.FC<ProductModalProps> = ({
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-5 space-y-4 max-h-[80vh] overflow-y-auto">
+          {/* Honeypot field for bot/spam protection */}
+          <input
+            type="text"
+            name="hp_field"
+            value={honeypot}
+            onChange={(e) => setHoneypot(e.target.value)}
+            tabIndex={-1}
+            autoComplete="off"
+            className="hidden opacity-0 h-0 w-0 absolute pointer-events-none"
+            aria-hidden="true"
+          />
+
           {/* Item Type Switch */}
           <div className="flex gap-2">
             <button
@@ -172,10 +216,18 @@ export const ProductModal: React.FC<ProductModalProps> = ({
               type="text"
               required
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => {
+                setName(e.target.value);
+                if (errors.name) setErrors((prev) => ({ ...prev, name: '' }));
+              }}
               placeholder={type === 'product' ? 'e.g. Cat6 Ethernet Cable 305m Drum' : 'e.g. Network Cabling & Server Setup'}
-              className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 focus:border-teal-500 focus:outline-none"
+              className={`w-full px-3 py-2 rounded-lg border bg-white dark:bg-slate-950 focus:outline-none transition-colors ${
+                errors.name
+                  ? 'border-rose-500 focus:ring-1 focus:ring-rose-500'
+                  : 'border-slate-200 dark:border-slate-800 focus:border-teal-500'
+              }`}
             />
+            {errors.name && <p className="text-[10px] text-rose-500 mt-1">{errors.name}</p>}
           </div>
 
           {/* SKU & HSN/SAC Code */}
@@ -201,10 +253,18 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                 type="text"
                 maxLength={8}
                 value={hsnSacCode}
-                onChange={(e) => setHsnSacCode(e.target.value)}
+                onChange={(e) => {
+                  setHsnSacCode(e.target.value);
+                  if (errors.hsnSacCode) setErrors((prev) => ({ ...prev, hsnSacCode: '' }));
+                }}
                 placeholder={type === 'product' ? 'e.g. 8544' : 'e.g. 9983'}
-                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 focus:border-teal-500 focus:outline-none font-mono"
+                className={`w-full px-3 py-2 rounded-lg border bg-white dark:bg-slate-950 focus:outline-none font-mono ${
+                  errors.hsnSacCode
+                    ? 'border-rose-500 focus:ring-1 focus:ring-rose-500'
+                    : 'border-slate-200 dark:border-slate-800 focus:border-teal-500'
+                }`}
               />
+              {errors.hsnSacCode && <p className="text-[10px] text-rose-500 mt-1">{errors.hsnSacCode}</p>}
             </div>
           </div>
 
@@ -222,10 +282,18 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                   min="0"
                   required
                   value={sellingPrice}
-                  onChange={(e) => setSellingPrice(parseFloat(e.target.value) || 0)}
-                  className="w-full pl-7 pr-3 py-1.5 rounded border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 focus:border-teal-500 focus:outline-none font-mono font-semibold"
+                  onChange={(e) => {
+                    setSellingPrice(parseFloat(e.target.value) || 0);
+                    if (errors.sellingPrice) setErrors((prev) => ({ ...prev, sellingPrice: '' }));
+                  }}
+                  className={`w-full pl-7 pr-3 py-1.5 rounded border bg-white dark:bg-slate-900 focus:outline-none font-mono font-semibold ${
+                    errors.sellingPrice
+                      ? 'border-rose-500 focus:ring-1 focus:ring-rose-500'
+                      : 'border-slate-200 dark:border-slate-800 focus:border-teal-500'
+                  }`}
                 />
               </div>
+              {errors.sellingPrice && <p className="text-[10px] text-rose-500 mt-1">{errors.sellingPrice}</p>}
             </div>
 
             <div>
@@ -239,10 +307,18 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                   step="0.01"
                   min="0"
                   value={purchasePrice}
-                  onChange={(e) => setPurchasePrice(parseFloat(e.target.value) || 0)}
-                  className="w-full pl-7 pr-3 py-1.5 rounded border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 focus:border-teal-500 focus:outline-none font-mono"
+                  onChange={(e) => {
+                    setPurchasePrice(parseFloat(e.target.value) || 0);
+                    if (errors.purchasePrice) setErrors((prev) => ({ ...prev, purchasePrice: '' }));
+                  }}
+                  className={`w-full pl-7 pr-3 py-1.5 rounded border bg-white dark:bg-slate-900 focus:outline-none font-mono ${
+                    errors.purchasePrice
+                      ? 'border-rose-500 focus:ring-1 focus:ring-rose-500'
+                      : 'border-slate-200 dark:border-slate-800 focus:border-teal-500'
+                  }`}
                 />
               </div>
+              {errors.purchasePrice && <p className="text-[10px] text-rose-500 mt-1">{errors.purchasePrice}</p>}
             </div>
 
             <div>

@@ -14,7 +14,10 @@ import {
   ChevronLeft,
   ChevronRight,
   ShieldCheck,
-  Building
+  Building,
+  Activity,
+  Shield,
+  Scale
 } from 'lucide-react';
 
 export const Sidebar: React.FC = () => {
@@ -91,6 +94,13 @@ export const Sidebar: React.FC = () => {
       id: 'reports',
       label: 'GST & Sales Reports',
       icon: BarChart3,
+    },
+    {
+      id: 'analytics',
+      label: 'Privacy Analytics',
+      icon: Activity,
+      badge: 'Local',
+      badgeColor: 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 font-semibold',
     },
     {
       id: 'ai-assistant',
@@ -171,6 +181,30 @@ export const Sidebar: React.FC = () => {
             </div>
             <div className="text-[10px] text-slate-500 mt-1 truncate">
               {settings.city}, {settings.state}
+            </div>
+
+            {/* Quick Legal Links */}
+            <div className="pt-2 mt-2 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-[10px] text-slate-500">
+              <button
+                onClick={() => setCurrentView('privacy-policy')}
+                className="hover:text-teal-600 dark:hover:text-teal-400 hover:underline"
+              >
+                Privacy
+              </button>
+              <span>•</span>
+              <button
+                onClick={() => setCurrentView('terms-conditions')}
+                className="hover:text-teal-600 dark:hover:text-teal-400 hover:underline"
+              >
+                Terms
+              </button>
+              <span>•</span>
+              <button
+                onClick={() => setCurrentView('analytics')}
+                className="hover:text-teal-600 dark:hover:text-teal-400 hover:underline"
+              >
+                Metrics
+              </button>
             </div>
           </div>
         )}

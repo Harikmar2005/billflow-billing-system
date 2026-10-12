@@ -15,7 +15,47 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = 3000;
 
+// Security & HTTPS enforcement middleware
+app.use((req, res, next) => {
+  // Trust proxy for x-forwarded-proto
+  const proto = req.headers['x-forwarded-proto'];
+  if (process.env.NODE_ENV === 'production' && proto && proto !== 'https') {
+    return res.redirect(301, `https://${req.headers.host}${req.url}`);
+  }
+
+  // Security Headers
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  if (process.env.NODE_ENV === 'production') {
+    res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  }
+  next();
+});
+
+// Serve public static assets (robots.txt, sitemap.xml, favicon.svg, og-image.svg)
+app.use(express.static(path.join(__dirname, 'public')));
+
+app.get('/robots.txt', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'robots.txt'));
+});
+
+app.get('/sitemap.xml', (req, res) => {
+  res.header('Content-Type', 'application/xml');
+  res.sendFile(path.join(__dirname, 'public', 'sitemap.xml'));
+});
+
 app.use(express.json({ limit: '5mb' }));
+
+// Bot & Spam Protection Shield
+app.use((req, res, next) => {
+  if (req.method === 'POST') {
+    if (req.body && (req.body.hp_field || req.body._honeypot || req.body.website_url_trap)) {
+      console.warn('[SPAM SHIELD] Automated bot submission rejected via honeypot');
+      return res.status(400).json({ error: 'Automated spam submission rejected' });
+    }
+  }
+  next();
+});
 
 // Initialize Gemini Client
 const apiKey = process.env.GEMINI_API_KEY || '';
@@ -719,92 +759,230 @@ app.get('/api/metrics', (req: Request, res: Response) => {
 
 // 4. Customers CRUD
 app.get('/api/customers', (req: Request, res: Response) => {
-  const db = readDb();
-  // enrich with customer totals
-  const enriched = db.customers.map((c: any) => {
-    const custInvoices = db.invoices.filter((i: any) => i.customerId === c.id && i.status !== 'cancelled');
-    const totalBilled = custInvoices.reduce((sum: number, i: any) => sum + (i.totalAmount || 0), 0);
-    const totalPaid = custInvoices.reduce((sum: number, i: any) => sum + (i.amountPaid || 0), 0);
-    const outstandingBalance = custInvoices.reduce((sum: number, i: any) => sum + (i.balanceDue || 0), 0);
-    return {
-      ...c,
-      totalBilled,
-      totalPaid,
-      outstandingBalance,
-      invoiceCount: custInvoices.length,
-    };
-  });
-  res.json(enriched);
+  try {
+    const db = readDb();
+    const includeArchived = req.query.includeArchived === 'true' || req.query.status === 'all';
+    // enrich with customer totals and archive status
+    const enriched = db.customers.map((c: any) => {
+      const custInvoices = (db.invoices || []).filter((i: any) => i.customerId === c.id && i.status !== 'cancelled');
+      const custPayments = (db.payments || []).filter((p: any) => p.customerId === c.id);
+      const totalBilled = custInvoices.reduce((sum: number, i: any) => sum + (i.totalAmount || 0), 0);
+      const totalPaid = custInvoices.reduce((sum: number, i: any) => sum + (i.amountPaid || 0), 0) || custPayments.reduce((sum: number, p: any) => sum + (p.amount || 0), 0);
+      const outstandingBalance = custInvoices.reduce((sum: number, i: any) => sum + (i.balanceDue || 0), 0);
+      return {
+        ...c,
+        isArchived: !!c.isArchived,
+        status: c.status || (c.isArchived ? 'archived' : 'active'),
+        totalBilled,
+        totalPaid,
+        outstandingBalance,
+        invoiceCount: custInvoices.length,
+        paymentCount: custPayments.length,
+      };
+    });
+
+    if (req.query.status === 'archived') {
+      res.json(enriched.filter((c: any) => c.isArchived));
+      return;
+    }
+    if (req.query.status === 'active' && !includeArchived) {
+      res.json(enriched.filter((c: any) => !c.isArchived));
+      return;
+    }
+
+    res.json(enriched);
+  } catch (err: any) {
+    console.error('Error fetching customers:', err);
+    res.status(500).json({ error: 'Failed to retrieve customers from database.' });
+  }
 });
 
 app.get('/api/customers/:id', (req: Request, res: Response) => {
-  const db = readDb();
-  const customer = db.customers.find((c: any) => c.id === req.params.id);
-  if (!customer) {
-    res.status(404).json({ error: 'Customer not found' });
-    return;
+  try {
+    const db = readDb();
+    const customer = db.customers.find((c: any) => c.id === req.params.id);
+    if (!customer) {
+      res.status(404).json({ error: 'Customer not found' });
+      return;
+    }
+    const invoices = (db.invoices || []).filter((i: any) => i.customerId === customer.id);
+    const payments = (db.payments || []).filter((p: any) => p.customerId === customer.id);
+    res.json({
+      ...customer,
+      isArchived: !!customer.isArchived,
+      status: customer.status || (customer.isArchived ? 'archived' : 'active'),
+      invoices,
+      payments,
+    });
+  } catch (err: any) {
+    console.error('Error fetching customer details:', err);
+    res.status(500).json({ error: 'Failed to fetch customer.' });
   }
-  const invoices = db.invoices.filter((i: any) => i.customerId === customer.id);
-  res.json({ ...customer, invoices });
 });
 
 app.post('/api/customers', (req: Request, res: Response) => {
-  const db = readDb();
-  const { name, phone, email, billingAddress, city, state, stateCode, pincode, gstin, pan } = req.body;
-  if (!name || !name.trim()) {
-    res.status(400).json({ error: 'Customer name is required' });
-    return;
+  try {
+    const db = readDb();
+    const { name, phone, email, billingAddress, city, state, stateCode, pincode, gstin, pan } = req.body;
+    if (!name || !name.trim()) {
+      res.status(400).json({ error: 'Customer name is required' });
+      return;
+    }
+
+    const newCust = {
+      id: `cust-${Date.now()}`,
+      name: name.trim(),
+      phone: phone || '',
+      email: email || '',
+      billingAddress: billingAddress || '',
+      city: city || '',
+      state: state || 'Maharashtra',
+      stateCode: stateCode || '27',
+      pincode: pincode || '',
+      gstin: gstin ? gstin.toUpperCase().trim() : '',
+      pan: pan ? pan.toUpperCase().trim() : '',
+      isArchived: false,
+      status: 'active',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    db.customers.unshift(newCust);
+    writeDb(db);
+    res.status(201).json(newCust);
+  } catch (err: any) {
+    console.error('Error creating customer:', err);
+    res.status(500).json({ error: 'Database failure during customer creation.' });
   }
-
-  const newCust = {
-    id: `cust-${Date.now()}`,
-    name: name.trim(),
-    phone: phone || '',
-    email: email || '',
-    billingAddress: billingAddress || '',
-    city: city || '',
-    state: state || 'Maharashtra',
-    stateCode: stateCode || '27',
-    pincode: pincode || '',
-    gstin: gstin ? gstin.toUpperCase().trim() : '',
-    pan: pan ? pan.toUpperCase().trim() : '',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
-
-  db.customers.unshift(newCust);
-  writeDb(db);
-  res.status(201).json(newCust);
 });
 
 app.put('/api/customers/:id', (req: Request, res: Response) => {
-  const db = readDb();
-  const idx = db.customers.findIndex((c: any) => c.id === req.params.id);
-  if (idx === -1) {
-    res.status(404).json({ error: 'Customer not found' });
-    return;
-  }
+  try {
+    const db = readDb();
+    const idx = db.customers.findIndex((c: any) => c.id === req.params.id);
+    if (idx === -1) {
+      res.status(404).json({ error: 'Customer not found' });
+      return;
+    }
 
-  const updated = {
-    ...db.customers[idx],
-    ...req.body,
-    updatedAt: new Date().toISOString(),
-  };
-  db.customers[idx] = updated;
-  writeDb(db);
-  res.json(updated);
+    const updated = {
+      ...db.customers[idx],
+      ...req.body,
+      updatedAt: new Date().toISOString(),
+    };
+    db.customers[idx] = updated;
+    writeDb(db);
+    res.json(updated);
+  } catch (err: any) {
+    console.error('Error updating customer:', err);
+    res.status(500).json({ error: 'Database failure during customer update.' });
+  }
 });
 
 app.delete('/api/customers/:id', (req: Request, res: Response) => {
-  const db = readDb();
-  const hasInvoices = db.invoices.some((i: any) => i.customerId === req.params.id);
-  if (hasInvoices) {
-    res.status(400).json({ error: 'Cannot delete customer with existing invoice history.' });
-    return;
+  try {
+    const db = readDb();
+    const customer = db.customers.find((c: any) => c.id === req.params.id);
+    if (!customer) {
+      res.status(404).json({
+        error: 'Customer not found',
+        customerId: req.params.id,
+      });
+      return;
+    }
+
+    // Check financial records: invoices and direct payments
+    const linkedInvoices = (db.invoices || []).filter((i: any) => i.customerId === req.params.id);
+    const linkedPayments = (db.payments || []).filter((p: any) => p.customerId === req.params.id);
+    const hasFinancialRecords = linkedInvoices.length > 0 || linkedPayments.length > 0;
+
+    if (hasFinancialRecords) {
+      res.status(409).json({
+        error: `Cannot delete customer "${customer.name}" with existing financial records (${linkedInvoices.length} invoices, ${linkedPayments.length} payments). To preserve accounting records and tax audit history, archive this customer instead.`,
+        canArchive: true,
+        hasFinancialRecords: true,
+        invoiceCount: linkedInvoices.length,
+        paymentCount: linkedPayments.length,
+        customerId: customer.id,
+        customerName: customer.name,
+      });
+      return;
+    }
+
+    // Safe permanent delete when no financial history exists
+    db.customers = db.customers.filter((c: any) => c.id !== req.params.id);
+    writeDb(db);
+    res.json({
+      success: true,
+      id: req.params.id,
+      message: `Customer "${customer.name}" permanently deleted.`,
+    });
+  } catch (err: any) {
+    console.error('Error deleting customer:', err);
+    res.status(500).json({ error: 'Database failure while deleting customer.' });
   }
-  db.customers = db.customers.filter((c: any) => c.id !== req.params.id);
-  writeDb(db);
-  res.json({ success: true, id: req.params.id });
+});
+
+// Archive customer endpoint to preserve financial integrity
+app.post('/api/customers/:id/archive', (req: Request, res: Response) => {
+  try {
+    const db = readDb();
+    const idx = db.customers.findIndex((c: any) => c.id === req.params.id);
+    if (idx === -1) {
+      res.status(404).json({ error: 'Customer not found' });
+      return;
+    }
+
+    const customer = db.customers[idx];
+    const updated = {
+      ...customer,
+      isArchived: true,
+      status: 'archived',
+      archivedAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    db.customers[idx] = updated;
+    writeDb(db);
+    res.json({
+      success: true,
+      customer: updated,
+      message: `Customer "${customer.name}" has been archived and removed from the active directory. All historical invoices and ledgers remain intact.`,
+    });
+  } catch (err: any) {
+    console.error('Error archiving customer:', err);
+    res.status(500).json({ error: 'Database failure while archiving customer.' });
+  }
+});
+
+// Unarchive / restore customer endpoint
+app.post('/api/customers/:id/unarchive', (req: Request, res: Response) => {
+  try {
+    const db = readDb();
+    const idx = db.customers.findIndex((c: any) => c.id === req.params.id);
+    if (idx === -1) {
+      res.status(404).json({ error: 'Customer not found' });
+      return;
+    }
+
+    const customer = db.customers[idx];
+    const updated = {
+      ...customer,
+      isArchived: false,
+      status: 'active',
+      archivedAt: undefined,
+      updatedAt: new Date().toISOString(),
+    };
+    db.customers[idx] = updated;
+    writeDb(db);
+    res.json({
+      success: true,
+      customer: updated,
+      message: `Customer "${customer.name}" has been restored to active status.`,
+    });
+  } catch (err: any) {
+    console.error('Error unarchiving customer:', err);
+    res.status(500).json({ error: 'Database failure while unarchiving customer.' });
+  }
 });
 
 // 5. Products & Inventory CRUD

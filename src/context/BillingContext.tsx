@@ -21,7 +21,71 @@ export type BillingView =
   | 'expenses'
   | 'reports'
   | 'settings'
-  | 'ai-assistant';
+  | 'ai-assistant'
+  | 'privacy-policy'
+  | 'terms-conditions'
+  | 'analytics'
+  | 'not-found';
+
+export const VIEW_ROUTES: Record<string, BillingView> = {
+  '/': 'dashboard',
+  '/dashboard': 'dashboard',
+  '/invoices': 'invoices',
+  '/create-invoice': 'create-invoice',
+  '/invoices/new': 'create-invoice',
+  '/customers': 'customers',
+  '/products': 'products',
+  '/payments': 'payments',
+  '/expenses': 'expenses',
+  '/reports': 'reports',
+  '/settings': 'settings',
+  '/ai-assistant': 'ai-assistant',
+  '/privacy-policy': 'privacy-policy',
+  '/terms-conditions': 'terms-conditions',
+  '/analytics': 'analytics',
+};
+
+export const VIEW_PATHS: Record<BillingView, string> = {
+  'dashboard': '/',
+  'invoices': '/invoices',
+  'create-invoice': '/create-invoice',
+  'customers': '/customers',
+  'products': '/products',
+  'payments': '/payments',
+  'expenses': '/expenses',
+  'reports': '/reports',
+  'settings': '/settings',
+  'ai-assistant': '/ai-assistant',
+  'privacy-policy': '/privacy-policy',
+  'terms-conditions': '/terms-conditions',
+  'analytics': '/analytics',
+  'not-found': '/404',
+};
+
+export const VIEW_TITLES: Record<BillingView, string> = {
+  'dashboard': 'BillFlow — Smart Billing Software for India',
+  'invoices': 'Tax Invoices & History — BillFlow',
+  'create-invoice': 'Create GST Tax Invoice — BillFlow',
+  'customers': 'Customer Ledger & Balances — BillFlow',
+  'products': 'Product Inventory & HSN Catalog — BillFlow',
+  'payments': 'Payment Receipts & Collections — BillFlow',
+  'expenses': 'Business Expenses & Vouchers — BillFlow',
+  'reports': 'GST & Sales Intelligence Reports — BillFlow',
+  'settings': 'Business Profile & GST Settings — BillFlow',
+  'ai-assistant': 'Smart Billing AI Advisor — BillFlow',
+  'privacy-policy': 'Privacy Policy & DPDP Act 2023 — BillFlow',
+  'terms-conditions': 'Terms & Conditions of Service — BillFlow',
+  'analytics': 'Privacy-Safe Local Analytics — BillFlow',
+  'not-found': 'Page Not Found (404) — BillFlow',
+};
+
+function getViewFromPath(pathname: string): BillingView {
+  const normalized = pathname.toLowerCase().replace(/\/+$/, '') || '/';
+  if (normalized in VIEW_ROUTES) {
+    return VIEW_ROUTES[normalized];
+  }
+  return 'not-found';
+}
 
 interface Toast {
   id: string;
@@ -62,7 +126,9 @@ interface BillingContextType {
   // Customer Actions
   createCustomer: (data: Omit<Customer, 'id' | 'createdAt' | 'updatedAt'>) => Promise<Customer>;
   updateCustomer: (id: string, updates: Partial<Customer>) => Promise<Customer>;
-  deleteCustomer: (id: string) => Promise<void>;
+  deleteCustomer: (id: string) => Promise<{ success: boolean; id: string; message?: string }>;
+  archiveCustomer: (id: string) => Promise<Customer>;
+  unarchiveCustomer: (id: string) => Promise<Customer>;
 
   // Product Actions
   createProduct: (data: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>) => Promise<Product>;
@@ -113,7 +179,24 @@ interface BillingContextType {
 const BillingContext = createContext<BillingContextType | undefined>(undefined);
 
 export const BillingProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [currentView, setCurrentView] = useState<BillingView>('dashboard');
+  const [currentView, setCurrentViewState] = useState<BillingView>(() => {
+    if (typeof window !== 'undefined') {
+      return getViewFromPath(window.location.pathname);
+    }
+    return 'dashboard';
+  });
+
+  const setCurrentView = (view: BillingView) => {
+    setCurrentViewState(view);
+    const targetPath = VIEW_PATHS[view] || '/';
+    if (typeof window !== 'undefined' && window.location.pathname !== targetPath) {
+      window.history.pushState({ view }, '', targetPath);
+    }
+    if (typeof document !== 'undefined') {
+      document.title = VIEW_TITLES[view] || 'BillFlow — Smart Billing Software for India';
+    }
+  };
+
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [isDark, setIsDark] = useState<boolean>(false);
 
@@ -195,6 +278,21 @@ export const BillingProvider: React.FC<{ children: ReactNode }> = ({ children })
 
   useEffect(() => {
     refreshAllData();
+
+    if (typeof document !== 'undefined') {
+      document.title = VIEW_TITLES[currentView] || 'BillFlow — Smart Billing Software for India';
+    }
+
+    const handlePopState = () => {
+      const v = getViewFromPath(window.location.pathname);
+      setCurrentViewState(v);
+      if (typeof document !== 'undefined') {
+        document.title = VIEW_TITLES[v] || 'BillFlow — Smart Billing Software for India';
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
   const updateSettings = async (updates: Partial<BusinessSettings>) => {
@@ -237,12 +335,46 @@ export const BillingProvider: React.FC<{ children: ReactNode }> = ({ children })
 
   const deleteCustomer = async (id: string) => {
     try {
-      await api.deleteCustomer(id);
+      const res = await api.deleteCustomer(id);
       setCustomers((prev) => prev.filter((c) => c.id !== id));
-      addToast('Customer removed', 'info');
+      addToast(res.message || 'Customer deleted successfully', 'success');
       refreshAllData();
+      return res;
     } catch (err: any) {
+      console.error('Failed to delete customer:', err);
       addToast(err.message || 'Failed to delete customer', 'error');
+      throw err;
+    }
+  };
+
+  const archiveCustomer = async (id: string) => {
+    try {
+      const res = await api.archiveCustomer(id);
+      setCustomers((prev) =>
+        prev.map((c) => (c.id === id ? { ...c, isArchived: true, status: 'archived' } : c))
+      );
+      addToast(res.message || 'Customer archived successfully', 'success');
+      refreshAllData();
+      return res.customer;
+    } catch (err: any) {
+      console.error('Failed to archive customer:', err);
+      addToast(err.message || 'Failed to archive customer', 'error');
+      throw err;
+    }
+  };
+
+  const unarchiveCustomer = async (id: string) => {
+    try {
+      const res = await api.unarchiveCustomer(id);
+      setCustomers((prev) =>
+        prev.map((c) => (c.id === id ? { ...c, isArchived: false, status: 'active' } : c))
+      );
+      addToast(res.message || 'Customer restored to active', 'success');
+      refreshAllData();
+      return res.customer;
+    } catch (err: any) {
+      console.error('Failed to restore customer:', err);
+      addToast(err.message || 'Failed to restore customer', 'error');
       throw err;
     }
   };
@@ -438,6 +570,8 @@ export const BillingProvider: React.FC<{ children: ReactNode }> = ({ children })
         createCustomer,
         updateCustomer,
         deleteCustomer,
+        archiveCustomer,
+        unarchiveCustomer,
         createProduct,
         updateProduct,
         toggleProductStatus,

@@ -25,6 +25,7 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
   const [referenceNumber, setReferenceNumber] = useState<string>('');
   const [notes, setNotes] = useState<string>('');
   const [submitting, setSubmitting] = useState<boolean>(false);
+  const [honeypot, setHoneypot] = useState<string>('');
 
   // Sync default amount when invoice opens
   React.useEffect(() => {
@@ -37,6 +38,11 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (honeypot.trim()) {
+      console.warn('[SPAM SHIELD] Automated bot submission rejected via honeypot');
+      onClose();
+      return;
+    }
     if (amount <= 0) {
       addToast('Payment amount must be greater than zero', 'error');
       return;

@@ -27,8 +27,12 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({
   const [gstin, setGstin] = useState('');
   const [pan, setPan] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [honeypot, setHoneypot] = useState(''); // Anti-bot spam shield
 
   useEffect(() => {
+    setErrors({});
+    setHoneypot('');
     if (customerToEdit) {
       setName(customerToEdit.name);
       setPhone(customerToEdit.phone || '');
@@ -76,14 +80,52 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) {
-      addToast('Customer Name is required', 'error');
+
+    // Spam / bot protection: If honeypot is filled, abort silently
+    if (honeypot.trim()) {
+      console.warn('Bot detected via honeypot');
+      onClose();
       return;
     }
+
+    const newErrors: Record<string, string> = {};
+
+    if (!name.trim() || name.trim().length < 2) {
+      newErrors.name = 'Customer Name must be at least 2 characters long';
+    }
+
+    const cleanPhone = phone.replace(/[\s\-\+\(\)]/g, '');
     if (!phone.trim()) {
-      addToast('Customer Phone number is required for billing SMS/WhatsApp', 'error');
+      newErrors.phone = 'Customer phone number is required';
+    } else if (cleanPhone.length < 10) {
+      newErrors.phone = 'Please enter a valid phone number (at least 10 digits)';
+    }
+
+    if (email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      newErrors.email = 'Please enter a valid email address (e.g. name@company.com)';
+    }
+
+    const cleanGstin = gstin.trim().toUpperCase();
+    if (cleanGstin && !/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/.test(cleanGstin)) {
+      newErrors.gstin = 'Invalid GSTIN format. Must be 15 characters (e.g. 27AABCA1234F1Z9)';
+    }
+
+    const cleanPan = pan.trim().toUpperCase();
+    if (cleanPan && !/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(cleanPan)) {
+      newErrors.pan = 'Invalid PAN format. Must be 10 characters (e.g. AABCA1234F)';
+    }
+
+    if (pincode.trim() && !/^\d{6}$/.test(pincode.trim())) {
+      newErrors.pincode = 'PIN code must be a 6-digit number';
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      addToast(Object.values(newErrors)[0], 'error');
       return;
     }
+
+    setErrors({});
 
     try {
       setSubmitting(true);
@@ -97,8 +139,8 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({
           state,
           stateCode,
           pincode: pincode.trim(),
-          gstin: gstin.trim(),
-          pan: pan.trim().toUpperCase(),
+          gstin: cleanGstin,
+          pan: cleanPan,
         });
       } else {
         await createCustomer({
@@ -110,8 +152,8 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({
           state,
           stateCode,
           pincode: pincode.trim(),
-          gstin: gstin.trim(),
-          pan: pan.trim().toUpperCase(),
+          gstin: cleanGstin,
+          pan: cleanPan,
         });
       }
       onClose();
@@ -143,6 +185,18 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-5 space-y-4 max-h-[80vh] overflow-y-auto">
+          {/* Honeypot field for bot/spam protection */}
+          <input
+            type="text"
+            name="hp_field"
+            value={honeypot}
+            onChange={(e) => setHoneypot(e.target.value)}
+            tabIndex={-1}
+            autoComplete="off"
+            className="hidden opacity-0 h-0 w-0 absolute pointer-events-none"
+            aria-hidden="true"
+          />
+
           {/* Customer / Company Name */}
           <div>
             <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">
@@ -152,10 +206,18 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({
               type="text"
               required
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => {
+                setName(e.target.value);
+                if (errors.name) setErrors((prev) => ({ ...prev, name: '' }));
+              }}
               placeholder="e.g. Acme Tech Solutions Pvt Ltd or Rajesh Sharma"
-              className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 focus:border-teal-500 focus:outline-none"
+              className={`w-full px-3 py-2 rounded-lg border bg-white dark:bg-slate-950 focus:outline-none transition-colors ${
+                errors.name
+                  ? 'border-rose-500 focus:ring-1 focus:ring-rose-500'
+                  : 'border-slate-200 dark:border-slate-800 focus:border-teal-500'
+              }`}
             />
+            {errors.name && <p className="text-[10px] text-rose-500 mt-1">{errors.name}</p>}
           </div>
 
           {/* Contact Details Grid */}
@@ -170,11 +232,19 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({
                   type="text"
                   required
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
+                  onChange={(e) => {
+                    setPhone(e.target.value);
+                    if (errors.phone) setErrors((prev) => ({ ...prev, phone: '' }));
+                  }}
                   placeholder="+91 98765 43210"
-                  className="w-full pl-8 pr-3 py-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 focus:border-teal-500 focus:outline-none font-mono"
+                  className={`w-full pl-8 pr-3 py-2 rounded-lg border bg-white dark:bg-slate-950 focus:outline-none font-mono ${
+                    errors.phone
+                      ? 'border-rose-500 focus:ring-1 focus:ring-rose-500'
+                      : 'border-slate-200 dark:border-slate-800 focus:border-teal-500'
+                  }`}
                 />
               </div>
+              {errors.phone && <p className="text-[10px] text-rose-500 mt-1">{errors.phone}</p>}
             </div>
 
             <div>
@@ -186,11 +256,19 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({
                 <input
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (errors.email) setErrors((prev) => ({ ...prev, email: '' }));
+                  }}
                   placeholder="accounts@customer.com"
-                  className="w-full pl-8 pr-3 py-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 focus:border-teal-500 focus:outline-none"
+                  className={`w-full pl-8 pr-3 py-2 rounded-lg border bg-white dark:bg-slate-950 focus:outline-none ${
+                    errors.email
+                      ? 'border-rose-500 focus:ring-1 focus:ring-rose-500'
+                      : 'border-slate-200 dark:border-slate-800 focus:border-teal-500'
+                  }`}
                 />
               </div>
+              {errors.email && <p className="text-[10px] text-rose-500 mt-1">{errors.email}</p>}
             </div>
           </div>
 
@@ -204,11 +282,22 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({
                 type="text"
                 maxLength={15}
                 value={gstin}
-                onChange={handleGstinChange}
+                onChange={(e) => {
+                  handleGstinChange(e);
+                  if (errors.gstin) setErrors((prev) => ({ ...prev, gstin: '' }));
+                }}
                 placeholder="27AABCA1234F1Z9"
-                className="w-full px-3 py-1.5 rounded border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 focus:border-teal-500 focus:outline-none font-mono uppercase"
+                className={`w-full px-3 py-1.5 rounded border bg-white dark:bg-slate-900 focus:outline-none font-mono uppercase ${
+                  errors.gstin
+                    ? 'border-rose-500 focus:ring-1 focus:ring-rose-500'
+                    : 'border-slate-200 dark:border-slate-800 focus:border-teal-500'
+                }`}
               />
-              <span className="text-[10px] text-slate-400">Leave blank for unregistered consumer</span>
+              {errors.gstin ? (
+                <span className="text-[10px] text-rose-500 block mt-0.5">{errors.gstin}</span>
+              ) : (
+                <span className="text-[10px] text-slate-400 block mt-0.5">Leave blank for unregistered consumer</span>
+              )}
             </div>
 
             <div>
@@ -219,10 +308,18 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({
                 type="text"
                 maxLength={10}
                 value={pan}
-                onChange={(e) => setPan(e.target.value.toUpperCase())}
+                onChange={(e) => {
+                  setPan(e.target.value.toUpperCase());
+                  if (errors.pan) setErrors((prev) => ({ ...prev, pan: '' }));
+                }}
                 placeholder="AABCA1234F"
-                className="w-full px-3 py-1.5 rounded border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 focus:border-teal-500 focus:outline-none font-mono uppercase"
+                className={`w-full px-3 py-1.5 rounded border bg-white dark:bg-slate-900 focus:outline-none font-mono uppercase ${
+                  errors.pan
+                    ? 'border-rose-500 focus:ring-1 focus:ring-rose-500'
+                    : 'border-slate-200 dark:border-slate-800 focus:border-teal-500'
+                }`}
               />
+              {errors.pan && <span className="text-[10px] text-rose-500 block mt-0.5">{errors.pan}</span>}
             </div>
           </div>
 
@@ -280,10 +377,18 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({
                 type="text"
                 maxLength={6}
                 value={pincode}
-                onChange={(e) => setPincode(e.target.value)}
+                onChange={(e) => {
+                  setPincode(e.target.value);
+                  if (errors.pincode) setErrors((prev) => ({ ...prev, pincode: '' }));
+                }}
                 placeholder="400001"
-                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 focus:border-teal-500 focus:outline-none font-mono"
+                className={`w-full px-3 py-2 rounded-lg border bg-white dark:bg-slate-950 focus:outline-none font-mono ${
+                  errors.pincode
+                    ? 'border-rose-500 focus:ring-1 focus:ring-rose-500'
+                    : 'border-slate-200 dark:border-slate-800 focus:border-teal-500'
+                }`}
               />
+              {errors.pincode && <span className="text-[10px] text-rose-500 block mt-0.5">{errors.pincode}</span>}
             </div>
           </div>
 

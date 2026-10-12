@@ -45,6 +45,9 @@ export interface Customer {
   totalPaid?: number;
   outstandingBalance?: number;
   invoiceCount?: number;
+  isArchived?: boolean;
+  status?: 'active' | 'archived';
+  archivedAt?: string;
 }
 
 export interface ProductRateHistory {

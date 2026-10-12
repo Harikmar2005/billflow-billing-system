@@ -23,8 +23,9 @@ class ApiService {
       const response = await fetch(url, { ...options, headers });
       if (!response.ok) {
         let errorMsg = `Server error ${response.status}`;
+        let errData: any = null;
         try {
-          const errData = await response.json();
+          errData = await response.json();
           if (errData && errData.error) {
             errorMsg = errData.error;
           } else if (errData && errData.detail) {
@@ -33,7 +34,10 @@ class ApiService {
         } catch {
           errorMsg = (await response.text()) || errorMsg;
         }
-        throw new Error(errorMsg);
+        const errorObj: any = new Error(errorMsg);
+        errorObj.status = response.status;
+        errorObj.data = errData;
+        throw errorObj;
       }
       return (await response.json()) as T;
     } catch (err: any) {
@@ -87,9 +91,21 @@ class ApiService {
     });
   }
 
-  async deleteCustomer(id: string): Promise<{ success: boolean; id: string }> {
+  async deleteCustomer(id: string): Promise<{ success: boolean; id: string; message?: string }> {
     return this.request(`/customers/${id}`, {
       method: 'DELETE',
+    });
+  }
+
+  async archiveCustomer(id: string): Promise<{ success: boolean; customer: Customer; message: string }> {
+    return this.request(`/customers/${id}/archive`, {
+      method: 'POST',
+    });
+  }
+
+  async unarchiveCustomer(id: string): Promise<{ success: boolean; customer: Customer; message: string }> {
+    return this.request(`/customers/${id}/unarchive`, {
+      method: 'POST',
     });
   }
 
