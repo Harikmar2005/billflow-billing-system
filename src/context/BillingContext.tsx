@@ -142,6 +142,20 @@ interface BillingContextType {
     summary: { totalProcessed: number; added: number; updated: number; skipped: number; failed: number };
     errors: Array<{ row: number; item: string; error: string }>;
   }>;
+  replaceProductCatalog: (
+    items: any[],
+    backupNote?: string
+  ) => Promise<{
+    success: boolean;
+    message: string;
+    count: number;
+    historicalPreservedCount: number;
+    flaggedCount: number;
+    backupId: string;
+    timestamp: string;
+  }>;
+  restoreProductBackup: (backupId?: string) => Promise<{ success: boolean; message: string; count: number }>;
+  getProductBackups: () => Promise<Array<{ id: string; timestamp: string; note: string; productCount: number }>>;
   bulkUpdateRates: (data: {
     productIds?: string[];
     category?: string;
@@ -155,6 +169,7 @@ interface BillingContextType {
   // Invoice Actions
   createInvoice: (data: Omit<Invoice, 'id' | 'createdAt' | 'updatedAt'>) => Promise<Invoice>;
   cancelInvoice: (id: string, reason: string) => Promise<Invoice>;
+  deleteInvoice: (id: string) => Promise<{ success: boolean; id: string; invoiceNumber?: string; message?: string }>;
 
   // Payment Actions
   recordPayment: (data: {
@@ -433,6 +448,42 @@ export const BillingProvider: React.FC<{ children: ReactNode }> = ({ children })
     }
   };
 
+  const replaceProductCatalog = async (items: any[], backupNote?: string) => {
+    try {
+      const res = await api.replaceCatalog(items, backupNote);
+      addToast(
+        `Catalog replaced: ${res.count} items imported${res.flaggedCount > 0 ? ` (${res.flaggedCount} flagged for review)` : ''}`,
+        'success'
+      );
+      refreshAllData();
+      return res;
+    } catch (err: any) {
+      addToast(err.message || 'Failed to replace catalog', 'error');
+      throw err;
+    }
+  };
+
+  const restoreProductBackup = async (backupId?: string) => {
+    try {
+      const res = await api.restoreProductBackup(backupId);
+      addToast(`Restored inventory: ${res.count} items recovered`, 'success');
+      refreshAllData();
+      return res;
+    } catch (err: any) {
+      addToast(err.message || 'Failed to restore backup', 'error');
+      throw err;
+    }
+  };
+
+  const getProductBackups = async () => {
+    try {
+      return await api.getProductBackups();
+    } catch (err: any) {
+      console.error('Failed to get backups:', err);
+      return [];
+    }
+  };
+
   const bulkUpdateRates = async (data: {
     productIds?: string[];
     category?: string;
@@ -498,6 +549,23 @@ export const BillingProvider: React.FC<{ children: ReactNode }> = ({ children })
       return cancelled;
     } catch (err: any) {
       addToast(err.message || 'Failed to cancel invoice', 'error');
+      throw err;
+    }
+  };
+
+  const deleteInvoice = async (id: string) => {
+    try {
+      const res = await api.deleteInvoice(id);
+      setInvoices((prev) => prev.filter((i) => i.id !== id));
+      if (previewInvoice?.id === id) {
+        setPreviewInvoice(null);
+      }
+      addToast(res.message || 'Invoice deleted successfully', 'success');
+      await refreshAllData();
+      return res;
+    } catch (err: any) {
+      console.error('Failed to delete invoice:', err);
+      addToast(err.message || 'Failed to delete invoice', 'error');
       throw err;
     }
   };
@@ -576,11 +644,15 @@ export const BillingProvider: React.FC<{ children: ReactNode }> = ({ children })
         updateProduct,
         toggleProductStatus,
         bulkImportProducts,
+        replaceProductCatalog,
+        restoreProductBackup,
+        getProductBackups,
         bulkUpdateRates,
         adjustStock,
         deleteProduct,
         createInvoice,
         cancelInvoice,
+        deleteInvoice,
         recordPayment,
         createExpense,
         deleteExpense,

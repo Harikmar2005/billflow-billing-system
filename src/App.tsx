@@ -29,6 +29,7 @@ import { AdjustStockModal } from './components/modals/AdjustStockModal';
 import { ExpenseModal } from './components/modals/ExpenseModal';
 import { RecordPaymentModal } from './components/modals/RecordPaymentModal';
 import { CancelInvoiceModal } from './components/modals/CancelInvoiceModal';
+import { DeleteInvoiceModal } from './components/modals/DeleteInvoiceModal';
 import { InvoicePreviewModal } from './components/invoices/InvoicePreviewModal';
 
 import { Customer, Product, Invoice } from './types';
@@ -80,6 +81,14 @@ const BillingApp: React.FC = () => {
 
   const [isCancelInvoiceModalOpen, setIsCancelInvoiceModalOpen] = useState(false);
   const [invoiceToCancel, setInvoiceToCancel] = useState<Invoice | null>(null);
+
+  const [isDeleteInvoiceModalOpen, setIsDeleteInvoiceModalOpen] = useState(false);
+  const [invoiceToDelete, setInvoiceToDelete] = useState<Invoice | null>(null);
+
+  const handleOpenDeleteInvoice = (invoice: Invoice) => {
+    setInvoiceToDelete(invoice);
+    setIsDeleteInvoiceModalOpen(true);
+  };
 
   // Customer handlers
   const handleOpenCreateCustomer = () => {
@@ -154,6 +163,7 @@ const BillingApp: React.FC = () => {
             <InvoiceListView
               onOpenRecordPayment={handleOpenRecordPayment}
               onOpenCancelInvoice={handleOpenCancelInvoice}
+              onOpenDeleteInvoice={handleOpenDeleteInvoice}
             />
           )}
 
@@ -278,6 +288,15 @@ const BillingApp: React.FC = () => {
         isOpen={isCancelInvoiceModalOpen}
         onClose={() => setIsCancelInvoiceModalOpen(false)}
         invoice={invoiceToCancel}
+      />
+
+      <DeleteInvoiceModal
+        isOpen={isDeleteInvoiceModalOpen}
+        onClose={() => {
+          setIsDeleteInvoiceModalOpen(false);
+          setInvoiceToDelete(null);
+        }}
+        invoice={invoiceToDelete}
       />
 
       {/* Invoice Detail / PDF Modal */}

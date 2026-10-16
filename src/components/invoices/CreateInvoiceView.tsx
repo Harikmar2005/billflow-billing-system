@@ -27,8 +27,11 @@ import {
   Truck,
   FileText,
   Search,
+  Sparkles,
+  FileUp,
 } from 'lucide-react';
 import { ProductSearchModal } from '../modals/ProductSearchModal';
+import { BillUploadWizardModal } from './BillUploadWizardModal';
 import { analytics } from '../../utils/analytics';
 
 interface CreateInvoiceViewProps {
@@ -113,6 +116,32 @@ export const CreateInvoiceView: React.FC<CreateInvoiceViewProps> = ({
   ]);
 
   const [submitting, setSubmitting] = useState<boolean>(false);
+
+  // Bill Upload Auto-Generation Wizard state
+  const [isUploadWizardOpen, setIsUploadWizardOpen] = useState<boolean>(false);
+
+  const handleApplyFromUploadWizard = (data: {
+    customerId: string;
+    placeOfSupply: string;
+    placeOfSupplyCode: string;
+    isInterState: boolean;
+    items: InvoiceLineItem[];
+    notes?: string;
+  }) => {
+    if (data.customerId) {
+      setSelectedCustomerId(data.customerId);
+      const cust = customers.find((c) => c.id === data.customerId);
+      if (cust) {
+        setPlaceOfSupply(cust.state || businessState);
+        setPlaceOfSupplyCode(cust.stateCode || businessStateCode);
+      }
+    }
+    if (data.placeOfSupply) setPlaceOfSupply(data.placeOfSupply);
+    if (data.placeOfSupplyCode) setPlaceOfSupplyCode(data.placeOfSupplyCode);
+    setIsInterState(data.isInterState);
+    if (data.items && data.items.length > 0) setItems(data.items);
+    if (data.notes) setNotes((prev) => (prev ? `${prev}\n${data.notes}` : data.notes!));
+  };
 
   // Product Search Modal state
   const [isProductSearchOpen, setIsProductSearchOpen] = useState<boolean>(false);
@@ -459,7 +488,16 @@ export const CreateInvoiceView: React.FC<CreateInvoiceViewProps> = ({
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setIsUploadWizardOpen(true)}
+            className="px-3 py-1.5 text-xs font-bold rounded-md bg-gradient-to-r from-teal-600 via-teal-500 to-indigo-600 hover:from-teal-700 hover:to-indigo-700 text-white shadow-sm hover:shadow transition-all flex items-center gap-1.5"
+            title="Upload PDF, JPG, PNG or scanned customer bill to auto-generate"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-amber-200 animate-pulse" />
+            <span>Upload Customer Bill</span>
+          </button>
           <button
             type="button"
             onClick={handlePreview}
@@ -486,6 +524,37 @@ export const CreateInvoiceView: React.FC<CreateInvoiceViewProps> = ({
             <span>{submitting ? 'Generating...' : 'Finalize & Issue Invoice'}</span>
           </button>
         </div>
+      </div>
+
+      {/* Prominent Upload Customer Bill Banner Card */}
+      <div className="p-4 sm:p-5 rounded-2xl border border-teal-500/30 bg-gradient-to-r from-teal-500/10 via-slate-50 to-indigo-500/10 dark:from-teal-950/40 dark:via-slate-900 dark:to-indigo-950/40 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex items-start sm:items-center gap-3.5">
+          <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-teal-600 to-indigo-600 text-white flex items-center justify-center shrink-0 shadow-md">
+            <FileUp className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="font-bold text-sm text-slate-900 dark:text-slate-100">
+                Have a Customer Bill, Quotation PDF, or Scanned Receipt?
+              </h2>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-teal-100 dark:bg-teal-950/80 text-teal-800 dark:text-teal-300 font-bold border border-teal-300 dark:border-teal-800">
+                OCR + 360+ Inventory Matcher
+              </span>
+            </div>
+            <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5 max-w-2xl">
+              Upload customer bills (PDF, JPG, PNG, scanned paper). BillFlow will automatically extract line items, match them against your authoritative catalog products, compare selling rates, and generate your GST invoice in 4 steps.
+            </p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setIsUploadWizardOpen(true)}
+          className="px-4 py-2 rounded-xl bg-gradient-to-r from-teal-600 to-indigo-600 hover:from-teal-700 hover:to-indigo-700 text-white font-bold text-xs shadow-md transition-all flex items-center justify-center gap-2 shrink-0 hover:scale-[1.02]"
+        >
+          <Sparkles className="w-3.5 h-3.5 text-amber-200" />
+          <span>Upload Customer Bill</span>
+        </button>
       </div>
 
       {/* Invoice Meta Grid */}
@@ -1084,6 +1153,13 @@ export const CreateInvoiceView: React.FC<CreateInvoiceViewProps> = ({
             : undefined
         }
         rowIndex={activeSearchRowIndex !== null ? activeSearchRowIndex : undefined}
+      />
+
+      {/* Bill Upload & Auto-Generate Invoice Wizard Modal */}
+      <BillUploadWizardModal
+        isOpen={isUploadWizardOpen}
+        onClose={() => setIsUploadWizardOpen(false)}
+        onApplyToManualEditor={handleApplyFromUploadWizard}
       />
     </div>
   );

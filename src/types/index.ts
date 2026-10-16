@@ -71,10 +71,25 @@ export interface Product {
   category?: string;
   stockQuantity: number;
   lowStockThreshold: number;
-  status: 'active' | 'inactive';
+  status: 'active' | 'inactive' | 'archived';
+  sno?: string | number;
+  requiresManualRateVerification?: boolean;
+  rawFinalRate?: string;
+  isIncomplete?: boolean;
+  isHistoricalInvoiceReference?: boolean;
   rateHistory?: ProductRateHistory[];
   createdAt: string;
   updatedAt: string;
+}
+
+export interface CustomCatalogueImportRow {
+  sno?: string | number;
+  description: string;
+  finalRate: string | number;
+  rawRate?: string;
+  parsedRate?: number;
+  status: 'valid' | 'flagged_rate' | 'incomplete' | 'duplicate';
+  flags: string[];
 }
 
 export interface InvoiceLineItem {
@@ -278,3 +293,80 @@ export const PRODUCT_UNITS = [
   'Days',
   'Month',
 ];
+
+// Bill Upload & Auto-Generation Types
+export type BillItemMatchStatus =
+  | 'exact' // Exact Match
+  | 'review' // Possible Match — Review Required
+  | 'unmatched' // No Match Found
+  | 'rate_diff'; // Rate Difference
+
+export interface ExtractedBillItem {
+  id: string;
+  rawName: string;
+  quantity: number;
+  unit?: string;
+  rate: number;
+  discountPercent?: number;
+  discountAmount?: number;
+  hsnSac?: string;
+  gstRate?: number;
+  lineTotal?: number;
+  notes?: string;
+}
+
+export interface MatchedBillItem {
+  id: string;
+  extractedItem: ExtractedBillItem;
+  matchedProduct: Product | null;
+  matchStatus: BillItemMatchStatus;
+  matchConfidence: number; // 0 to 1
+  matchReason?: string;
+  candidateProducts?: Product[]; // For possible matches requiring review
+  quantity: number;
+  unit: string;
+  billRate: number;
+  inventoryRate: number;
+  selectedRateSource: 'inventory' | 'bill' | 'custom';
+  approvedRate: number;
+  isPriceOverridden: boolean;
+  overrideReason?: string;
+  hsnSac: string;
+  gstRate: number;
+  discountPercent: number;
+  lineTotal: number;
+  isResolved: boolean;
+}
+
+export interface ExtractedBillData {
+  customerName?: string;
+  customerPhone?: string;
+  customerEmail?: string;
+  customerAddress?: string;
+  customerCity?: string;
+  customerState?: string;
+  customerGstin?: string;
+  originalInvoiceNumber?: string;
+  invoiceDate?: string;
+  dueDate?: string;
+  placeOfSupply?: string;
+  items: ExtractedBillItem[];
+  subtotal?: number;
+  totalDiscount?: number;
+  totalCgst?: number;
+  totalSgst?: number;
+  totalIgst?: number;
+  totalTax?: number;
+  finalTotal?: number;
+  notes?: string;
+  missingFields?: string[];
+  extractionSource?: 'gemini-ocr' | 'pdf-text' | 'sample';
+}
+
+export interface SampleCustomerBill {
+  id: string;
+  title: string;
+  documentType: string;
+  fileName: string;
+  data: ExtractedBillData;
+}

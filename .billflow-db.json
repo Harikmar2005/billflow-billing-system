@@ -15,7 +15,7 @@
     "isGstRegistered": true,
     "gstScheme": "regular",
     "invoicePrefix": "BF/2026-27/",
-    "nextInvoiceNumber": 107,
+    "nextInvoiceNumber": 108,
     "currency": "₹",
     "bankName": "HDFC Bank Ltd",
     "accountNumber": "50200049281734",
@@ -2570,7 +2570,7 @@
       "purchasePrice": 13900,
       "gstRate": 18,
       "category": "IT & Networking",
-      "stockQuantity": 8,
+      "stockQuantity": 9,
       "lowStockThreshold": 2,
       "status": "active",
       "rateHistory": [
@@ -3610,7 +3610,7 @@
       "purchasePrice": 17.4,
       "gstRate": 18,
       "category": "Fasteners & Hardware",
-      "stockQuantity": 600,
+      "stockQuantity": 601,
       "lowStockThreshold": 90,
       "status": "active",
       "rateHistory": [
@@ -5850,7 +5850,7 @@
       "isInterState": false,
       "invoiceDate": "2026-10-12",
       "dueDate": "2026-10-27",
-      "status": "draft",
+      "status": "cancelled",
       "paymentStatus": "unpaid",
       "items": [
         {
@@ -5916,7 +5916,9 @@
       "termsOfDelivery": "Door Delivery",
       "copyType": "ORIGINAL",
       "createdAt": "2026-10-12T13:42:34.794Z",
-      "updatedAt": "2026-10-12T13:42:34.794Z"
+      "updatedAt": "2026-10-16T13:16:38.038Z",
+      "cancellationReason": "Order cancelled by client before dispatch",
+      "cancelledAt": "2026-10-16T13:16:38.038Z"
     },
     {
       "id": "inv-1791810592064",
@@ -6354,6 +6356,54 @@
     }
   ],
   "inventoryMovements": [
+    {
+      "id": "mov-1792157204321-prod-1",
+      "productId": "prod-1",
+      "productName": "Enterprise Router Dual-Band AC1200",
+      "type": "sale_deletion",
+      "quantity": 2,
+      "previousStock": 30,
+      "newStock": 32,
+      "referenceId": "BF/2026-27/107",
+      "reason": "Stock restored upon deletion of invoice BF/2026-27/107",
+      "createdAt": "2026-10-16T13:26:44.321Z"
+    },
+    {
+      "id": "mov-1792157204299-prod-1",
+      "productId": "prod-1",
+      "productName": "Enterprise Router Dual-Band AC1200",
+      "type": "sale",
+      "quantity": -2,
+      "previousStock": 32,
+      "newStock": 30,
+      "referenceId": "BF/2026-27/107",
+      "reason": "Invoice BF/2026-27/107 issued",
+      "createdAt": "2026-10-16T13:26:44.299Z"
+    },
+    {
+      "id": "mov-1792156598038-prod-seed-135",
+      "productId": "prod-seed-135",
+      "productName": "Allen Socket Head Cap Screw SS 304 DIN 912 (M8 x 35mm)",
+      "type": "sale_cancellation",
+      "quantity": 1,
+      "previousStock": 600,
+      "newStock": 601,
+      "referenceId": "BF/2026-27/106",
+      "reason": "Stock restored upon cancellation of BF/2026-27/106: Order cancelled by client before dispatch",
+      "createdAt": "2026-10-16T13:16:38.038Z"
+    },
+    {
+      "id": "mov-1792156598038-prod-seed-95",
+      "productId": "prod-seed-95",
+      "productName": "24-Port Gigabit PoE Managed Network Switch Rackmount",
+      "type": "sale_cancellation",
+      "quantity": 1,
+      "previousStock": 8,
+      "newStock": 9,
+      "referenceId": "BF/2026-27/106",
+      "reason": "Stock restored upon cancellation of BF/2026-27/106: Order cancelled by client before dispatch",
+      "createdAt": "2026-10-16T13:16:38.038Z"
+    },
     {
       "id": "mov-1",
       "productId": "prod-1",

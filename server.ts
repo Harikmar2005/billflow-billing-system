@@ -44,7 +44,8 @@ app.get('/sitemap.xml', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'sitemap.xml'));
 });
 
-app.use(express.json({ limit: '5mb' }));
+app.use(express.json({ limit: '25mb' }));
+app.use(express.urlencoded({ extended: true, limit: '25mb' }));
 
 // Bot & Spam Protection Shield
 app.use((req, res, next) => {
@@ -1459,6 +1460,213 @@ app.delete('/api/products/:id', (req: Request, res: Response) => {
   res.json({ success: true, id: req.params.id });
 });
 
+// Replace entire active catalog with uploaded product list (preserving historical invoice integrity & creating backups)
+app.post('/api/products/replace-catalog', (req: Request, res: Response) => {
+  try {
+    const db = readDb();
+    const { items, backupNote } = req.body;
+
+    if (!Array.isArray(items) || items.length === 0) {
+      res.status(400).json({ error: 'Items array is required and must not be empty.' });
+      return;
+    }
+
+    // 1. Create reversible backup of current products
+    if (!Array.isArray(db.productBackups)) {
+      db.productBackups = [];
+    }
+    const backupEntry = {
+      id: `backup-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      note: backupNote || 'Automated backup before catalog replacement',
+      productCount: db.products.length,
+      products: JSON.parse(JSON.stringify(db.products)),
+    };
+    db.productBackups.unshift(backupEntry);
+    if (db.productBackups.length > 5) {
+      db.productBackups = db.productBackups.slice(0, 5);
+    }
+
+    // Write file backup for resilience
+    try {
+      fs.writeFileSync(
+        path.join(__dirname, '.billflow-db.backup.json'),
+        JSON.stringify(backupEntry, null, 2)
+      );
+    } catch (e) {
+      console.warn('Could not write backup file:', e);
+    }
+
+    // 2. Identify products referenced in historical invoices to protect audit trail
+    const invoiceReferencedProductIds = new Set<string>();
+    (db.invoices || []).forEach((inv: any) => {
+      (inv.items || []).forEach((item: any) => {
+        if (item.productId) invoiceReferencedProductIds.add(item.productId);
+      });
+    });
+
+    const historicalPreserved: any[] = [];
+    db.products.forEach((p: any) => {
+      if (invoiceReferencedProductIds.has(p.id)) {
+        historicalPreserved.push({
+          ...p,
+          status: 'archived',
+          isHistoricalInvoiceReference: true,
+          updatedAt: new Date().toISOString(),
+        });
+      }
+    });
+
+    // 3. Process imported items
+    const newProducts: any[] = [];
+    let flaggedCount = 0;
+
+    items.forEach((item: any, idx: number) => {
+      const rawDesc = String(item.description || item.name || item.DESCRIPTION || '').trim();
+      const rawRate = item.finalRate ?? item.FinalRate ?? item['Final Rate'] ?? item.rate ?? item.sellingPrice;
+      const rawSno = item.sno ?? item.SNO ?? item['S.NO'] ?? item.sNo;
+
+      // Discard completely empty rows
+      if (!rawDesc && (rawRate === undefined || rawRate === null || String(rawRate).trim() === '') && (rawSno === undefined || rawSno === null || String(rawSno).trim() === '')) {
+        return;
+      }
+
+      // Check for non-numeric rate e.g. "31KG"
+      let parsedRate = 0;
+      let requiresManualRateVerification = false;
+      const rawRateStr = String(rawRate ?? '').trim();
+
+      if (rawRateStr === '31KG' || /[a-zA-Z]/.test(rawRateStr)) {
+        requiresManualRateVerification = true;
+        flaggedCount++;
+        parsedRate = 0;
+      } else {
+        const cleaned = rawRateStr.replace(/[^0-9.-]/g, '');
+        const num = parseFloat(cleaned);
+        if (isNaN(num)) {
+          requiresManualRateVerification = true;
+          flaggedCount++;
+          parsedRate = 0;
+        } else {
+          parsedRate = Math.round(num * 100) / 100;
+        }
+      }
+
+      // Generate unique ID without altering the original description
+      const id = `prod-imp-${String(idx + 1).padStart(4, '0')}`;
+      const sku = `SKU-${String(rawSno || idx + 1).padStart(4, '0')}`;
+
+      // Incomplete flag if description is missing
+      const isIncomplete = !rawDesc || (rawRate === undefined || rawRate === null || rawRateStr === '');
+      if (isIncomplete && !requiresManualRateVerification) {
+        flaggedCount++;
+      }
+
+      newProducts.push({
+        id,
+        sno: rawSno !== undefined && rawSno !== null ? rawSno : idx + 1,
+        name: rawDesc || `Incomplete Product #${idx + 1}`,
+        description: rawDesc,
+        type: 'product',
+        sku,
+        hsnSacCode: item.hsnSacCode || '8517',
+        unit: item.unit || 'Pcs',
+        sellingPrice: parsedRate,
+        purchasePrice: Math.round(parsedRate * 0.7 * 100) / 100,
+        gstRate: item.gstRate || 18,
+        category: item.category || 'General',
+        stockQuantity: item.stockQuantity !== undefined ? Number(item.stockQuantity) : 100,
+        lowStockThreshold: 10,
+        status: 'active',
+        requiresManualRateVerification,
+        rawFinalRate: requiresManualRateVerification ? rawRateStr : undefined,
+        isIncomplete,
+        rateHistory: [
+          {
+            oldPrice: parsedRate,
+            newPrice: parsedRate,
+            changedAt: new Date().toISOString(),
+            reason: 'Imported via replacement catalog',
+          },
+        ],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+    });
+
+    // Replace active catalog: historical archived products kept safe + new products
+    db.products = [...historicalPreserved, ...newProducts];
+    writeDb(db);
+
+    res.json({
+      success: true,
+      message: `Successfully replaced inventory with ${newProducts.length} items.`,
+      count: newProducts.length,
+      historicalPreservedCount: historicalPreserved.length,
+      flaggedCount,
+      backupId: backupEntry.id,
+      timestamp: backupEntry.timestamp,
+    });
+  } catch (err: any) {
+    console.error('Error replacing catalog:', err);
+    res.status(500).json({ error: err.message || 'Database error during catalog replacement.' });
+  }
+});
+
+// Restore previous product inventory from backup
+app.post('/api/products/restore-backup', (req: Request, res: Response) => {
+  try {
+    const db = readDb();
+    const { backupId } = req.body;
+
+    if (!Array.isArray(db.productBackups) || db.productBackups.length === 0) {
+      try {
+        const fileBackup = JSON.parse(fs.readFileSync(path.join(__dirname, '.billflow-db.backup.json'), 'utf8'));
+        if (fileBackup && Array.isArray(fileBackup.products)) {
+          db.products = fileBackup.products;
+          writeDb(db);
+          res.json({ success: true, message: 'Restored products from backup file.', count: db.products.length });
+          return;
+        }
+      } catch {}
+      res.status(404).json({ error: 'No backups found to restore.' });
+      return;
+    }
+
+    const backup = backupId
+      ? db.productBackups.find((b: any) => b.id === backupId)
+      : db.productBackups[0];
+
+    if (!backup) {
+      res.status(404).json({ error: 'Specified backup not found.' });
+      return;
+    }
+
+    db.products = JSON.parse(JSON.stringify(backup.products));
+    writeDb(db);
+
+    res.json({
+      success: true,
+      message: `Restored inventory from backup created at ${backup.timestamp}`,
+      count: db.products.length,
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'Failed to restore backup.' });
+  }
+});
+
+// List available inventory backups
+app.get('/api/products/backups', (req: Request, res: Response) => {
+  const db = readDb();
+  const backups = (db.productBackups || []).map((b: any) => ({
+    id: b.id,
+    timestamp: b.timestamp,
+    note: b.note,
+    productCount: b.productCount,
+  }));
+  res.json(backups);
+});
+
 // 6. Invoices CRUD & Workflow
 app.get('/api/invoices', (req: Request, res: Response) => {
   const db = readDb();
@@ -1601,6 +1809,63 @@ app.post('/api/invoices/:id/cancel', (req: Request, res: Response) => {
 
   writeDb(db);
   res.json(invoice);
+});
+
+app.delete('/api/invoices/:id', (req: Request, res: Response) => {
+  try {
+    const db = readDb();
+    const invoiceIndex = (db.invoices || []).findIndex((i: any) => i.id === req.params.id);
+    if (invoiceIndex === -1) {
+      res.status(404).json({ error: 'Invoice not found', id: req.params.id });
+      return;
+    }
+
+    const invoice = db.invoices[invoiceIndex];
+
+    // If the invoice was issued (and not already cancelled), restore stock inventory for physical products
+    if (invoice.status === 'issued' && Array.isArray(invoice.items)) {
+      for (const item of invoice.items) {
+        if (item.type === 'product' && item.productId) {
+          const prod = db.products.find((p: any) => p.id === item.productId);
+          if (prod) {
+            const prev = prod.stockQuantity || 0;
+            prod.stockQuantity = prev + (Number(item.quantity) || 0);
+            db.inventoryMovements.unshift({
+              id: `mov-${Date.now()}-${item.productId}`,
+              productId: prod.id,
+              productName: prod.name,
+              type: 'sale_deletion',
+              quantity: Number(item.quantity) || 0,
+              previousStock: prev,
+              newStock: prod.stockQuantity,
+              referenceId: invoice.invoiceNumber,
+              reason: `Stock restored upon deletion of invoice ${invoice.invoiceNumber}`,
+              createdAt: new Date().toISOString(),
+            });
+          }
+        }
+      }
+    }
+
+    // Clean up only payments specifically tied to this deleted invoice
+    if (Array.isArray(db.payments)) {
+      db.payments = db.payments.filter((p: any) => p.invoiceId !== invoice.id);
+    }
+
+    // Remove the invoice from db.invoices
+    db.invoices.splice(invoiceIndex, 1);
+
+    writeDb(db);
+    res.json({
+      success: true,
+      id: req.params.id,
+      invoiceNumber: invoice.invoiceNumber,
+      message: `Invoice ${invoice.invoiceNumber} has been deleted successfully.`,
+    });
+  } catch (err: any) {
+    console.error('Error deleting invoice:', err);
+    res.status(500).json({ error: err.message || 'Database failure while deleting invoice.' });
+  }
 });
 
 // 7. Payments
@@ -1775,6 +2040,377 @@ STRICT RULES:
     console.error('AI assistant error:', err);
     res.status(500).json({ error: err.message || 'Failed to query assistant' });
   }
+});
+
+// 11. Bill Upload & OCR / PDF Extraction
+app.post('/api/bills/extract', async (req: Request, res: Response) => {
+  const { fileData, mimeType, fileName } = req.body;
+
+  if (!fileData || !mimeType) {
+    res.status(400).json({ error: 'fileData (base64) and mimeType are required' });
+    return;
+  }
+
+  // Validate supported mime types
+  const allowedMimes = [
+    'application/pdf',
+    'image/jpeg',
+    'image/jpg',
+    'image/png',
+    'image/webp',
+    'image/bmp',
+  ];
+  const normalizedMime = mimeType.toLowerCase();
+  if (!allowedMimes.some((m) => normalizedMime.includes(m.split('/')[1]) || normalizedMime === m)) {
+    res.status(400).json({
+      error: `Unsupported file type "${mimeType}". Allowed types: PDF, JPG, JPEG, PNG, WEBP.`,
+    });
+    return;
+  }
+
+  // Strip possible data URI header e.g. "data:image/jpeg;base64,"
+  let cleanBase64 = fileData;
+  if (fileData.includes(',')) {
+    cleanBase64 = fileData.split(',')[1];
+  }
+  cleanBase64 = cleanBase64.replace(/\s+/g, '');
+
+  if (!ai) {
+    res.status(503).json({
+      error: 'Gemini AI Vision & OCR Engine is not configured on the server. Please verify GEMINI_API_KEY.',
+      apiKeyMissing: true,
+    });
+    return;
+  }
+
+  try {
+    const prompt = `You are a high-precision document extraction engine for Indian MSME bills, tax invoices, vendor receipts, and quotations.
+Analyze this uploaded document (which can be a digital PDF, scanned paper bill, photographed thermal receipt, or invoice).
+Perform optical character recognition (OCR) and document understanding to extract all invoice, customer, tax, and item details.
+
+Return a STRICT valid JSON object with EXACTLY this structure:
+{
+  "customerName": "Customer or Buyer Name (string, or empty string if missing)",
+  "customerPhone": "Customer Phone (string, or empty string if missing)",
+  "customerAddress": "Customer Billing Address (string, or empty string if missing)",
+  "customerCity": "Customer City (string, or empty string if missing)",
+  "customerState": "Customer State in India (string, or empty string if missing)",
+  "customerGstin": "Customer 15-character GSTIN (string, or empty string if missing)",
+  "originalInvoiceNumber": "Original bill or invoice number on document (string, or empty string if missing)",
+  "invoiceDate": "Invoice/Bill date formatted as YYYY-MM-DD (string, or empty string if missing)",
+  "dueDate": "Payment due date formatted as YYYY-MM-DD (string, or empty string if missing)",
+  "placeOfSupply": "Place of Supply State name (string, or empty string if missing)",
+  "items": [
+    {
+      "rawName": "Exact item or product name as written on the bill (include dimensions/specs like M6x25mm, Cat6 305m, 4MP PoE if present)",
+      "quantity": 1.0,
+      "unit": "Pcs or Box or Set or Kg or Mtr or Nos",
+      "rate": 100.0,
+      "discountPercent": 0,
+      "discountAmount": 0,
+      "hsnSac": "HSN or SAC code if present, or empty string",
+      "gstRate": 18,
+      "lineTotal": 118.0
+    }
+  ],
+  "subtotal": 100.0,
+  "totalDiscount": 0,
+  "totalCgst": 9.0,
+  "totalSgst": 9.0,
+  "totalIgst": 0,
+  "totalTax": 18.0,
+  "finalTotal": 118.0,
+  "notes": "Any notes or payment terms from the bill",
+  "missingFields": ["list of any required invoice fields that were unclear, unreadable, torn, or absent on the bill"]
+}
+
+STRICT EXTRACTION RULES:
+1. Never invent missing items, imaginary quantities, or fake prices. If an item name is partially blurred, transcribe what is visible and flag in missingFields.
+2. Quantities and rates must be numeric values (e.g. 2, not "two").
+3. Preserve the exact product name in "rawName" so our inventory matcher can cross-reference it against existing catalog products.
+4. If line item rates on the bill already include tax, compute the base unit rate before tax if detectable, or provide the rate as stated.
+5. In missingFields, list any important information that could not be confidently determined (e.g., "Customer Phone not found", "Due Date not specified").`;
+
+    let requestMime = 'application/pdf';
+    if (normalizedMime.includes('jpeg') || normalizedMime.includes('jpg')) requestMime = 'image/jpeg';
+    else if (normalizedMime.includes('png')) requestMime = 'image/png';
+    else if (normalizedMime.includes('webp')) requestMime = 'image/webp';
+    else if (normalizedMime.includes('pdf')) requestMime = 'application/pdf';
+
+    const aiResponse = await ai.models.generateContent({
+      model: 'gemini-3.8-flash',
+      contents: [
+        {
+          role: 'user',
+          parts: [
+            {
+              inlineData: {
+                mimeType: requestMime,
+                data: cleanBase64,
+              },
+            },
+            {
+              text: prompt,
+            },
+          ],
+        },
+      ],
+      config: {
+        responseMimeType: 'application/json',
+      },
+    });
+
+    const rawText = aiResponse.text || '{}';
+    let parsed: any;
+    try {
+      parsed = JSON.parse(rawText);
+    } catch {
+      const cleaned = rawText.replace(/```json\n?|```/g, '').trim();
+      parsed = JSON.parse(cleaned);
+    }
+
+    if (Array.isArray(parsed.items)) {
+      parsed.items = parsed.items.map((item: any, idx: number) => ({
+        id: `extracted-${Date.now()}-${idx + 1}`,
+        rawName: String(item.rawName || item.name || `Item ${idx + 1}`).trim(),
+        quantity: Math.max(0.01, Number(item.quantity) || 1),
+        unit: item.unit || 'Pcs',
+        rate: Math.max(0, Number(item.rate) || 0),
+        discountPercent: Number(item.discountPercent) || 0,
+        discountAmount: Number(item.discountAmount) || 0,
+        hsnSac: String(item.hsnSac || '').trim(),
+        gstRate: Number(item.gstRate) || 18,
+        lineTotal: Number(item.lineTotal) || (Number(item.quantity) || 1) * (Number(item.rate) || 0),
+        notes: item.notes || '',
+      }));
+    } else {
+      parsed.items = [];
+    }
+
+    res.json({
+      success: true,
+      fileName: fileName || 'uploaded_document',
+      mimeType: requestMime,
+      data: parsed,
+      extractedAt: new Date().toISOString(),
+      engine: 'gemini-3.8-flash-vision-ocr',
+    });
+  } catch (err: any) {
+    console.error('Bill extraction error:', err);
+    res.status(500).json({
+      error: err.message || 'Failed to extract bill details using AI vision OCR.',
+      details: err.toString(),
+    });
+  }
+});
+
+// Provide realistic Indian sample customer bills for instant verification
+app.get('/api/bills/sample-bills', (req: Request, res: Response) => {
+  const db = readDb();
+  const samples = [
+    {
+      id: 'sample-networking',
+      title: 'Enterprise Networking & IT Consignment Bill',
+      documentType: 'PDF Tax Invoice',
+      fileName: 'TCS_Network_Purchase_Bill_9921.pdf',
+      data: {
+        customerName: 'Tata Consultancy Vendor Desk',
+        customerPhone: '+91 98220 11223',
+        customerEmail: 'procurement@tcs-vendor.com',
+        customerGstin: '27AAACT2727Q1ZW',
+        customerAddress: 'TCS Sahyadri Park, Rajiv Gandhi Infotech Park, Hinjawadi',
+        customerCity: 'Pune',
+        customerState: 'Maharashtra',
+        originalInvoiceNumber: 'VEND-TCS/2026/9921',
+        invoiceDate: new Date().toISOString().split('T')[0],
+        dueDate: new Date(Date.now() + 15 * 86400000).toISOString().split('T')[0],
+        placeOfSupply: 'Maharashtra',
+        items: [
+          {
+            id: 'sample-item-1',
+            rawName: 'Enterprise Router Dual-Band AC1200', // EXACT MATCH in inventory prod-1
+            quantity: 3,
+            unit: 'Pcs',
+            rate: 4500, // Matching BillFlow rate 4500
+            discountPercent: 0,
+            discountAmount: 0,
+            hsnSac: '8517',
+            gstRate: 18,
+            lineTotal: 15930,
+          },
+          {
+            id: 'sample-item-2',
+            rawName: 'Cat6 Shielded Ethernet Spool (305m)', // EXACT MATCH prod-2, BUT RATE DIFFERENCE!
+            quantity: 2,
+            unit: 'Box',
+            rate: 7200, // On bill it is 7200, but BillFlow rate is 6800! Tests Rate Difference!
+            discountPercent: 0,
+            discountAmount: 0,
+            hsnSac: '8544',
+            gstRate: 18,
+            lineTotal: 16992,
+          },
+          {
+            id: 'sample-item-3',
+            rawName: 'Network Infrastructure Setup & Security Audit', // EXACT MATCH prod-5 (service)
+            quantity: 1,
+            unit: 'Set',
+            rate: 25000,
+            discountPercent: 5,
+            discountAmount: 1250,
+            hsnSac: '998313',
+            gstRate: 18,
+            lineTotal: 28025,
+          },
+        ],
+        subtotal: 51900,
+        totalDiscount: 1250,
+        totalTaxableAmount: 50650,
+        totalCgst: 4558.5,
+        totalSgst: 4558.5,
+        totalIgst: 0,
+        totalTax: 9117,
+        finalTotal: 59767,
+        notes: 'Delivery completed to Hinjawadi IT Campus.',
+        missingFields: [],
+      },
+    },
+    {
+      id: 'sample-hardware-fasteners',
+      title: 'Scanned Hardware & Machine Fasteners Bill',
+      documentType: 'Scanned Paper Bill (OCR)',
+      fileName: 'Apex_Machine_Bolts_Invoice_482.jpg',
+      data: {
+        customerName: 'Sharma Electronics & Telecom',
+        customerPhone: '+91 71225 98765',
+        customerEmail: 'sharma.telecom@gmail.com',
+        customerGstin: '27AABCS5544K1ZS',
+        customerAddress: '45, Sitabuldi Main Road',
+        customerCity: 'Nagpur',
+        customerState: 'Maharashtra',
+        originalInvoiceNumber: 'INV-BLT/2026/482',
+        invoiceDate: new Date(Date.now() - 2 * 86400000).toISOString().split('T')[0],
+        dueDate: new Date(Date.now() + 12 * 86400000).toISOString().split('T')[0],
+        placeOfSupply: 'Maharashtra',
+        items: [
+          {
+            id: 'sample-fastener-1',
+            rawName: 'Hex Head Bolt MS Grade 4.6 M6 x 25mm', // Exact match JET-HW-001 (rate 4.5)
+            quantity: 200,
+            unit: 'Pcs',
+            rate: 4.5,
+            discountPercent: 0,
+            discountAmount: 0,
+            hsnSac: '73181500',
+            gstRate: 18,
+            lineTotal: 1062,
+          },
+          {
+            id: 'sample-fastener-2',
+            rawName: 'Hex Head Bolt MS Grade 4.6 M8 x 30mm', // Exact match JET-HW-003 (rate 8.0)
+            quantity: 100,
+            unit: 'Pcs',
+            rate: 9.0, // Bill rate is 9.0 vs inventory 8.0! Tests Rate Difference!
+            discountPercent: 0,
+            discountAmount: 0,
+            hsnSac: '73181500',
+            gstRate: 18,
+            lineTotal: 1062,
+          },
+          {
+            id: 'sample-fastener-3',
+            rawName: 'Hex Head Bolt MS Grade 4.6 M6 x', // Ambiguous / truncated name (could be 25mm or 40mm) -> Possible Match / Review Required!
+            quantity: 50,
+            unit: 'Pcs',
+            rate: 5.0,
+            discountPercent: 0,
+            discountAmount: 0,
+            hsnSac: '73181500',
+            gstRate: 18,
+            lineTotal: 295,
+          },
+          {
+            id: 'sample-fastener-4',
+            rawName: 'Custom Titanium Aerospace Anchor Bracket 2026', // UNMATCHED item -> No Match Found!
+            quantity: 10,
+            unit: 'Pcs',
+            rate: 450,
+            discountPercent: 0,
+            discountAmount: 0,
+            hsnSac: '8483',
+            gstRate: 18,
+            lineTotal: 5310,
+          },
+        ],
+        subtotal: 7150,
+        totalDiscount: 0,
+        totalTaxableAmount: 7150,
+        totalCgst: 643.5,
+        totalSgst: 643.5,
+        totalIgst: 0,
+        totalTax: 1287,
+        finalTotal: 8437,
+        notes: 'Cash-on-delivery terms. Scanned invoice processed.',
+        missingFields: ['Due date handwritten and partially obscured on paper copy'],
+      },
+    },
+    {
+      id: 'sample-surveillance',
+      title: 'Photographed Thermal Receipt / Camera Consignment',
+      documentType: 'Photograph Receipt (Mobile OCR)',
+      fileName: 'Kaveri_Camera_Receipt_Photo_091.png',
+      data: {
+        customerName: 'Kaveri Digital Studio',
+        customerPhone: '+91 94440 88776',
+        customerEmail: 'kaveri.digital@yahoo.in',
+        customerGstin: '',
+        customerAddress: '12, T. Nagar Main Street',
+        customerCity: 'Chennai',
+        customerState: 'Tamil Nadu',
+        originalInvoiceNumber: 'KDS-BILL-091',
+        invoiceDate: new Date().toISOString().split('T')[0],
+        dueDate: new Date(Date.now() + 10 * 86400000).toISOString().split('T')[0],
+        placeOfSupply: 'Tamil Nadu', // Inter-state IGST
+        items: [
+          {
+            id: 'sample-cam-1',
+            rawName: 'CCTV Surveillance Camera 4MP IP PoE', // Exact match prod-3 (rate 2400)
+            quantity: 4,
+            unit: 'Pcs',
+            rate: 2400,
+            discountPercent: 0,
+            discountAmount: 0,
+            hsnSac: '8525',
+            gstRate: 18,
+            lineTotal: 11328,
+          },
+          {
+            id: 'sample-cam-2',
+            rawName: 'Biometric Attendance & Access Terminal', // Exact match prod-4 (rate 8900)
+            quantity: 1,
+            unit: 'Pcs',
+            rate: 8900,
+            discountPercent: 0,
+            discountAmount: 0,
+            hsnSac: '8471',
+            gstRate: 18,
+            lineTotal: 10502,
+          },
+        ],
+        subtotal: 18500,
+        totalDiscount: 0,
+        totalTaxableAmount: 18500,
+        totalCgst: 0,
+        totalSgst: 0,
+        totalIgst: 3330,
+        totalTax: 3330,
+        finalTotal: 21830,
+        notes: 'Outstation interstate consignment dispatch.',
+        missingFields: ['Customer GSTIN (Unregistered buyer)'],
+      },
+    },
+  ];
+  res.json(samples);
 });
 
 // Configure Vite integration for dev server or static serve

@@ -15,17 +15,21 @@ import {
   ExternalLink,
   Calendar,
   AlertCircle,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Trash2
 } from 'lucide-react';
+import { DeleteInvoiceModal } from '../modals/DeleteInvoiceModal';
 
 interface InvoiceListViewProps {
   onOpenRecordPayment: (invoice: Invoice) => void;
   onOpenCancelInvoice: (invoice: Invoice) => void;
+  onOpenDeleteInvoice?: (invoice: Invoice) => void;
 }
 
 export const InvoiceListView: React.FC<InvoiceListViewProps> = ({
   onOpenRecordPayment,
   onOpenCancelInvoice,
+  onOpenDeleteInvoice,
 }) => {
   const {
     invoices,
@@ -44,6 +48,19 @@ export const InvoiceListView: React.FC<InvoiceListViewProps> = ({
   const [customerFilter, setCustomerFilter] = useState<string>('all');
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
+
+  // Delete invoice modal state
+  const [isLocalDeleteModalOpen, setIsLocalDeleteModalOpen] = useState(false);
+  const [localInvoiceToDelete, setLocalInvoiceToDelete] = useState<Invoice | null>(null);
+
+  const handleDeleteClick = (inv: Invoice) => {
+    if (onOpenDeleteInvoice) {
+      onOpenDeleteInvoice(inv);
+    } else {
+      setLocalInvoiceToDelete(inv);
+      setIsLocalDeleteModalOpen(true);
+    }
+  };
 
   const filteredInvoices = invoices.filter((inv) => {
     const q = searchQuery.toLowerCase();
@@ -361,6 +378,15 @@ export const InvoiceListView: React.FC<InvoiceListViewProps> = ({
                             <Ban className="w-3.5 h-3.5" />
                           </button>
                         )}
+
+                        <button
+                          onClick={() => handleDeleteClick(inv)}
+                          className="p-1 rounded text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors"
+                          title="Delete Invoice"
+                          aria-label="Delete Invoice"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -370,6 +396,18 @@ export const InvoiceListView: React.FC<InvoiceListViewProps> = ({
           </div>
         )}
       </div>
+
+      {/* Local Delete Confirmation Modal (if not controlled by parent) */}
+      {!onOpenDeleteInvoice && (
+        <DeleteInvoiceModal
+          isOpen={isLocalDeleteModalOpen}
+          onClose={() => {
+            setIsLocalDeleteModalOpen(false);
+            setLocalInvoiceToDelete(null);
+          }}
+          invoice={localInvoiceToDelete}
+        />
+      )}
     </div>
   );
 };

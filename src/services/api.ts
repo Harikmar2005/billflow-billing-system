@@ -7,6 +7,8 @@ import {
   Expense,
   InventoryMovement,
   DashboardMetrics,
+  ExtractedBillData,
+  SampleCustomerBill,
 } from '../types';
 
 const API_BASE = '/api';
@@ -177,6 +179,32 @@ class ApiService {
     });
   }
 
+  async replaceCatalog(items: any[], backupNote?: string): Promise<{
+    success: boolean;
+    message: string;
+    count: number;
+    historicalPreservedCount: number;
+    flaggedCount: number;
+    backupId: string;
+    timestamp: string;
+  }> {
+    return this.request('/products/replace-catalog', {
+      method: 'POST',
+      body: JSON.stringify({ items, backupNote }),
+    });
+  }
+
+  async restoreProductBackup(backupId?: string): Promise<{ success: boolean; message: string; count: number }> {
+    return this.request('/products/restore-backup', {
+      method: 'POST',
+      body: JSON.stringify({ backupId }),
+    });
+  }
+
+  async getProductBackups(): Promise<Array<{ id: string; timestamp: string; note: string; productCount: number }>> {
+    return this.request('/products/backups');
+  }
+
   async bulkUpdateRates(data: {
     productIds?: string[];
     category?: string;
@@ -239,6 +267,12 @@ class ApiService {
     });
   }
 
+  async deleteInvoice(id: string): Promise<{ success: boolean; id: string; invoiceNumber?: string; message?: string }> {
+    return this.request(`/invoices/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
   // Payments
   async getPayments(invoiceId?: string): Promise<Payment[]> {
     const query = invoiceId ? `?invoiceId=${encodeURIComponent(invoiceId)}` : '';
@@ -290,6 +324,22 @@ class ApiService {
       method: 'POST',
       body: JSON.stringify({ query }),
     });
+  }
+
+  // Bill Upload & Auto-Generation Extraction
+  async extractBill(
+    fileData: string,
+    mimeType: string,
+    fileName: string
+  ): Promise<{ success: boolean; data: ExtractedBillData; fileName: string; engine: string }> {
+    return this.request('/bills/extract', {
+      method: 'POST',
+      body: JSON.stringify({ fileData, mimeType, fileName }),
+    });
+  }
+
+  async getSampleBills(): Promise<SampleCustomerBill[]> {
+    return this.request('/bills/sample-bills');
   }
 }
 
