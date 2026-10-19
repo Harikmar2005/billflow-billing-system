@@ -370,3 +370,65 @@ export interface SampleCustomerBill {
   fileName: string;
   data: ExtractedBillData;
 }
+
+// ==========================================
+// Role-Based Access Control (RBAC) Types
+// ==========================================
+
+export type UserRole = 'super_admin' | 'manager' | 'employee';
+export type UserStatus = 'active' | 'deactivated';
+
+export interface AppUser {
+  id: string;
+  email: string;
+  name: string;
+  role: UserRole;
+  status: UserStatus;
+  mfaEnabled: boolean;
+  lastLoginAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AuditLogEntry {
+  id: string;
+  timestamp: string;
+  userId: string;
+  userName: string;
+  userRole: UserRole | string;
+  action: string;
+  entityType: string;
+  entityId?: string;
+  details: string;
+  ip?: string;
+}
+
+export interface DatabaseBackup {
+  id: string;
+  timestamp: string;
+  note: string;
+  itemCount: number;
+  invoiceCount: number;
+  customerCount: number;
+  paymentCount: number;
+  createdAt: string;
+  createdBy: string;
+}
+
+export interface AuthSessionResponse {
+  token: string;
+  user: AppUser;
+  expiresAt: string;
+}
+
+export interface SetupStatusResponse {
+  isSetupRequired: boolean;
+  totalUsers: number;
+}
+
+export interface MfaChallengeResponse {
+  mfaRequired: true;
+  tempToken: string;
+  email: string;
+  maskedPhone?: string;
+}

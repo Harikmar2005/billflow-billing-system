@@ -147,15 +147,15 @@ export const InvoiceListView: React.FC<InvoiceListViewProps> = ({
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[#E2E8F0]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[#E2E8F0] dark:border-[#1E293B]">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-[#0F172A] flex items-center gap-2">
+          <h1 className="text-xl font-bold tracking-tight text-[#0F172A] dark:text-[#F8FAFC] flex items-center gap-2">
             Tax Invoices Ledger
-            <span className="text-xs font-mono text-slate-500 font-normal">
+            <span className="text-xs font-mono text-slate-500 dark:text-slate-400 font-normal">
               ({filteredInvoices.length} of {invoices.length})
             </span>
           </h1>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
             Track issued tax invoices, payment settlements, cancellations, and export GST records.
           </p>
         </div>
@@ -163,14 +163,14 @@ export const InvoiceListView: React.FC<InvoiceListViewProps> = ({
         <div className="flex items-center gap-2">
           <button
             onClick={handleExportCsv}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md border border-[#E2E8F0] bg-white text-slate-700 hover:bg-slate-50 shadow-xs transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md border border-[#E2E8F0] dark:border-[#1E293B] bg-white dark:bg-[#111827] text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-[#1E293B] shadow-xs transition-colors"
           >
-            <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
+            <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
             <span>Export CSV</span>
           </button>
           <button
             onClick={() => setCurrentView('create-invoice')}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md bg-[#009688] hover:bg-[#00796B] text-white shadow-xs transition-all"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md bg-[#009688] hover:bg-[#00796B] dark:bg-[#00BFA5] dark:hover:bg-[#009688] text-white shadow-xs transition-all"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Create Invoice</span>
@@ -179,14 +179,14 @@ export const InvoiceListView: React.FC<InvoiceListViewProps> = ({
       </div>
 
       {/* Filter Toolbar */}
-      <div className="p-3.5 rounded-lg border border-[#E2E8F0] bg-white shadow-xs flex flex-wrap items-center gap-3 text-xs">
-        <Filter className="w-3.5 h-3.5 text-slate-400 mr-1" />
+      <div className="p-3.5 rounded-lg border border-[#E2E8F0] dark:border-[#1E293B] bg-white dark:bg-[#111827] shadow-xs flex flex-wrap items-center gap-3 text-xs">
+        <Filter className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 mr-1" />
 
         {/* Payment Status */}
         <select
           value={paymentFilter}
           onChange={(e) => setPaymentFilter(e.target.value)}
-          className="px-2.5 py-1.5 rounded-md border border-[#E2E8F0] bg-white text-[#0F172A] focus:border-[#009688] focus:outline-none shadow-2xs"
+          className="px-2.5 py-1.5 rounded-md border border-[#E2E8F0] dark:border-[#1E293B] bg-white dark:bg-[#0F172A] text-[#0F172A] dark:text-[#F8FAFC] focus:border-[#009688] dark:focus:border-[#00BFA5] focus:outline-none shadow-2xs"
         >
           <option value="all">All Payment Statuses</option>
           <option value="unpaid">Unpaid</option>
@@ -199,7 +199,7 @@ export const InvoiceListView: React.FC<InvoiceListViewProps> = ({
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="px-2.5 py-1.5 rounded-md border border-[#E2E8F0] bg-white text-[#0F172A] focus:border-[#009688] focus:outline-none shadow-2xs"
+          className="px-2.5 py-1.5 rounded-md border border-[#E2E8F0] dark:border-[#1E293B] bg-white dark:bg-[#0F172A] text-[#0F172A] dark:text-[#F8FAFC] focus:border-[#009688] dark:focus:border-[#00BFA5] focus:outline-none shadow-2xs"
         >
           <option value="all">All Life Cycle Statuses</option>
           <option value="issued">Issued</option>
@@ -211,7 +211,7 @@ export const InvoiceListView: React.FC<InvoiceListViewProps> = ({
         <select
           value={customerFilter}
           onChange={(e) => setCustomerFilter(e.target.value)}
-          className="px-2.5 py-1.5 rounded-md border border-[#E2E8F0] bg-white text-[#0F172A] focus:border-[#009688] focus:outline-none shadow-2xs max-w-xs truncate"
+          className="px-2.5 py-1.5 rounded-md border border-[#E2E8F0] dark:border-[#1E293B] bg-white dark:bg-[#0F172A] text-[#0F172A] dark:text-[#F8FAFC] focus:border-[#009688] dark:focus:border-[#00BFA5] focus:outline-none shadow-2xs max-w-xs truncate"
         >
           <option value="all">All Customers</option>
           {customers.map((c) => (
@@ -223,35 +223,35 @@ export const InvoiceListView: React.FC<InvoiceListViewProps> = ({
 
         {/* Date range */}
         <div className="flex items-center gap-1.5 font-mono text-[11px]">
-          <span className="text-slate-500 font-sans">From:</span>
+          <span className="text-slate-500 dark:text-slate-400 font-sans">From:</span>
           <input
             type="date"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
-            className="px-2 py-1 rounded border border-[#E2E8F0] bg-white text-[#0F172A] focus:border-[#009688] focus:outline-none shadow-2xs"
+            className="px-2 py-1 rounded border border-[#E2E8F0] dark:border-[#1E293B] bg-white dark:bg-[#0F172A] text-[#0F172A] dark:text-[#F8FAFC] focus:border-[#009688] dark:focus:border-[#00BFA5] focus:outline-none shadow-2xs"
           />
-          <span className="text-slate-500 font-sans">To:</span>
+          <span className="text-slate-500 dark:text-slate-400 font-sans">To:</span>
           <input
             type="date"
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
-            className="px-2 py-1 rounded border border-[#E2E8F0] bg-white text-[#0F172A] focus:border-[#009688] focus:outline-none shadow-2xs"
+            className="px-2 py-1 rounded border border-[#E2E8F0] dark:border-[#1E293B] bg-white dark:bg-[#0F172A] text-[#0F172A] dark:text-[#F8FAFC] focus:border-[#009688] dark:focus:border-[#00BFA5] focus:outline-none shadow-2xs"
           />
         </div>
       </div>
 
       {/* Invoices Table */}
-      <div className="rounded-lg border border-[#E2E8F0] bg-white shadow-xs overflow-hidden">
+      <div className="rounded-lg border border-[#E2E8F0] dark:border-[#1E293B] bg-white dark:bg-[#111827] shadow-xs overflow-hidden">
         {filteredInvoices.length === 0 ? (
-          <div className="p-12 text-center text-slate-400 text-xs bg-white">
-            <FileText className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-            <p className="font-semibold text-slate-600">No invoices match your filter criteria.</p>
+          <div className="p-12 text-center text-slate-400 dark:text-slate-500 text-xs bg-white dark:bg-[#111827]">
+            <FileText className="w-8 h-8 text-slate-300 dark:text-slate-600 mx-auto mb-2" />
+            <p className="font-semibold text-slate-600 dark:text-slate-300">No invoices match your filter criteria.</p>
             <p className="mt-1">Create a new invoice or adjust your search filter above.</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-[#F1F5F9] text-[#64748B] font-semibold font-mono text-[11px] border-b border-[#E2E8F0]">
+            <table className="w-full text-left text-xs bg-white dark:bg-[#0F172A]">
+              <thead className="bg-[#F1F5F9] dark:bg-[#020617] text-[#64748B] dark:text-[#94A3B8] font-semibold font-mono text-[11px] border-b border-[#E2E8F0] dark:border-[#1E293B]">
                 <tr>
                   <th className="py-3 px-3">INVOICE NO</th>
                   <th className="py-3 px-3">CUSTOMER & GSTIN</th>
@@ -264,19 +264,19 @@ export const InvoiceListView: React.FC<InvoiceListViewProps> = ({
                   <th className="py-3 px-3 text-right">ACTIONS</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#E2E8F0] font-mono">
+              <tbody className="divide-y divide-[#E2E8F0] dark:divide-[#1E293B] font-mono">
                 {filteredInvoices.map((inv) => (
                   <tr
                     key={inv.id}
-                    className={`odd:bg-white even:bg-[#F8FAFC] hover:bg-slate-100/80 transition-colors ${
-                      inv.status === 'cancelled' ? 'opacity-60 bg-slate-50/50' : ''
+                    className={`odd:bg-white dark:odd:bg-[#0F172A] even:bg-[#F8FAFC] dark:even:bg-[#0A1122] hover:bg-slate-100/80 dark:hover:bg-[#1E293B]/70 transition-colors ${
+                      inv.status === 'cancelled' ? 'opacity-60 bg-slate-50/50 dark:bg-slate-900/50' : ''
                     }`}
                   >
                     {/* Invoice Number */}
                     <td className="py-3 px-3">
                       <button
                         onClick={() => setPreviewInvoice(inv)}
-                        className="font-bold text-[#009688] hover:text-[#00796B] hover:underline flex items-center gap-1"
+                        className="font-bold text-[#009688] dark:text-[#00BFA5] hover:underline flex items-center gap-1"
                       >
                         <span>{inv.invoiceNumber}</span>
                       </button>
@@ -284,35 +284,35 @@ export const InvoiceListView: React.FC<InvoiceListViewProps> = ({
 
                     {/* Customer & GSTIN */}
                     <td className="py-3 px-3 font-sans">
-                      <div className="font-semibold text-[#0F172A] truncate max-w-[200px]">
+                      <div className="font-semibold text-[#0F172A] dark:text-[#F8FAFC] truncate max-w-[200px]">
                         {inv.customerName}
                       </div>
                       {inv.customerGstin ? (
-                        <span className="font-mono text-[10px] text-slate-500">
+                        <span className="font-mono text-[10px] text-slate-500 dark:text-slate-400">
                           GSTIN: {inv.customerGstin}
                         </span>
                       ) : (
-                        <span className="text-[10px] text-slate-400">Unregistered Buyer</span>
+                        <span className="text-[10px] text-slate-400 dark:text-slate-500">Unregistered Buyer</span>
                       )}
                     </td>
 
                     {/* Dates */}
-                    <td className="py-3 px-3 text-slate-600">
+                    <td className="py-3 px-3 text-slate-600 dark:text-slate-400">
                       {formatDate(inv.invoiceDate)}
                     </td>
-                    <td className="py-3 px-3 text-slate-600">
+                    <td className="py-3 px-3 text-slate-600 dark:text-slate-400">
                       {formatDate(inv.dueDate)}
                     </td>
 
                     {/* Financial Amounts */}
-                    <td className="py-3 px-3 text-right font-bold text-[#0F172A]">
+                    <td className="py-3 px-3 text-right font-bold text-[#0F172A] dark:text-[#F8FAFC]">
                       {formatINR(inv.totalAmount)}
                     </td>
-                    <td className="py-3 px-3 text-right text-emerald-600 font-medium">
+                    <td className="py-3 px-3 text-right text-emerald-600 dark:text-emerald-400 font-medium">
                       {formatINR(inv.amountPaid)}
                     </td>
                     <td className="py-3 px-3 text-right font-bold">
-                      <span className={inv.balanceDue > 0 ? 'text-amber-600' : 'text-slate-400'}>
+                      <span className={inv.balanceDue > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-slate-400 dark:text-slate-500'}>
                         {formatINR(inv.balanceDue)}
                       </span>
                     </td>
@@ -320,19 +320,19 @@ export const InvoiceListView: React.FC<InvoiceListViewProps> = ({
                     {/* Status Pill */}
                     <td className="py-3 px-3 text-center font-sans">
                       {inv.status === 'cancelled' ? (
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase bg-slate-100 text-slate-500 line-through">
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 line-through">
                           Cancelled
                         </span>
                       ) : (
                         <span
                           className={`px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase ${
                             inv.paymentStatus === 'paid'
-                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                              ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
                               : inv.paymentStatus === 'partially_paid'
-                              ? 'bg-sky-50 text-sky-700 border border-sky-200'
+                              ? 'bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800'
                               : inv.paymentStatus === 'overdue'
-                              ? 'bg-rose-50 text-rose-700 border border-rose-200'
-                              : 'bg-amber-50 text-amber-700 border border-amber-200'
+                              ? 'bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800'
+                              : 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800'
                           }`}
                         >
                           {inv.paymentStatus.replace('_', ' ')}
@@ -345,7 +345,7 @@ export const InvoiceListView: React.FC<InvoiceListViewProps> = ({
                       <div className="flex items-center justify-end gap-1.5">
                         <button
                           onClick={() => setPreviewInvoice(inv)}
-                          className="p-1 rounded text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors"
+                          className="p-1 rounded text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-[#1E293B] transition-colors"
                           title="View / Print Tax Invoice"
                         >
                           <Printer className="w-3.5 h-3.5" />
@@ -353,7 +353,7 @@ export const InvoiceListView: React.FC<InvoiceListViewProps> = ({
 
                         <button
                           onClick={() => handleDownloadPdf(inv)}
-                          className="p-1 rounded text-slate-500 hover:text-[#009688] hover:bg-slate-100 transition-colors"
+                          className="p-1 rounded text-slate-500 dark:text-slate-400 hover:text-[#009688] dark:hover:text-[#00BFA5] hover:bg-slate-100 dark:hover:bg-[#1E293B] transition-colors"
                           title="Download PDF"
                         >
                           <Download className="w-3.5 h-3.5" />
@@ -362,7 +362,7 @@ export const InvoiceListView: React.FC<InvoiceListViewProps> = ({
                         {inv.status !== 'cancelled' && inv.balanceDue > 0 && (
                           <button
                             onClick={() => onOpenRecordPayment(inv)}
-                            className="p-1 rounded text-slate-500 hover:text-[#009688] hover:bg-slate-100 transition-colors"
+                            className="p-1 rounded text-slate-500 dark:text-slate-400 hover:text-[#009688] dark:hover:text-[#00BFA5] hover:bg-slate-100 dark:hover:bg-[#1E293B] transition-colors"
                             title="Record Payment"
                           >
                             <CreditCard className="w-3.5 h-3.5" />
@@ -372,7 +372,7 @@ export const InvoiceListView: React.FC<InvoiceListViewProps> = ({
                         {inv.status !== 'cancelled' && (
                           <button
                             onClick={() => onOpenCancelInvoice(inv)}
-                            className="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-slate-100 transition-colors"
+                            className="p-1 rounded text-slate-400 dark:text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-slate-100 dark:hover:bg-[#1E293B] transition-colors"
                             title="Cancel Invoice & Restore Stock"
                           >
                             <Ban className="w-3.5 h-3.5" />
@@ -381,7 +381,7 @@ export const InvoiceListView: React.FC<InvoiceListViewProps> = ({
 
                         <button
                           onClick={() => handleDeleteClick(inv)}
-                          className="p-1 rounded text-red-500 hover:text-red-600 hover:bg-red-50 transition-colors"
+                          className="p-1 rounded text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/60 transition-colors"
                           title="Delete Invoice"
                           aria-label="Delete Invoice"
                         >

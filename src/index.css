@@ -4,33 +4,128 @@
 
 @layer base {
   :root {
-    --bg-surface: #f8fafc;
-    --card-surface: #ffffff;
-    --navy-primary: #0f172a;
-    --navy-secondary: #64748b;
-    --teal-brand: #009688;
-    --teal-hover: #00796b;
-    --border-subtle: #e2e8f0;
+    --bg-main: #f8fafc;
+    --header-sidebar: #ffffff;
+    --card-panel: #ffffff;
+    --table-bg: #ffffff;
     --table-header: #f1f5f9;
+    --text-primary: #0f172a;
+    --text-secondary: #64748b;
+    --border-color: #e2e8f0;
+    --brand-teal: #009688;
+    --brand-teal-hover: #00796b;
     --table-row-alt: #f8fafc;
+    --input-bg: #ffffff;
+  }
+
+  html.dark, :root[data-theme="dark"], .dark {
+    --bg-main: #020617;
+    --header-sidebar: #0f172a;
+    --card-panel: #111827;
+    --table-bg: #0f172a;
+    --table-header: #020617;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --border-color: #1e293b;
+    --brand-teal: #00bfa5;
+    --brand-teal-hover: #14b8a6;
+    --table-row-alt: #0a1122;
+    --input-bg: #0f172a;
   }
 
   html {
-    background-color: #f8fafc;
-    color: #0f172a;
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    transition: background-color 150ms ease, color 150ms ease;
+    color-scheme: light;
+  }
+
+  html.dark {
+    color-scheme: dark;
   }
 
   body {
-    background-color: #f8fafc;
-    color: #0f172a;
+    background-color: var(--bg-main);
+    color: var(--text-primary);
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     margin: 0;
     padding: 0;
     min-height: 100vh;
+    transition: background-color 150ms ease, color 150ms ease;
   }
 
   .font-mono {
     font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  }
+}
+
+/* Centralized Dark Mode & Light Mode Theme Enforcement */
+@layer components {
+  /* Prevent style pollution inside printable invoice */
+  #printable-tax-invoice,
+  #printable-tax-invoice * {
+    color-scheme: light !important;
+  }
+
+  /* Global dark mode styling enforcement for cards, tables, inputs and dialogs */
+  .dark input:not([type="checkbox"]):not([type="radio"]):not([type="color"]):not([type="range"]):not(#printable-tax-invoice *),
+  .dark select:not(#printable-tax-invoice *),
+  .dark textarea:not(#printable-tax-invoice *) {
+    background-color: var(--input-bg);
+    color: var(--text-primary);
+    border-color: var(--border-color);
+  }
+
+  .dark input::placeholder,
+  .dark textarea::placeholder {
+    color: #64748b;
+  }
+
+  /* Ensure modal cards in dark mode match the cards & panels spec (#111827) */
+  .dark .bg-white:not(#printable-tax-invoice):not(#printable-tax-invoice *) {
+    background-color: var(--card-panel);
+  }
+
+  .dark .bg-slate-900:not(#printable-tax-invoice *) {
+    background-color: var(--card-panel);
+  }
+
+  .dark .bg-slate-50:not(#printable-tax-invoice *) {
+    background-color: var(--bg-main);
+  }
+
+  .dark .border-slate-200:not(#printable-tax-invoice *),
+  .dark .border-slate-300:not(#printable-tax-invoice *),
+  .dark .border-slate-100:not(#printable-tax-invoice *) {
+    border-color: var(--border-color);
+  }
+
+  .dark .text-slate-900:not(#printable-tax-invoice *) {
+    color: var(--text-primary);
+  }
+
+  .dark .text-slate-800:not(#printable-tax-invoice *) {
+    color: #f1f5f9;
+  }
+
+  .dark .text-slate-700:not(#printable-tax-invoice *) {
+    color: #e2e8f0;
+  }
+
+  .dark .text-slate-600:not(#printable-tax-invoice *),
+  .dark .text-slate-500:not(#printable-tax-invoice *) {
+    color: var(--text-secondary);
+  }
+
+  /* Ensure tables in dark mode match #0F172A and thead matches #020617 */
+  .dark table:not(#printable-tax-invoice *) {
+    background-color: var(--table-bg);
+  }
+
+  .dark thead:not(#printable-tax-invoice *),
+  .dark thead tr:not(#printable-tax-invoice *) {
+    background-color: var(--table-header) !important;
+    color: var(--text-secondary) !important;
   }
 }
 

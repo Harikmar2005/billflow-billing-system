@@ -224,7 +224,12 @@ export const BillingProvider: React.FC<{ children: ReactNode }> = ({ children })
   const [isDark, setIsDark] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('billflow_theme');
-      if (saved === 'dark') return true;
+      if (saved === 'dark') {
+        document.documentElement.classList.add('dark');
+        document.documentElement.setAttribute('data-theme', 'dark');
+        return true;
+      }
+      // Default to Light Mode
       localStorage.setItem('billflow_theme', 'light');
       document.documentElement.classList.remove('dark');
       document.documentElement.setAttribute('data-theme', 'light');
@@ -235,20 +240,48 @@ export const BillingProvider: React.FC<{ children: ReactNode }> = ({ children })
 
   useEffect(() => {
     if (typeof document !== 'undefined') {
+      const meta = document.getElementById('theme-meta');
       if (isDark) {
         document.documentElement.classList.add('dark');
         document.documentElement.setAttribute('data-theme', 'dark');
         localStorage.setItem('billflow_theme', 'dark');
+        if (meta) meta.setAttribute('content', '#020617');
       } else {
         document.documentElement.classList.remove('dark');
         document.documentElement.setAttribute('data-theme', 'light');
         localStorage.setItem('billflow_theme', 'light');
+        if (meta) meta.setAttribute('content', '#ffffff');
       }
     }
   }, [isDark]);
 
   const toggleTheme = () => {
     setIsDark((prev) => !prev);
+  };
+
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [settings, setSettings] = useState<BusinessSettings | null>(null);
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [payments, setPayments] = useState<Payment[]>([]);
+  const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [previewInvoice, setPreviewInvoice] = useState<Invoice | null>(null);
+  const [toasts, setToasts] = useState<Toast[]>([]);
+
+  const removeToast = (id: string) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  };
+
+  const addToast = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
+    const id = `toast-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+    setToasts((prev) => [...prev, { id, type, message }]);
+    setTimeout(() => {
+      removeToast(id);
+    }, 4000);
   };
 
   const refreshAllData = async () => {

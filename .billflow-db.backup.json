@@ -1,8 +1,8 @@
 {
-  "id": "backup-1792406204628",
-  "timestamp": "2026-10-19T10:36:44.628Z",
-  "note": "Initial clear default inventory for user catalog import",
-  "productCount": 15,
+  "id": "backup-1792410253148",
+  "timestamp": "2026-10-19T11:44:13.148Z",
+  "note": "Import user catalog after clearing defaults",
+  "productCount": 13,
   "products": [
     {
       "id": "prod-1",
@@ -18,10 +18,10 @@
       "stockQuantity": 32,
       "lowStockThreshold": 5,
       "createdAt": "2026-08-12T10:40:44.390Z",
-      "updatedAt": "2026-10-19T10:36:13.572Z",
+      "updatedAt": "2026-10-19T11:44:13.116Z",
       "status": "archived",
       "isHistoricalInvoiceReference": true,
-      "archivedAt": "2026-10-19T10:36:13.507Z"
+      "archivedAt": "2026-10-19T11:44:13.116Z"
     },
     {
       "id": "prod-2",
@@ -37,10 +37,10 @@
       "stockQuantity": 18,
       "lowStockThreshold": 4,
       "createdAt": "2026-08-22T10:40:44.390Z",
-      "updatedAt": "2026-10-19T10:36:13.572Z",
+      "updatedAt": "2026-10-19T11:44:13.116Z",
       "status": "archived",
       "isHistoricalInvoiceReference": true,
-      "archivedAt": "2026-10-19T10:36:13.507Z"
+      "archivedAt": "2026-10-19T11:44:13.116Z"
     },
     {
       "id": "prod-3",
@@ -56,10 +56,10 @@
       "stockQuantity": 3,
       "lowStockThreshold": 5,
       "createdAt": "2026-09-01T10:40:44.390Z",
-      "updatedAt": "2026-10-19T10:36:13.572Z",
+      "updatedAt": "2026-10-19T11:44:13.116Z",
       "status": "archived",
       "isHistoricalInvoiceReference": true,
-      "archivedAt": "2026-10-19T10:36:13.507Z"
+      "archivedAt": "2026-10-19T11:44:13.116Z"
     },
     {
       "id": "prod-4",
@@ -75,10 +75,10 @@
       "stockQuantity": 14,
       "lowStockThreshold": 3,
       "createdAt": "2026-09-01T10:40:44.390Z",
-      "updatedAt": "2026-10-19T10:36:13.572Z",
+      "updatedAt": "2026-10-19T11:44:13.116Z",
       "status": "archived",
       "isHistoricalInvoiceReference": true,
-      "archivedAt": "2026-10-19T10:36:13.507Z"
+      "archivedAt": "2026-10-19T11:44:13.116Z"
     },
     {
       "id": "prod-5",
@@ -94,10 +94,10 @@
       "stockQuantity": 0,
       "lowStockThreshold": 0,
       "createdAt": "2026-09-01T10:40:44.390Z",
-      "updatedAt": "2026-10-19T10:36:13.578Z",
+      "updatedAt": "2026-10-19T11:44:13.116Z",
       "status": "archived",
       "isHistoricalInvoiceReference": true,
-      "archivedAt": "2026-10-19T10:36:13.507Z"
+      "archivedAt": "2026-10-19T11:44:13.116Z"
     },
     {
       "id": "prod-seed-61",
@@ -123,9 +123,9 @@
         }
       ],
       "createdAt": "2026-08-13T13:03:20.209Z",
-      "updatedAt": "2026-10-19T10:36:13.578Z",
+      "updatedAt": "2026-10-19T11:44:13.116Z",
       "isHistoricalInvoiceReference": true,
-      "archivedAt": "2026-10-19T10:36:13.507Z"
+      "archivedAt": "2026-10-19T11:44:13.116Z"
     },
     {
       "id": "prod-seed-95",
@@ -151,9 +151,9 @@
         }
       ],
       "createdAt": "2026-08-13T13:03:20.209Z",
-      "updatedAt": "2026-10-19T10:36:13.578Z",
+      "updatedAt": "2026-10-19T11:44:13.116Z",
       "isHistoricalInvoiceReference": true,
-      "archivedAt": "2026-10-19T10:36:13.507Z"
+      "archivedAt": "2026-10-19T11:44:13.116Z"
     },
     {
       "id": "prod-seed-128",
@@ -179,9 +179,9 @@
         }
       ],
       "createdAt": "2026-08-13T13:03:20.209Z",
-      "updatedAt": "2026-10-19T10:36:13.578Z",
+      "updatedAt": "2026-10-19T11:44:13.116Z",
       "isHistoricalInvoiceReference": true,
-      "archivedAt": "2026-10-19T10:36:13.507Z"
+      "archivedAt": "2026-10-19T11:44:13.116Z"
     },
     {
       "id": "prod-seed-135",
@@ -207,9 +207,9 @@
         }
       ],
       "createdAt": "2026-08-13T13:03:20.209Z",
-      "updatedAt": "2026-10-19T10:36:13.578Z",
+      "updatedAt": "2026-10-19T11:44:13.116Z",
       "isHistoricalInvoiceReference": true,
-      "archivedAt": "2026-10-19T10:36:13.507Z"
+      "archivedAt": "2026-10-19T11:44:13.116Z"
     },
     {
       "id": "prod-seed-136",
@@ -235,9 +235,9 @@
         }
       ],
       "createdAt": "2026-08-13T13:03:20.209Z",
-      "updatedAt": "2026-10-19T10:36:13.578Z",
+      "updatedAt": "2026-10-19T11:44:13.116Z",
       "isHistoricalInvoiceReference": true,
-      "archivedAt": "2026-10-19T10:36:13.507Z"
+      "archivedAt": "2026-10-19T11:44:13.116Z"
     },
     {
       "id": "prod-imp-0002",
@@ -266,38 +266,9 @@
         }
       ],
       "createdAt": "2026-10-19T10:30:14.250Z",
-      "updatedAt": "2026-10-19T10:36:13.578Z",
+      "updatedAt": "2026-10-19T11:44:13.116Z",
       "isHistoricalInvoiceReference": true,
-      "archivedAt": "2026-10-19T10:36:13.507Z"
-    },
-    {
-      "id": "prod-imp-0001",
-      "sno": 1,
-      "name": "Hex Head Bolt MS Grade 4.6 M6 x 25mm Half Thread Zinc Plated",
-      "description": "Hex Head Bolt MS Grade 4.6 M6 x 25mm Half Thread Zinc Plated",
-      "type": "product",
-      "sku": "SKU-0001",
-      "hsnSacCode": "8517",
-      "unit": "Pcs",
-      "sellingPrice": 3.5,
-      "purchasePrice": 2.45,
-      "gstRate": 18,
-      "category": "General",
-      "stockQuantity": 100,
-      "lowStockThreshold": 10,
-      "status": "active",
-      "requiresManualRateVerification": false,
-      "isIncomplete": false,
-      "rateHistory": [
-        {
-          "oldPrice": 3.5,
-          "newPrice": 3.5,
-          "changedAt": "2026-10-19T10:36:13.578Z",
-          "reason": "Imported via replacement catalog"
-        }
-      ],
-      "createdAt": "2026-10-19T10:36:13.578Z",
-      "updatedAt": "2026-10-19T10:36:13.578Z"
+      "archivedAt": "2026-10-19T11:44:13.116Z"
     },
     {
       "id": "prod-imp-0002",
@@ -314,7 +285,7 @@
       "category": "General",
       "stockQuantity": 100,
       "lowStockThreshold": 10,
-      "status": "active",
+      "status": "archived",
       "requiresManualRateVerification": false,
       "isIncomplete": false,
       "rateHistory": [
@@ -326,66 +297,40 @@
         }
       ],
       "createdAt": "2026-10-19T10:36:13.578Z",
-      "updatedAt": "2026-10-19T10:36:13.578Z"
+      "updatedAt": "2026-10-19T11:44:13.116Z",
+      "isHistoricalInvoiceReference": true,
+      "archivedAt": "2026-10-19T11:44:13.116Z"
     },
     {
-      "id": "prod-imp-0003",
-      "sno": 3,
-      "name": "Special Heavy Industrial Casting Part Batch X",
-      "description": "Special Heavy Industrial Casting Part Batch X",
+      "id": "prod-imp-0002",
+      "sno": 2,
+      "name": "Nylon Lock Nut SS 304 M8 DIN 985",
+      "description": "Nylon Lock Nut SS 304 M8 DIN 985",
       "type": "product",
-      "sku": "SKU-0003",
+      "sku": "SKU-0002",
       "hsnSacCode": "8517",
       "unit": "Pcs",
-      "sellingPrice": 0,
-      "purchasePrice": 0,
+      "sellingPrice": 6.2,
+      "purchasePrice": 4.34,
       "gstRate": 18,
       "category": "General",
       "stockQuantity": 100,
       "lowStockThreshold": 10,
-      "status": "active",
-      "requiresManualRateVerification": true,
-      "rawFinalRate": "31KG",
-      "isIncomplete": false,
-      "rateHistory": [
-        {
-          "oldPrice": 0,
-          "newPrice": 0,
-          "changedAt": "2026-10-19T10:36:13.578Z",
-          "reason": "Imported via replacement catalog"
-        }
-      ],
-      "createdAt": "2026-10-19T10:36:13.578Z",
-      "updatedAt": "2026-10-19T10:36:13.578Z"
-    },
-    {
-      "id": "prod-imp-0004",
-      "sno": 4,
-      "name": "Spring Washer High Tensile B7 M10",
-      "description": "Spring Washer High Tensile B7 M10",
-      "type": "product",
-      "sku": "SKU-0004",
-      "hsnSacCode": "8517",
-      "unit": "Pcs",
-      "sellingPrice": 4.8,
-      "purchasePrice": 3.36,
-      "gstRate": 18,
-      "category": "General",
-      "stockQuantity": 100,
-      "lowStockThreshold": 10,
-      "status": "active",
+      "status": "archived",
       "requiresManualRateVerification": false,
       "isIncomplete": false,
       "rateHistory": [
         {
-          "oldPrice": 4.8,
-          "newPrice": 4.8,
-          "changedAt": "2026-10-19T10:36:13.579Z",
+          "oldPrice": 6.2,
+          "newPrice": 6.2,
+          "changedAt": "2026-10-19T11:20:09.928Z",
           "reason": "Imported via replacement catalog"
         }
       ],
-      "createdAt": "2026-10-19T10:36:13.579Z",
-      "updatedAt": "2026-10-19T10:36:13.579Z"
+      "createdAt": "2026-10-19T11:20:09.928Z",
+      "updatedAt": "2026-10-19T11:44:13.116Z",
+      "isHistoricalInvoiceReference": true,
+      "archivedAt": "2026-10-19T11:44:13.116Z"
     }
   ]
 }

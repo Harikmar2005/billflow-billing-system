@@ -118,7 +118,7 @@ export const Sidebar: React.FC = () => {
 
   return (
     <aside
-      className={`h-[calc(100vh-3.5rem)] sticky top-14 border-r border-[#E2E8F0] bg-white flex flex-col justify-between transition-all duration-200 z-20 ${
+      className={`h-[calc(100vh-3.5rem)] sticky top-14 border-r border-[#E2E8F0] dark:border-[#1E293B] bg-white dark:bg-[#0F172A] flex flex-col justify-between transition-all duration-200 z-20 ${
         collapsed ? 'w-14' : 'w-56'
       }`}
     >
@@ -134,14 +134,14 @@ export const Sidebar: React.FC = () => {
               onClick={() => setCurrentView(item.id)}
               className={`w-full flex items-center gap-3 px-2.5 py-2 rounded-md text-xs font-medium transition-all group relative ${
                 isActive
-                  ? 'bg-teal-50 text-teal-800 border border-teal-200 font-semibold'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                  ? 'bg-teal-50 dark:bg-teal-950/60 text-teal-800 dark:text-teal-300 border border-teal-200 dark:border-teal-800 font-semibold'
+                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-[#111827]'
               }`}
               title={collapsed ? item.label : undefined}
             >
               <Icon
                 className={`w-4 h-4 shrink-0 transition-colors ${
-                  isActive ? 'text-[#009688]' : 'text-slate-400 group-hover:text-slate-600'
+                  isActive ? 'text-[#009688] dark:text-[#00BFA5]' : 'text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300'
                 }`}
               />
 
@@ -151,7 +151,7 @@ export const Sidebar: React.FC = () => {
                   {item.badge !== undefined && (
                     <span
                       className={`text-[10px] px-1.5 py-0.2 rounded font-mono ${
-                        item.badgeColor || 'bg-slate-100 text-slate-600'
+                        item.badgeColor || 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
                       }`}
                     >
                       {item.badge}
@@ -161,7 +161,7 @@ export const Sidebar: React.FC = () => {
               )}
 
               {isActive && (
-                <span className="absolute left-0 top-1.5 bottom-1.5 w-0.5 bg-[#009688] rounded-r" />
+                <span className="absolute left-0 top-1.5 bottom-1.5 w-0.5 bg-[#009688] dark:bg-[#00BFA5] rounded-r" />
               )}
             </button>
           );
@@ -169,39 +169,39 @@ export const Sidebar: React.FC = () => {
       </div>
 
       {/* Bottom Business Card & Collapse Toggle */}
-      <div className="p-2 border-t border-[#E2E8F0] space-y-2">
+      <div className="p-2 border-t border-[#E2E8F0] dark:border-[#1E293B] space-y-2">
         {!collapsed && settings && (
-          <div className="p-2 rounded-md bg-slate-50 border border-[#E2E8F0] text-[11px]">
-            <div className="flex items-center justify-between text-slate-400 mb-0.5 font-mono text-[10px]">
+          <div className="p-2 rounded-md bg-slate-50 dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#1E293B] text-[11px]">
+            <div className="flex items-center justify-between text-slate-400 dark:text-slate-500 mb-0.5 font-mono text-[10px]">
               <span>REGISTERED GSTIN</span>
-              <span className="text-[#009688] font-bold">{settings.stateCode}</span>
+              <span className="text-[#009688] dark:text-[#00BFA5] font-bold">{settings.stateCode}</span>
             </div>
-            <div className="font-mono text-[10px] text-slate-700 font-semibold truncate">
+            <div className="font-mono text-[10px] text-slate-700 dark:text-slate-200 font-semibold truncate">
               {settings.gstin || 'GST Unregistered'}
             </div>
-            <div className="text-[10px] text-slate-500 mt-1 truncate">
+            <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 truncate">
               {settings.city}, {settings.state}
             </div>
 
             {/* Quick Legal Links */}
-            <div className="pt-2 mt-2 border-t border-slate-200 flex items-center justify-between text-[10px] text-slate-500">
+            <div className="pt-2 mt-2 border-t border-slate-200 dark:border-[#1E293B] flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400">
               <button
                 onClick={() => setCurrentView('privacy-policy')}
-                className="hover:text-[#009688] hover:underline"
+                className="hover:text-[#009688] dark:hover:text-[#00BFA5] hover:underline"
               >
                 Privacy
               </button>
               <span>•</span>
               <button
                 onClick={() => setCurrentView('terms-conditions')}
-                className="hover:text-[#009688] hover:underline"
+                className="hover:text-[#009688] dark:hover:text-[#00BFA5] hover:underline"
               >
                 Terms
               </button>
               <span>•</span>
               <button
                 onClick={() => setCurrentView('analytics')}
-                className="hover:text-[#009688] hover:underline"
+                className="hover:text-[#009688] dark:hover:text-[#00BFA5] hover:underline"
               >
                 Metrics
               </button>
@@ -211,7 +211,7 @@ export const Sidebar: React.FC = () => {
 
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="w-full flex items-center justify-center py-1.5 text-xs text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-md transition-colors"
+          className="w-full flex items-center justify-center py-1.5 text-xs text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-[#111827] rounded-md transition-colors"
           title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
           {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}

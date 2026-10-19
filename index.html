@@ -7,8 +7,25 @@
     <meta name="description" content="GST-compliant smart billing, invoice management, customer ledger, inventory tracking, and sales intelligence application for Indian businesses." />
     <meta name="keywords" content="GST billing software, Indian invoicing, tax invoice generator, MSME billing, HSN code billing, inventory tracker India, GST calculator" />
     <meta name="author" content="BillFlow Systems" />
-    <meta name="robots" content="index, follow" />
-    <meta name="theme-color" content="#ffffff" />
+    <meta name="theme-color" content="#ffffff" id="theme-meta" />
+
+    <!-- Theme initialization before render to avoid FOUC -->
+    <script>
+      (function() {
+        try {
+          var saved = localStorage.getItem('billflow_theme');
+          if (saved === 'dark') {
+            document.documentElement.classList.add('dark');
+            document.documentElement.setAttribute('data-theme', 'dark');
+            var meta = document.getElementById('theme-meta');
+            if (meta) meta.setAttribute('content', '#020617');
+          } else {
+            document.documentElement.classList.remove('dark');
+            document.documentElement.setAttribute('data-theme', 'light');
+          }
+        } catch (e) {}
+      })();
+    </script>
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />

@@ -32,7 +32,7 @@ const CATEGORY_COLORS: Record<string, string> = {
 };
 
 export const ExpensesView: React.FC<ExpensesViewProps> = ({ onOpenCreateExpense }) => {
-  const { expenses, deleteExpense, addToast } = useBilling();
+  const { expenses, deleteExpense, addToast, isDark } = useBilling();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
   const filteredExpenses = expenses.filter(
@@ -126,11 +126,15 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({ onOpenCreateExpense 
                 <Tooltip
                   formatter={(val: any) => [formatINR(Number(val)), 'Amount']}
                   contentStyle={{
-                    backgroundColor: '#0f172a',
-                    borderColor: '#334155',
-                    borderRadius: '6px',
-                    fontSize: '11px',
-                    color: '#f8fafc',
+                    backgroundColor: isDark ? '#111827' : '#ffffff',
+                    borderColor: isDark ? '#1e293b' : '#e2e8f0',
+                    borderRadius: '8px',
+                    fontSize: '12px',
+                    color: isDark ? '#f8fafc' : '#0f172a',
+                    boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+                  }}
+                  itemStyle={{
+                    color: isDark ? '#f8fafc' : '#0f172a'
                   }}
                 />
               </PieChart>
