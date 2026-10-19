@@ -179,6 +179,21 @@ class ApiService {
     });
   }
 
+  async clearAllProducts(backupNote?: string): Promise<{
+    success: boolean;
+    message: string;
+    clearedCount: number;
+    activeCount: number;
+    historicalPreservedCount: number;
+    backupId: string;
+    timestamp: string;
+  }> {
+    return this.request('/products/clear-all', {
+      method: 'POST',
+      body: JSON.stringify({ backupNote }),
+    });
+  }
+
   async replaceCatalog(items: any[], backupNote?: string): Promise<{
     success: boolean;
     message: string;

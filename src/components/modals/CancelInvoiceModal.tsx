@@ -52,18 +52,18 @@ export const CancelInvoiceModal: React.FC<CancelInvoiceModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-150">
-      <div className="w-full max-w-md rounded-xl border border-rose-200 dark:border-rose-900/50 bg-white dark:bg-slate-900 shadow-2xl overflow-hidden text-xs">
+      <div className="w-full max-w-md rounded-xl border border-rose-200 bg-white shadow-2xl overflow-hidden text-xs">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-rose-100 dark:border-rose-950/40 bg-rose-50/50 dark:bg-rose-950/20">
+        <div className="flex items-center justify-between p-4 border-b border-rose-100 bg-rose-50/50">
           <div className="flex items-center gap-2">
-            <Ban className="w-4 h-4 text-rose-600 dark:text-rose-400" />
-            <h2 className="font-bold text-sm text-rose-900 dark:text-rose-200">
+            <Ban className="w-4 h-4 text-rose-600" />
+            <h2 className="font-bold text-sm text-rose-900">
               Cancel Issued Tax Invoice
             </h2>
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+            className="text-slate-400 hover:text-slate-600 transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
@@ -71,11 +71,11 @@ export const CancelInvoiceModal: React.FC<CancelInvoiceModalProps> = ({
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
-          <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 text-amber-800 dark:text-amber-300 text-[11px] flex gap-2.5">
+          <div className="p-3 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-[11px] flex gap-2.5">
             <AlertTriangle className="w-4 h-4 shrink-0 text-amber-600 mt-0.5" />
             <div>
               <p className="font-semibold">GST Compliance Notice:</p>
-              <p className="mt-0.5 text-slate-600 dark:text-slate-400">
+              <p className="mt-0.5 text-slate-600">
                 Issued invoices cannot be deleted to maintain an immutable audit trail.
                 Cancelling will mark invoice as <strong>CANCELLED</strong>, reverse product quantities
                 back to stock, and update customer receivables.
@@ -83,22 +83,22 @@ export const CancelInvoiceModal: React.FC<CancelInvoiceModalProps> = ({
             </div>
           </div>
 
-          <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 space-y-1 font-mono text-[11px]">
+          <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 space-y-1 font-mono text-[11px]">
             <div className="flex justify-between">
               <span className="text-slate-500 font-sans">Invoice Number:</span>
-              <span className="font-bold text-slate-900 dark:text-slate-100">
+              <span className="font-bold text-slate-900">
                 {invoice.invoiceNumber}
               </span>
             </div>
             <div className="flex justify-between">
               <span className="text-slate-500 font-sans">Customer:</span>
-              <span className="font-semibold text-slate-800 dark:text-slate-200">
+              <span className="font-semibold text-slate-800">
                 {invoice.customerName}
               </span>
             </div>
             <div className="flex justify-between">
               <span className="text-slate-500 font-sans">Total Amount:</span>
-              <span className="font-bold text-slate-900 dark:text-slate-100">
+              <span className="font-bold text-slate-900">
                 {formatINR(invoice.totalAmount)}
               </span>
             </div>
@@ -106,13 +106,13 @@ export const CancelInvoiceModal: React.FC<CancelInvoiceModalProps> = ({
 
           {/* Reason selection */}
           <div>
-            <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">
+            <label className="block text-[11px] font-semibold text-slate-700 mb-1">
               Select Primary Reason
             </label>
             <select
               value={selectedReason}
               onChange={(e) => setSelectedReason(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 focus:border-rose-500 focus:outline-none"
+              className="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white text-slate-900 focus:border-rose-500 focus:outline-none"
             >
               {COMMON_REASONS.map((r) => (
                 <option key={r} value={r}>
@@ -124,7 +124,7 @@ export const CancelInvoiceModal: React.FC<CancelInvoiceModalProps> = ({
 
           {/* Custom explanation */}
           <div>
-            <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">
+            <label className="block text-[11px] font-semibold text-slate-700 mb-1">
               Audit Notes / Supporting Reference
             </label>
             <textarea
@@ -132,16 +132,16 @@ export const CancelInvoiceModal: React.FC<CancelInvoiceModalProps> = ({
               value={customReason}
               onChange={(e) => setCustomReason(e.target.value)}
               placeholder="e.g. Email confirmation received from client on 11/10/2026..."
-              className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 focus:border-rose-500 focus:outline-none resize-none"
+              className="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white text-slate-900 focus:border-rose-500 focus:outline-none resize-none"
             />
           </div>
 
           {/* Actions */}
-          <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
+          <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-200">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors font-medium"
+              className="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-100 transition-colors font-medium"
             >
               Keep Invoice Active
             </button>

@@ -1,28 +1,32 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @layer base {
   :root {
     --bg-surface: #f8fafc;
     --card-surface: #ffffff;
     --navy-primary: #0f172a;
-    --navy-secondary: #334155;
-    --teal-accent: #0d9488;
-    --teal-hover: #0f766e;
+    --navy-secondary: #64748b;
+    --teal-brand: #009688;
+    --teal-hover: #00796b;
     --border-subtle: #e2e8f0;
+    --table-header: #f1f5f9;
+    --table-row-alt: #f8fafc;
   }
 
-  .dark {
-    --bg-surface: #0b1120;
-    --card-surface: #131c31;
-    --navy-primary: #f8fafc;
-    --navy-secondary: #94a3b8;
-    --teal-accent: #14b8a6;
-    --teal-hover: #2dd4bf;
-    --border-subtle: #1e293b;
+  html {
+    background-color: #f8fafc;
+    color: #0f172a;
   }
 
   body {
+    background-color: #f8fafc;
+    color: #0f172a;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
   }
 
   .font-mono {

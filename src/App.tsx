@@ -138,19 +138,19 @@ const BillingApp: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors duration-200">
+    <div className="min-h-screen bg-[#F8FAFC] text-[#0F172A] flex flex-col font-sans transition-colors duration-200">
       <Navbar />
 
       <div className="flex-1 flex overflow-hidden">
         <Sidebar />
 
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 bg-[#F8FAFC]">
           {error && (
-            <div className="mb-6 p-4 rounded-lg border border-rose-500/30 bg-rose-500/10 text-rose-600 dark:text-rose-300 text-xs flex items-center justify-between">
+            <div className="mb-6 p-4 rounded-lg border border-rose-300 bg-rose-50 text-rose-700 text-xs flex items-center justify-between">
               <span>{error}</span>
               <button
                 onClick={() => refreshAllData()}
-                className="underline hover:text-rose-800 dark:hover:text-white font-medium ml-4"
+                className="underline hover:text-rose-900 font-medium ml-4"
               >
                 Retry connection
               </button>
@@ -209,11 +209,11 @@ const BillingApp: React.FC = () => {
           {currentView === 'not-found' && <NotFoundView />}
 
           {/* App Footer */}
-          <footer className="mt-12 pt-6 border-t border-slate-200 dark:border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500 dark:text-slate-400 no-print">
+          <footer className="mt-12 pt-6 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500 no-print">
             <div className="flex items-center gap-2">
-              <span className="font-semibold text-slate-800 dark:text-slate-200">BillFlow India</span>
+              <span className="font-semibold text-slate-800">BillFlow India</span>
               <span>•</span>
-              <span className="flex items-center gap-1 text-teal-600 dark:text-teal-400">
+              <span className="flex items-center gap-1 text-teal-600">
                 <Lock className="w-3 h-3" />
                 <span>HTTPS Enforced</span>
               </span>
@@ -224,25 +224,25 @@ const BillingApp: React.FC = () => {
             <div className="flex items-center gap-4 text-[11px] font-medium">
               <button
                 onClick={() => setCurrentView('privacy-policy')}
-                className="hover:text-teal-600 dark:hover:text-teal-400 hover:underline transition-colors"
+                className="hover:text-teal-600 hover:underline transition-colors"
               >
                 Privacy Policy
               </button>
               <button
                 onClick={() => setCurrentView('terms-conditions')}
-                className="hover:text-teal-600 dark:hover:text-teal-400 hover:underline transition-colors"
+                className="hover:text-teal-600 hover:underline transition-colors"
               >
                 Terms &amp; Conditions
               </button>
               <button
                 onClick={() => setCurrentView('analytics')}
-                className="hover:text-teal-600 dark:hover:text-teal-400 hover:underline transition-colors"
+                className="hover:text-teal-600 hover:underline transition-colors"
               >
                 Privacy Analytics
               </button>
               <button
                 onClick={() => setCurrentView('create-invoice')}
-                className="text-teal-600 dark:text-teal-400 font-semibold hover:underline"
+                className="text-teal-600 font-semibold hover:underline"
               >
                 + New Invoice
               </button>

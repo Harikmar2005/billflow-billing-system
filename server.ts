@@ -604,8 +604,8 @@ function readDb() {
       db = JSON.parse(data);
     }
 
-    // Auto-seed 360+ items if catalog has fewer than 50 products
-    if (!db.products || db.products.length < 50) {
+    // Auto-seed 360+ items ONLY on initial startup if catalog was NEVER seeded and has not been cleared
+    if (!db.seedDone && !db.isCatalogCleared && (!db.products || db.products.length < 50)) {
       const seedCatalogue = getExpandedSeedCatalogue();
       const existingSkus = new Set((db.products || []).map((p: any) => (p.sku || '').toLowerCase()));
       const seeded = seedCatalogue.map((item, idx) => ({
@@ -626,6 +626,7 @@ function readDb() {
 
       const newItems = seeded.filter((s) => !existingSkus.has((s.sku || '').toLowerCase()));
       db.products = [...(db.products || []), ...newItems];
+      db.seedDone = true;
       writeDb(db);
     }
 
@@ -700,8 +701,11 @@ app.get('/api/metrics', (req: Request, res: Response) => {
   const overdueInvoices = activeInvoices.filter((i: any) => i.paymentStatus === 'overdue' || (i.balanceDue > 0 && i.dueDate < todayStr));
   const overdueAmount = overdueInvoices.reduce((sum: number, i: any) => sum + (i.balanceDue || 0), 0);
 
+  // Active products in catalog (excluding archived historical invoice references)
+  const activeProducts = (db.products || []).filter((p: any) => (p.status || 'active') !== 'archived');
+
   // Low stock products count
-  const lowStockCount = db.products.filter(
+  const lowStockCount = activeProducts.filter(
     (p: any) => p.type === 'product' && p.stockQuantity <= (p.lowStockThreshold || 5)
   ).length;
 
@@ -750,7 +754,7 @@ app.get('/api/metrics', (req: Request, res: Response) => {
     overdueCount: overdueInvoices.length,
     overdueAmount: Math.round(overdueAmount * 100) / 100,
     totalCustomers: db.customers.length,
-    totalProducts: db.products.length,
+    totalProducts: activeProducts.length,
     lowStockCount,
     recentInvoices: db.invoices.slice(0, 6),
     monthlyRevenueSeries,
@@ -1011,9 +1015,11 @@ app.get('/api/products', (req: Request, res: Response) => {
     items = items.filter((p: any) => p.category === category);
   }
 
-  // Status filter
+  // Status filter: exclude archived historical items by default unless explicitly requested
   if (status && typeof status === 'string' && status !== 'all') {
     items = items.filter((p: any) => (p.status || 'active') === status);
+  } else if (!status || status !== 'all') {
+    items = items.filter((p: any) => (p.status || 'active') !== 'archived');
   }
 
   // Type filter
@@ -1460,6 +1466,93 @@ app.delete('/api/products/:id', (req: Request, res: Response) => {
   res.json({ success: true, id: req.params.id });
 });
 
+// Clear All Default Inventory (with automatic backup and historical invoice reference protection)
+app.post('/api/products/clear-all', (req: Request, res: Response) => {
+  try {
+    const db = readDb();
+    const currentProducts = Array.isArray(db.products) ? db.products : [];
+
+    // 1. Create automatic reversible backup of inventory before clearing
+    if (!Array.isArray(db.productBackups)) {
+      db.productBackups = [];
+    }
+    const backupEntry = {
+      id: `backup-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      note: req.body?.backupNote || 'Automated backup before clearing inventory items',
+      productCount: currentProducts.length,
+      products: JSON.parse(JSON.stringify(currentProducts)),
+    };
+    db.productBackups.unshift(backupEntry);
+    if (db.productBackups.length > 10) {
+      db.productBackups = db.productBackups.slice(0, 10);
+    }
+
+    // Write file backup for persistence and resilience
+    try {
+      fs.writeFileSync(
+        path.join(__dirname, '.billflow-db.backup.json'),
+        JSON.stringify(backupEntry, null, 2)
+      );
+    } catch (e) {
+      console.warn('Could not write backup file:', e);
+    }
+
+    // 2. Protect existing business records: collect product IDs referenced in historical invoices
+    const invoiceReferencedProductIds = new Set<string>();
+    (db.invoices || []).forEach((inv: any) => {
+      (inv.items || []).forEach((item: any) => {
+        if (item.productId) invoiceReferencedProductIds.add(item.productId);
+      });
+    });
+
+    // 3. Separate historical invoice-referenced products (safely archive) from unreferenced default items (completely delete)
+    const historicalPreserved: any[] = [];
+    let clearedCount = 0;
+
+    currentProducts.forEach((p: any) => {
+      if (invoiceReferencedProductIds.has(p.id)) {
+        historicalPreserved.push({
+          ...p,
+          status: 'archived',
+          isHistoricalInvoiceReference: true,
+          archivedAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        });
+      } else {
+        clearedCount++;
+      }
+    });
+
+    // 4. Update database: only archived invoice references remain, active items count = 0
+    db.products = historicalPreserved;
+    db.isCatalogCleared = true;
+    db.seedDone = true;
+
+    writeDb(db);
+
+    res.json({
+      success: true,
+      message: `Successfully cleared ${clearedCount} default items from catalog.${historicalPreserved.length > 0 ? ` ${historicalPreserved.length} invoice-referenced records safely archived to protect accounting audit trails.` : ''}`,
+      clearedCount,
+      activeCount: 0,
+      historicalPreservedCount: historicalPreserved.length,
+      backupId: backupEntry.id,
+      timestamp: backupEntry.timestamp,
+    });
+  } catch (err: any) {
+    console.error('Error clearing inventory:', err);
+    res.status(500).json({ error: err.message || 'Database error during inventory clearing.' });
+  }
+});
+
+// Alias DELETE /api/products/clear-all
+app.delete('/api/products/clear-all', (req: Request, res: Response) => {
+  req.url = '/api/products/clear-all';
+  // Forward to post handler logic
+  (app as any)._router.handle(req, res, () => {});
+});
+
 // Replace entire active catalog with uploaded product list (preserving historical invoice integrity & creating backups)
 app.post('/api/products/replace-catalog', (req: Request, res: Response) => {
   try {
@@ -1596,6 +1689,8 @@ app.post('/api/products/replace-catalog', (req: Request, res: Response) => {
 
     // Replace active catalog: historical archived products kept safe + new products
     db.products = [...historicalPreserved, ...newProducts];
+    db.isCatalogCleared = false;
+    db.seedDone = true;
     writeDb(db);
 
     res.json({
@@ -1643,6 +1738,7 @@ app.post('/api/products/restore-backup', (req: Request, res: Response) => {
     }
 
     db.products = JSON.parse(JSON.stringify(backup.products));
+    db.isCatalogCleared = false;
     writeDb(db);
 
     res.json({

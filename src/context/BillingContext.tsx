@@ -154,6 +154,15 @@ interface BillingContextType {
     backupId: string;
     timestamp: string;
   }>;
+  clearAllProducts: (backupNote?: string) => Promise<{
+    success: boolean;
+    message: string;
+    clearedCount: number;
+    activeCount: number;
+    historicalPreservedCount: number;
+    backupId: string;
+    timestamp: string;
+  }>;
   restoreProductBackup: (backupId?: string) => Promise<{ success: boolean; message: string; count: number }>;
   getProductBackups: () => Promise<Array<{ id: string; timestamp: string; note: string; productCount: number }>>;
   bulkUpdateRates: (data: {
@@ -212,45 +221,34 @@ export const BillingProvider: React.FC<{ children: ReactNode }> = ({ children })
     }
   };
 
-  const [searchQuery, setSearchQuery] = useState<string>('');
-  const [isDark, setIsDark] = useState<boolean>(false);
+  const [isDark, setIsDark] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('billflow_theme');
+      if (saved === 'dark') return true;
+      localStorage.setItem('billflow_theme', 'light');
+      document.documentElement.classList.remove('dark');
+      document.documentElement.setAttribute('data-theme', 'light');
+      return false;
+    }
+    return false;
+  });
 
-  const [settings, setSettings] = useState<BusinessSettings | null>(null);
-  const [customers, setCustomers] = useState<Customer[]>([]);
-  const [products, setProducts] = useState<Product[]>([]);
-  const [invoices, setInvoices] = useState<Invoice[]>([]);
-  const [payments, setPayments] = useState<Payment[]>([]);
-  const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
-
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const [previewInvoice, setPreviewInvoice] = useState<Invoice | null>(null);
-  const [toasts, setToasts] = useState<Toast[]>([]);
-
-  const addToast = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
-    const id = `toast-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
-    setToasts((prev) => [...prev, { id, message, type }]);
-    setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 4500);
-  };
-
-  const removeToast = (id: string) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
-  };
-
-  const toggleTheme = () => {
-    setIsDark((prev) => {
-      const next = !prev;
-      if (next) {
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      if (isDark) {
         document.documentElement.classList.add('dark');
+        document.documentElement.setAttribute('data-theme', 'dark');
+        localStorage.setItem('billflow_theme', 'dark');
       } else {
         document.documentElement.classList.remove('dark');
+        document.documentElement.setAttribute('data-theme', 'light');
+        localStorage.setItem('billflow_theme', 'light');
       }
-      return next;
-    });
+    }
+  }, [isDark]);
+
+  const toggleTheme = () => {
+    setIsDark((prev) => !prev);
   };
 
   const refreshAllData = async () => {
@@ -463,6 +461,22 @@ export const BillingProvider: React.FC<{ children: ReactNode }> = ({ children })
     }
   };
 
+  const clearAllProducts = async (backupNote?: string) => {
+    try {
+      const res = await api.clearAllProducts(backupNote);
+      setProducts([]);
+      addToast(
+        `Catalog cleared: ${res.clearedCount} default items removed. Inventory is empty and ready for import.`,
+        'success'
+      );
+      await refreshAllData();
+      return res;
+    } catch (err: any) {
+      addToast(err.message || 'Failed to clear inventory', 'error');
+      throw err;
+    }
+  };
+
   const restoreProductBackup = async (backupId?: string) => {
     try {
       const res = await api.restoreProductBackup(backupId);
@@ -645,6 +659,7 @@ export const BillingProvider: React.FC<{ children: ReactNode }> = ({ children })
         toggleProductStatus,
         bulkImportProducts,
         replaceProductCatalog,
+        clearAllProducts,
         restoreProductBackup,
         getProductBackups,
         bulkUpdateRates,

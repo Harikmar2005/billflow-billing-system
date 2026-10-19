@@ -72,11 +72,11 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-150">
-      <div className="w-full max-w-md rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl overflow-hidden text-xs">
-        <div className="flex items-center justify-between p-4 border-b border-slate-100 dark:border-slate-800">
+      <div className="w-full max-w-md rounded-lg border border-slate-200 bg-white shadow-xl overflow-hidden text-xs">
+        <div className="flex items-center justify-between p-4 border-b border-slate-200">
           <div className="flex items-center gap-2">
-            <CreditCard className="w-4 h-4 text-teal-600" />
-            <h2 className="font-bold text-sm text-slate-900 dark:text-slate-100">
+            <CreditCard className="w-4 h-4 text-[#009688]" />
+            <h2 className="font-bold text-sm text-slate-900">
               Record Payment Receipt
             </h2>
           </div>
@@ -86,29 +86,29 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
         </div>
 
         <form onSubmit={handleSubmit} className="p-4 space-y-3.5">
-          <div className="p-2.5 rounded-md bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-1">
+          <div className="p-2.5 rounded-md bg-slate-50 border border-slate-200 space-y-1">
             <div className="flex justify-between font-mono">
               <span className="text-slate-500 font-sans">Invoice:</span>
-              <span className="font-bold text-slate-900 dark:text-slate-100">
+              <span className="font-bold text-slate-900">
                 {invoice.invoiceNumber}
               </span>
             </div>
             <div className="flex justify-between font-mono">
               <span className="text-slate-500 font-sans">Customer:</span>
-              <span className="font-semibold text-slate-800 dark:text-slate-200">
+              <span className="font-semibold text-slate-800">
                 {invoice.customerName}
               </span>
             </div>
-            <div className="flex justify-between font-mono border-t border-slate-200 dark:border-slate-800 pt-1">
+            <div className="flex justify-between font-mono border-t border-slate-200 pt-1">
               <span className="text-slate-500 font-sans">Current Balance Due:</span>
-              <span className="font-bold text-amber-600 dark:text-amber-400">
+              <span className="font-bold text-amber-600">
                 {formatINR(invoice.balanceDue)}
               </span>
             </div>
           </div>
 
           <div>
-            <label className="text-[11px] font-semibold text-slate-500 block mb-1">
+            <label className="text-[11px] font-semibold text-slate-600 block mb-1">
               Amount Received (₹) *
             </label>
             <input
@@ -119,7 +119,7 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
               required
               value={amount}
               onChange={(e) => setAmount(Number(e.target.value))}
-              className="w-full px-2.5 py-1.5 rounded-md border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 font-mono font-bold text-teal-700 dark:text-teal-400"
+              className="w-full px-2.5 py-1.5 rounded-md border border-slate-200 bg-white font-mono font-bold text-teal-700 focus:outline-none focus:ring-1 focus:ring-teal-500 shadow-2xs"
             />
             {amount < invoice.balanceDue && (
               <span className="text-[10px] text-slate-500 mt-1 block">
@@ -130,7 +130,7 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-[11px] font-semibold text-slate-500 block mb-1">
+              <label className="text-[11px] font-semibold text-slate-600 block mb-1">
                 Receipt Date *
               </label>
               <input
@@ -138,18 +138,18 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
                 required
                 value={paymentDate}
                 onChange={(e) => setPaymentDate(e.target.value)}
-                className="w-full px-2.5 py-1.5 rounded-md border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 font-mono"
+                className="w-full px-2.5 py-1.5 rounded-md border border-slate-200 bg-white text-slate-900 font-mono focus:outline-none focus:ring-1 focus:ring-teal-500 shadow-2xs"
               />
             </div>
 
             <div>
-              <label className="text-[11px] font-semibold text-slate-500 block mb-1">
+              <label className="text-[11px] font-semibold text-slate-600 block mb-1">
                 Payment Mode *
               </label>
               <select
                 value={paymentMethod}
                 onChange={(e) => setPaymentMethod(e.target.value)}
-                className="w-full px-2.5 py-1.5 rounded-md border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950"
+                className="w-full px-2.5 py-1.5 rounded-md border border-slate-200 bg-white text-slate-900 focus:outline-none focus:ring-1 focus:ring-teal-500 shadow-2xs"
               >
                 <option value="upi">UPI (GPay / PhonePe / Paytm)</option>
                 <option value="bank_transfer">Bank Transfer (NEFT/RTGS/IMPS)</option>
@@ -161,7 +161,7 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
           </div>
 
           <div>
-            <label className="text-[11px] font-semibold text-slate-500 block mb-1">
+            <label className="text-[11px] font-semibold text-slate-600 block mb-1">
               Transaction / Reference / UTR No.
             </label>
             <input
@@ -169,12 +169,12 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
               value={referenceNumber}
               onChange={(e) => setReferenceNumber(e.target.value)}
               placeholder="e.g. UPI/409281729104 or Cheque #204918"
-              className="w-full px-2.5 py-1.5 rounded-md border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 font-mono"
+              className="w-full px-2.5 py-1.5 rounded-md border border-slate-200 bg-white text-slate-900 font-mono focus:outline-none focus:ring-1 focus:ring-teal-500 shadow-2xs"
             />
           </div>
 
           <div>
-            <label className="text-[11px] font-semibold text-slate-500 block mb-1">
+            <label className="text-[11px] font-semibold text-slate-600 block mb-1">
               Internal Notes
             </label>
             <textarea
@@ -182,22 +182,22 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Remarks..."
-              className="w-full p-2.5 rounded-md border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950"
+              className="w-full p-2.5 rounded-md border border-slate-200 bg-white text-slate-900 focus:outline-none focus:ring-1 focus:ring-teal-500 shadow-2xs"
             />
           </div>
 
-          <div className="pt-3 flex items-center justify-end gap-2 border-t border-slate-100 dark:border-slate-800">
+          <div className="pt-3 flex items-center justify-end gap-2 border-t border-slate-200">
             <button
               type="button"
               onClick={onClose}
-              className="px-3 py-1.5 rounded-md border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-100"
+              className="px-3 py-1.5 rounded-md border border-slate-300 text-slate-700 hover:bg-slate-100"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="px-4 py-1.5 rounded-md bg-teal-600 hover:bg-teal-700 text-white font-semibold transition-all shadow-sm"
+              className="px-4 py-1.5 rounded-md bg-[#009688] hover:bg-[#00796B] text-white font-semibold transition-all shadow-2xs"
             >
               {submitting ? 'Recording...' : 'Confirm Payment'}
             </button>

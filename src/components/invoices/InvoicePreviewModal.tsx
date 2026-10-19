@@ -57,23 +57,23 @@ export const InvoicePreviewModal: React.FC<InvoicePreviewModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/80 backdrop-blur-sm overflow-y-auto print:p-0 print:bg-white animate-in fade-in duration-150">
-      <div className="w-full max-w-5xl my-auto bg-slate-100 rounded-xl shadow-2xl border border-slate-300 dark:border-slate-800 overflow-hidden text-slate-900 print:shadow-none print:border-none print:m-0 print:max-w-none print:bg-white print:rounded-none">
+      <div className="w-full max-w-5xl my-auto bg-slate-100 rounded-xl shadow-2xl border border-slate-300 overflow-hidden text-slate-900 print:shadow-none print:border-none print:m-0 print:max-w-none print:bg-white print:rounded-none">
         {/* Modal Toolbar (hidden on print) */}
-        <div className="p-3.5 bg-slate-900 text-white flex flex-wrap items-center justify-between gap-3 no-print border-b border-slate-800">
+        <div className="p-3.5 bg-white text-slate-900 flex flex-wrap items-center justify-between gap-3 no-print border-b border-slate-200 shadow-xs">
           <div className="flex items-center gap-2.5">
-            <div className="p-1.5 rounded bg-teal-500/20 text-teal-400">
-              <FileSpreadsheet className="w-4 h-4" />
+            <div className="p-1.5 rounded bg-teal-50 text-teal-700 border border-teal-200">
+              <FileSpreadsheet className="w-4 h-4 text-[#009688]" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-mono text-xs font-bold text-teal-400">
+                <span className="font-mono text-xs font-bold text-[#009688]">
                   {invoice.invoiceNumber}
                 </span>
-                <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
+                <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
                   Excel Tax Invoice
                 </span>
               </div>
-              <p className="text-[11px] text-slate-400">
+              <p className="text-[11px] text-slate-500">
                 A4 Portrait Spreadsheet Layout (JET Enterprises Standard)
               </p>
             </div>
@@ -82,8 +82,8 @@ export const InvoicePreviewModal: React.FC<InvoicePreviewModalProps> = ({
           {/* Copy Selector & Action Buttons */}
           <div className="flex items-center flex-wrap gap-2">
             {/* Copy Type Selector */}
-            <div className="flex items-center bg-slate-800 rounded-md p-0.5 border border-slate-700 text-xs">
-              <span className="text-slate-400 px-2 text-[10px] uppercase font-semibold flex items-center gap-1">
+            <div className="flex items-center bg-slate-100 rounded-md p-0.5 border border-slate-200 text-xs">
+              <span className="text-slate-600 px-2 text-[10px] uppercase font-semibold flex items-center gap-1">
                 <Copy className="w-3 h-3" />
                 Copy:
               </span>
@@ -93,8 +93,8 @@ export const InvoicePreviewModal: React.FC<InvoicePreviewModalProps> = ({
                   onClick={() => setCopyType(type)}
                   className={`px-2 py-1 text-[11px] font-bold rounded transition-colors ${
                     copyType === type
-                      ? 'bg-teal-600 text-white shadow-sm'
-                      : 'text-slate-300 hover:text-white hover:bg-slate-700'
+                      ? 'bg-[#009688] text-white shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200'
                   }`}
                 >
                   {type}
@@ -108,7 +108,7 @@ export const InvoicePreviewModal: React.FC<InvoicePreviewModalProps> = ({
                   onClose();
                   onOpenPaymentModal(invoice);
                 }}
-                className="px-2.5 py-1.5 text-xs font-semibold rounded bg-teal-600 hover:bg-teal-700 text-white transition-colors flex items-center gap-1"
+                className="px-2.5 py-1.5 text-xs font-semibold rounded bg-[#009688] hover:bg-[#00796B] text-white transition-colors flex items-center gap-1 shadow-2xs"
               >
                 <CreditCard className="w-3.5 h-3.5" />
                 <span>Record Payment</span>
@@ -117,7 +117,7 @@ export const InvoicePreviewModal: React.FC<InvoicePreviewModalProps> = ({
 
             <button
               onClick={handleWhatsAppShare}
-              className="px-2.5 py-1.5 text-xs font-semibold rounded bg-emerald-600 hover:bg-emerald-700 text-white flex items-center gap-1 transition-colors"
+              className="px-2.5 py-1.5 text-xs font-semibold rounded bg-emerald-600 hover:bg-emerald-700 text-white flex items-center gap-1 transition-colors shadow-2xs"
               title="Share invoice summary on WhatsApp"
             >
               <Share2 className="w-3.5 h-3.5" />
@@ -126,15 +126,15 @@ export const InvoicePreviewModal: React.FC<InvoicePreviewModalProps> = ({
 
             <button
               onClick={handlePrint}
-              className="px-3 py-1.5 text-xs font-bold rounded bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 flex items-center gap-1.5 transition-colors"
+              className="px-3 py-1.5 text-xs font-bold rounded bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 flex items-center gap-1.5 transition-colors shadow-2xs"
             >
-              <Printer className="w-3.5 h-3.5 text-teal-400" />
+              <Printer className="w-3.5 h-3.5 text-[#009688]" />
               <span>Print A4</span>
             </button>
 
             <button
               onClick={handleDownloadPdf}
-              className="px-3 py-1.5 text-xs font-bold rounded bg-teal-500 hover:bg-teal-400 text-slate-950 flex items-center gap-1.5 transition-colors shadow-sm"
+              className="px-3 py-1.5 text-xs font-bold rounded bg-[#009688] hover:bg-[#00796B] text-white flex items-center gap-1.5 transition-colors shadow-2xs"
             >
               <Download className="w-3.5 h-3.5" />
               <span>Download PDF</span>
@@ -142,7 +142,7 @@ export const InvoicePreviewModal: React.FC<InvoicePreviewModalProps> = ({
 
             <button
               onClick={onClose}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors ml-1"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors ml-1"
               title="Close Preview"
             >
               <X className="w-4 h-4" />
