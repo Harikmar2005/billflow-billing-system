@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useBilling } from '../../context/BillingContext';
 import { BusinessSettings, INDIAN_STATES } from '../../types';
+import { api } from '../../services/api';
 import {
   Building2,
   Save,
@@ -10,11 +11,26 @@ import {
   CheckCircle,
   HelpCircle,
   Landmark,
-  Percent
+  Percent,
+  Lock,
+  UserCheck,
+  KeyRound,
+  ShieldAlert,
+  Sparkles,
+  RefreshCw,
 } from 'lucide-react';
 
 export const SettingsView: React.FC = () => {
-  const { settings, updateSettings, addToast } = useBilling();
+  const {
+    settings,
+    updateSettings,
+    addToast,
+    currentUser,
+    authStatus,
+    setIsAuthModalOpen,
+    setAuthMode,
+    checkAuthStatus,
+  } = useBilling();
 
   const [businessName, setBusinessName] = useState<string>(settings?.businessName || '');
   const [tradeName, setTradeName] = useState<string>(settings?.tradeName || '');
@@ -96,13 +112,29 @@ export const SettingsView: React.FC = () => {
     }
   };
 
+  const [togglingMfa, setTogglingMfa] = useState(false);
+  const handleToggleMfa = async () => {
+    if (!currentUser) return;
+    try {
+      setTogglingMfa(true);
+      const res = await api.toggleMfa(!currentUser.mfaEnabled);
+      currentUser.mfaEnabled = res.mfaEnabled;
+      addToast(res.message || 'MFA preference updated', 'success');
+      await checkAuthStatus();
+    } catch (err: any) {
+      addToast(err.message || 'Failed to update MFA setting', 'error');
+    } finally {
+      setTogglingMfa(false);
+    }
+  };
+
   return (
     <div className="space-y-6 max-w-4xl mx-auto pb-12">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200 dark:border-slate-800">
         <div>
           <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100 flex items-center gap-2">
-            Business Profile & Tax Configuration
+            Business Profile &amp; Tax Configuration
           </h1>
           <p className="text-xs text-slate-500 mt-0.5">
             Configure your registered business details, GSTIN, invoice sequence, and electronic bank remittance credentials.
@@ -118,6 +150,102 @@ export const SettingsView: React.FC = () => {
           <Save className="w-3.5 h-3.5" />
           <span>{saving ? 'Saving...' : 'Save Settings'}</span>
         </button>
+      </div>
+
+      {/* Administrator & Access Control Status Card */}
+      <div className="p-4 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm space-y-3">
+        <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="w-4 h-4 text-teal-600 dark:text-teal-400" />
+            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
+              Master Super Admin &amp; Security Credentials
+            </h2>
+          </div>
+          {currentUser && (
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 font-semibold flex items-center gap-1">
+              <CheckCircle className="w-3 h-3" /> System Initialized &amp; Authenticated
+            </span>
+          )}
+        </div>
+
+        {currentUser ? (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+            <div className="p-3 rounded-md bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+              <span className="text-[10px] font-semibold text-slate-400 block mb-0.5">Administrator</span>
+              <span className="font-bold text-slate-800 dark:text-slate-200 block truncate">{currentUser.name}</span>
+              <span className="text-[11px] text-slate-500 font-mono block truncate">{currentUser.email}</span>
+            </div>
+
+            <div className="p-3 rounded-md bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+              <span className="text-[10px] font-semibold text-slate-400 block mb-0.5">Assigned Role &amp; Access</span>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <span className="text-xs font-bold uppercase px-2 py-0.5 rounded bg-teal-50 dark:bg-teal-950 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-800">
+                  {currentUser.role.replace('_', ' ')}
+                </span>
+                <span className="text-[10px] text-emerald-600 font-semibold">Active</span>
+              </div>
+              <span className="text-[10px] text-slate-400 mt-1 block">Full Master Privileges</span>
+            </div>
+
+            <div className="p-3 rounded-md bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex flex-col justify-between">
+              <div>
+                <span className="text-[10px] font-semibold text-slate-400 block mb-0.5">Two-Factor Security (TOTP)</span>
+                <span className={`text-xs font-semibold ${currentUser.mfaEnabled ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-500'}`}>
+                  {currentUser.mfaEnabled ? 'Enabled & Active' : 'Disabled'}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={handleToggleMfa}
+                disabled={togglingMfa}
+                className="mt-2 px-2.5 py-1 text-[11px] font-semibold rounded border border-slate-200 dark:border-slate-800 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 self-start transition-colors"
+              >
+                {togglingMfa ? 'Updating...' : currentUser.mfaEnabled ? 'Disable 2FA' : 'Enable 2FA'}
+              </button>
+            </div>
+          </div>
+        ) : authStatus === 'setup_required' ? (
+          <div className="p-3.5 rounded-lg border border-amber-200 dark:border-amber-900/60 bg-amber-50/60 dark:bg-amber-950/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+            <div className="flex items-start gap-2.5">
+              <Sparkles className="w-4 h-4 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+              <div>
+                <strong className="text-amber-900 dark:text-amber-200 font-semibold">
+                  Initial Master Super Admin Not Configured
+                </strong>
+                <p className="text-[11px] text-amber-700 dark:text-amber-300 mt-0.5">
+                  Register your master Super Admin account with a secure password to unlock full administrative settings and GST invoice control.
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setAuthMode('setup');
+                setIsAuthModalOpen(true);
+              }}
+              className="px-3.5 py-1.5 rounded-md bg-amber-600 hover:bg-amber-700 text-white font-semibold text-xs shadow-xs transition-colors shrink-0"
+            >
+              Register Super Admin Now
+            </button>
+          </div>
+        ) : (
+          <div className="p-3.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+            <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
+              <Lock className="w-4 h-4 text-slate-400" />
+              <span>You are currently not signed in. Please sign in to edit business settings.</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setAuthMode('login');
+                setIsAuthModalOpen(true);
+              }}
+              className="px-3.5 py-1.5 rounded-md bg-teal-600 hover:bg-teal-700 text-white font-semibold text-xs shadow-xs transition-colors shrink-0"
+            >
+              Sign In to Account
+            </button>
+          </div>
+        )}
       </div>
 
       <form onSubmit={handleSave} className="space-y-6 text-xs">

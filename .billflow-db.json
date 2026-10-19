@@ -3290,5 +3290,9 @@
     }
   ],
   "isCatalogCleared": false,
-  "seedDone": true
+  "seedDone": true,
+  "users": [],
+  "sessions": [],
+  "auditLogs": [],
+  "backups": []
 }

@@ -9,17 +9,69 @@ import {
   DashboardMetrics,
   ExtractedBillData,
   SampleCustomerBill,
+  AppUser,
+  AuthSessionResponse,
+  SetupStatusResponse,
+  MfaChallengeResponse,
+  UserPermissions,
+  AuditLogEntry,
+  DatabaseBackup,
 } from '../types';
 
 const API_BASE = '/api';
 
 class ApiService {
+  private token: string | null = null;
+
+  constructor() {
+    if (typeof window !== 'undefined') {
+      try {
+        this.token = localStorage.getItem('billflow_auth_token');
+      } catch {
+        this.token = null;
+      }
+    }
+  }
+
+  setAuthToken(token: string | null): void {
+    this.token = token;
+    if (typeof window !== 'undefined') {
+      try {
+        if (token) {
+          localStorage.setItem('billflow_auth_token', token);
+        } else {
+          localStorage.removeItem('billflow_auth_token');
+        }
+      } catch (e) {
+        console.warn('Unable to access localStorage for auth token', e);
+      }
+    }
+  }
+
+  getAuthToken(): string | null {
+    if (!this.token && typeof window !== 'undefined') {
+      try {
+        this.token = localStorage.getItem('billflow_auth_token');
+      } catch {
+        this.token = null;
+      }
+    }
+    return this.token;
+  }
+
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const url = `${API_BASE}${endpoint}`;
-    const headers = {
+    const token = this.getAuthToken();
+
+    const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      ...(options.headers || {}),
+      ...((options.headers as Record<string, string>) || {}),
     };
+
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+      headers['x-session-token'] = token;
+    }
 
     try {
       const response = await fetch(url, { ...options, headers });
@@ -30,6 +82,8 @@ class ApiService {
           errData = await response.json();
           if (errData && errData.error) {
             errorMsg = errData.error;
+          } else if (errData && errData.message) {
+            errorMsg = errData.message;
           } else if (errData && errData.detail) {
             errorMsg = typeof errData.detail === 'string' ? errData.detail : JSON.stringify(errData.detail);
           }
@@ -38,6 +92,7 @@ class ApiService {
         }
         const errorObj: any = new Error(errorMsg);
         errorObj.status = response.status;
+        errorObj.code = errData?.code;
         errorObj.data = errData;
         throw errorObj;
       }
@@ -51,6 +106,144 @@ class ApiService {
   // Health
   async getHealth(): Promise<{ status: string; engine: string; gemini_configured: boolean; timestamp: string }> {
     return this.request('/health');
+  }
+
+  // Authentication & Access Control
+  async getSetupStatus(): Promise<SetupStatusResponse> {
+    return this.request('/auth/setup-status');
+  }
+
+  async setupSuperAdmin(data: {
+    name: string;
+    email: string;
+    password: string;
+    mfaEnabled?: boolean;
+  }): Promise<AuthSessionResponse & { mfaSecret?: string; recoveryCodes?: string[] }> {
+    const res = await this.request<AuthSessionResponse & { mfaSecret?: string; recoveryCodes?: string[] }>(
+      '/auth/setup',
+      {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }
+    );
+    if (res && res.token) {
+      this.setAuthToken(res.token);
+    }
+    return res;
+  }
+
+  async login(credentials: {
+    email: string;
+    password: string;
+  }): Promise<AuthSessionResponse | MfaChallengeResponse> {
+    const res = await this.request<AuthSessionResponse | MfaChallengeResponse>('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify(credentials),
+    });
+    if ('token' in res && res.token) {
+      this.setAuthToken(res.token);
+    }
+    return res;
+  }
+
+  async verifyMfa(data: { tempToken: string; code: string }): Promise<AuthSessionResponse> {
+    const res = await this.request<AuthSessionResponse>('/auth/verify-mfa', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+    if (res && res.token) {
+      this.setAuthToken(res.token);
+    }
+    return res;
+  }
+
+  async getMe(): Promise<{ user: AppUser; permissions: UserPermissions }> {
+    return this.request('/auth/me');
+  }
+
+  async logout(): Promise<{ success: boolean; message: string }> {
+    try {
+      const res = await this.request<{ success: boolean; message: string }>('/auth/logout', {
+        method: 'POST',
+      });
+      return res;
+    } finally {
+      this.setAuthToken(null);
+    }
+  }
+
+  async toggleMfa(enable: boolean): Promise<{
+    success: boolean;
+    mfaEnabled: boolean;
+    mfaSecret?: string;
+    recoveryCodes?: string[];
+    currentOtp?: string;
+    message: string;
+  }> {
+    return this.request('/auth/toggle-mfa', {
+      method: 'POST',
+      body: JSON.stringify({ enable }),
+    });
+  }
+
+  // User Management (Super Admin)
+  async getUsers(): Promise<AppUser[]> {
+    return this.request('/users');
+  }
+
+  async createUser(data: {
+    name: string;
+    email: string;
+    role: string;
+    password: string;
+    mfaEnabled?: boolean;
+  }): Promise<AppUser> {
+    return this.request('/users', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateUser(id: string, updates: Partial<AppUser>): Promise<AppUser> {
+    return this.request(`/users/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(updates),
+    });
+  }
+
+  async resetUserPassword(id: string, newPassword: string): Promise<{ success: boolean; message: string }> {
+    return this.request(`/users/${id}/reset-password`, {
+      method: 'POST',
+      body: JSON.stringify({ newPassword }),
+    });
+  }
+
+  async toggleUserStatus(id: string): Promise<AppUser> {
+    return this.request(`/users/${id}/toggle-status`, {
+      method: 'POST',
+    });
+  }
+
+  // Audit Logs & Backups (Super Admin)
+  async getAuditLogs(params?: { search?: string; action?: string; entityType?: string; limit?: number }): Promise<AuditLogEntry[]> {
+    const q = new URLSearchParams();
+    if (params?.search) q.set('search', params.search);
+    if (params?.action) q.set('action', params.action);
+    if (params?.entityType) q.set('entityType', params.entityType);
+    if (params?.limit) q.set('limit', String(params.limit));
+    const qs = q.toString() ? `?${q.toString()}` : '';
+    return this.request(`/audit-logs${qs}`);
+  }
+
+  async getBackups(): Promise<DatabaseBackup[]> {
+    return this.request('/backups');
+  }
+
+  async createBackup(note?: string): Promise<DatabaseBackup> {
+    return this.request('/backups/create', {
+      method: 'POST',
+      body: JSON.stringify({ note }),
+    });
   }
 
   // Business Settings

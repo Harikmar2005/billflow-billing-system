@@ -387,7 +387,24 @@ export interface AppUser {
   mfaEnabled: boolean;
   lastLoginAt?: string;
   createdAt: string;
-  updatedAt: string;
+  updatedAt?: string;
+}
+
+export interface UserPermissions {
+  canManageUsers: boolean;
+  canEditSettings: boolean;
+  canDeleteRecords: boolean;
+  canClearCatalog: boolean;
+  canViewAuditLogs: boolean;
+  canManageBackups: boolean;
+  canIssueInvoices: boolean;
+  canCancelInvoices: boolean;
+  canManageExpenses: boolean;
+  canViewGstReports: boolean;
+  canEditProductRates: boolean;
+  canCreateDrafts: boolean;
+  canViewCatalog: boolean;
+  canViewCustomers: boolean;
 }
 
 export interface AuditLogEntry {

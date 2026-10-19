@@ -669,6 +669,7 @@ export interface AuthenticatedUser {
   status: 'active' | 'deactivated';
   mfaEnabled: boolean;
   createdAt: string;
+  updatedAt?: string;
   lastLoginAt?: string;
 }
 
@@ -745,6 +746,7 @@ function sanitizeUser(user: any): AuthenticatedUser {
     status: user.status,
     mfaEnabled: Boolean(user.mfaEnabled),
     createdAt: user.createdAt,
+    updatedAt: user.updatedAt || user.createdAt,
     lastLoginAt: user.lastLoginAt,
   };
 }

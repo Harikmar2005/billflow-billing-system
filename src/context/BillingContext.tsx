@@ -8,6 +8,10 @@ import {
   Expense,
   InventoryMovement,
   DashboardMetrics,
+  AppUser,
+  UserPermissions,
+  SetupStatusResponse,
+  AuthSessionResponse,
 } from '../types';
 import { api } from '../services/api';
 
@@ -103,6 +107,29 @@ interface BillingContextType {
   // Theme
   isDark: boolean;
   toggleTheme: () => void;
+
+  // Authentication & RBAC
+  authStatus: 'checking' | 'setup_required' | 'unauthenticated' | 'authenticated' | 'connection_error';
+  currentUser: AppUser | null;
+  userPermissions: UserPermissions | null;
+  connectionError: string | null;
+  isAuthModalOpen: boolean;
+  setIsAuthModalOpen: (open: boolean) => void;
+  authMode: 'setup' | 'login' | 'mfa';
+  setAuthMode: (mode: 'setup' | 'login' | 'mfa') => void;
+  checkAuthStatus: () => Promise<void>;
+  registerSuperAdmin: (data: {
+    name: string;
+    email: string;
+    password: string;
+    mfaEnabled?: boolean;
+  }) => Promise<AuthSessionResponse & { message?: string; mfaSecret?: string; recoveryCodes?: string[] }>;
+  loginUser: (credentials: {
+    email: string;
+    password: string;
+  }) => Promise<{ mfaRequired?: boolean; tempToken?: string; email?: string } | AuthSessionResponse>;
+  verifyMfa: (tempToken: string, code: string) => Promise<void>;
+  logoutUser: () => Promise<void>;
 
   // Data
   settings: BusinessSettings | null;
@@ -260,6 +287,17 @@ export const BillingProvider: React.FC<{ children: ReactNode }> = ({ children })
   };
 
   const [searchQuery, setSearchQuery] = useState<string>('');
+
+  // Authentication & Access Control State
+  const [authStatus, setAuthStatus] = useState<
+    'checking' | 'setup_required' | 'unauthenticated' | 'authenticated' | 'connection_error'
+  >('checking');
+  const [currentUser, setCurrentUser] = useState<AppUser | null>(null);
+  const [userPermissions, setUserPermissions] = useState<UserPermissions | null>(null);
+  const [connectionError, setConnectionError] = useState<string | null>(null);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
+  const [authMode, setAuthMode] = useState<'setup' | 'login' | 'mfa'>('setup');
+
   const [settings, setSettings] = useState<BusinessSettings | null>(null);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -315,6 +353,20 @@ export const BillingProvider: React.FC<{ children: ReactNode }> = ({ children })
       setMetrics(metricsRes);
     } catch (err: any) {
       console.error('Error fetching billing data:', err);
+      if (err?.code === 'SETUP_REQUIRED') {
+        setAuthStatus('setup_required');
+        setAuthMode('setup');
+        setIsAuthModalOpen(true);
+        return;
+      }
+      if (err?.code === 'UNAUTHENTICATED' || err?.code === 'SESSION_EXPIRED' || err?.code === 'SESSION_INVALID') {
+        api.setAuthToken(null);
+        setCurrentUser(null);
+        setAuthStatus('unauthenticated');
+        setAuthMode('login');
+        setIsAuthModalOpen(true);
+        return;
+      }
       setError(err.message || 'Failed to connect to billing database');
       addToast('Error refreshing data from server', 'error');
     } finally {
@@ -322,8 +374,171 @@ export const BillingProvider: React.FC<{ children: ReactNode }> = ({ children })
     }
   };
 
+  // Inspect authentication implementation & verify persistent database connection
+  const checkAuthStatus = async () => {
+    try {
+      setLoading(true);
+      setConnectionError(null);
+      setAuthStatus('checking');
+
+      // 1. Verify backend server and database availability
+      let statusRes: SetupStatusResponse;
+      try {
+        statusRes = await api.getSetupStatus();
+      } catch (connErr: any) {
+        console.error('Connection failure to BillFlow backend server:', connErr);
+        const errorMsg =
+          connErr?.message ||
+          'Unable to connect to the BillFlow backend server. Please verify the server is running on port 3000.';
+        setConnectionError(errorMsg);
+        setAuthStatus('connection_error');
+        setLoading(false);
+        return;
+      }
+
+      // 2. Check if first-time Super Admin registration is required
+      if (statusRes.isSetupRequired) {
+        api.setAuthToken(null);
+        setCurrentUser(null);
+        setUserPermissions(null);
+        setAuthStatus('setup_required');
+        setAuthMode('setup');
+        setIsAuthModalOpen(true);
+        setLoading(false);
+        return;
+      }
+
+      // 3. Super Admin exists! Detect account and verify existing session token
+      const existingToken = api.getAuthToken();
+      if (existingToken) {
+        try {
+          const profile = await api.getMe();
+          setCurrentUser(profile.user);
+          setUserPermissions(profile.permissions);
+          setAuthStatus('authenticated');
+          setIsAuthModalOpen(false);
+          await refreshAllData();
+          return;
+        } catch (authErr: any) {
+          console.warn('Existing session invalid or expired, clearing token:', authErr);
+          api.setAuthToken(null);
+        }
+      }
+
+      // 4. Setup completed, but user needs to sign in
+      setCurrentUser(null);
+      setUserPermissions(null);
+      setAuthStatus('unauthenticated');
+      setAuthMode('login');
+      setIsAuthModalOpen(true);
+      setLoading(false);
+    } catch (err: any) {
+      console.error('Authentication status check failed:', err);
+      setConnectionError(err?.message || 'Database error occurred while checking setup status.');
+      setAuthStatus('connection_error');
+      setLoading(false);
+    }
+  };
+
+  // First-time Super Admin Registration
+  const registerSuperAdmin = async (data: {
+    name: string;
+    email: string;
+    password: string;
+    mfaEnabled?: boolean;
+  }) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await api.setupSuperAdmin(data);
+      setCurrentUser(res.user);
+      const profile = await api.getMe().catch(() => null);
+      if (profile) setUserPermissions(profile.permissions);
+      setAuthStatus('authenticated');
+      if (!data.mfaEnabled) {
+        setIsAuthModalOpen(false);
+      }
+      addToast(`Super Admin "${res.user.name}" initialized successfully!`, 'success');
+      await refreshAllData();
+      return res;
+    } catch (err: any) {
+      console.error('Super Admin registration failed:', err);
+      addToast(err.message || 'Failed to initialize Super Admin account', 'error');
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Login existing administrator or user
+  const loginUser = async (credentials: { email: string; password: string }) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await api.login(credentials);
+      if ('mfaRequired' in res && res.mfaRequired) {
+        setAuthMode('mfa');
+        return res;
+      }
+      const sessionRes = res as AuthSessionResponse;
+      setCurrentUser(sessionRes.user);
+      const profile = await api.getMe().catch(() => null);
+      if (profile) setUserPermissions(profile.permissions);
+      setAuthStatus('authenticated');
+      setIsAuthModalOpen(false);
+      addToast(`Welcome back, ${sessionRes.user.name}!`, 'success');
+      await refreshAllData();
+      return sessionRes;
+    } catch (err: any) {
+      console.error('Login failed:', err);
+      addToast(err.message || 'Invalid email or password', 'error');
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Multi-Factor Authentication Verification
+  const verifyMfa = async (tempToken: string, code: string) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await api.verifyMfa({ tempToken, code });
+      setCurrentUser(res.user);
+      const profile = await api.getMe().catch(() => null);
+      if (profile) setUserPermissions(profile.permissions);
+      setAuthStatus('authenticated');
+      setIsAuthModalOpen(false);
+      addToast(`MFA verified. Welcome back, ${res.user.name}!`, 'success');
+      await refreshAllData();
+    } catch (err: any) {
+      console.error('MFA verification error:', err);
+      addToast(err.message || 'Invalid 6-digit MFA code or recovery code', 'error');
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Logout
+  const logoutUser = async () => {
+    try {
+      await api.logout();
+    } catch (err) {
+      console.warn('Logout request warning:', err);
+    } finally {
+      api.setAuthToken(null);
+      setCurrentUser(null);
+      setUserPermissions(null);
+      setAuthStatus('unauthenticated');
+      setAuthMode('login');
+      setIsAuthModalOpen(true);
+      addToast('Logged out of BillFlow', 'info');
+    }
+  };
+
   useEffect(() => {
-    refreshAllData();
+    checkAuthStatus();
 
     if (typeof document !== 'undefined') {
       document.title = VIEW_TITLES[currentView] || 'BillFlow — Smart Billing Software for India';
@@ -669,6 +884,19 @@ export const BillingProvider: React.FC<{ children: ReactNode }> = ({ children })
         setSearchQuery,
         isDark,
         toggleTheme,
+        authStatus,
+        currentUser,
+        userPermissions,
+        connectionError,
+        isAuthModalOpen,
+        setIsAuthModalOpen,
+        authMode,
+        setAuthMode,
+        checkAuthStatus,
+        registerSuperAdmin,
+        loginUser,
+        verifyMfa,
+        logoutUser,
         settings,
         customers,
         products,
