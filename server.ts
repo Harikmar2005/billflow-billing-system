@@ -1,4 +1,4 @@
-import express, { Request, Response } from 'express';
+import express, { type Request, type Response } from 'express';
 import crypto from 'crypto';
 import { createServer as createViteServer } from 'vite';
 import { GoogleGenAI } from '@google/genai';
@@ -14,7 +14,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
 // Security & HTTPS enforcement middleware
 app.use((req, res, next) => {
@@ -72,8 +72,10 @@ const ai = apiKey
     })
   : null;
 
-// Database File Path
-const DB_FILE = path.join(__dirname, '.billflow-db.json');
+// Database File & Persistent Storage Path (Supports Render Persistent Disks via DATA_DIR)
+const DATA_DIR = process.env.DATA_DIR || process.env.RENDER_DISK_PATH || __dirname;
+const DB_FILE = path.join(DATA_DIR, '.billflow-db.json');
+const DEFAULT_REPO_DB_FILE = path.join(__dirname, '.billflow-db.json');
 
 // Initial seed data generator with realistic Indian business context
 function getInitialDbData() {
@@ -598,8 +600,31 @@ function readDb() {
   try {
     let db: any;
     if (!fs.existsSync(DB_FILE)) {
-      db = getInitialDbData();
-      fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2), 'utf8');
+      // If a persistent disk is configured and empty, copy existing repository database template
+      if (DB_FILE !== DEFAULT_REPO_DB_FILE && fs.existsSync(DEFAULT_REPO_DB_FILE)) {
+        try {
+          const defaultData = fs.readFileSync(DEFAULT_REPO_DB_FILE, 'utf8');
+          db = JSON.parse(defaultData);
+          if (!fs.existsSync(DATA_DIR)) {
+            fs.mkdirSync(DATA_DIR, { recursive: true });
+          }
+          fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2), 'utf8');
+          console.log(`[STORAGE] Initialized persistent database at ${DB_FILE} from repository template.`);
+        } catch (copyErr) {
+          console.warn('[STORAGE] Could not copy default database, using initial defaults:', copyErr);
+          db = getInitialDbData();
+          if (!fs.existsSync(path.dirname(DB_FILE))) {
+            fs.mkdirSync(path.dirname(DB_FILE), { recursive: true });
+          }
+          fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2), 'utf8');
+        }
+      } else {
+        db = getInitialDbData();
+        if (!fs.existsSync(path.dirname(DB_FILE))) {
+          fs.mkdirSync(path.dirname(DB_FILE), { recursive: true });
+        }
+        fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2), 'utf8');
+      }
     } else {
       const data = fs.readFileSync(DB_FILE, 'utf8');
       db = JSON.parse(data);
@@ -651,6 +676,10 @@ function readDb() {
 
 function writeDb(data: any) {
   try {
+    const dir = path.dirname(DB_FILE);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
     fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), 'utf8');
   } catch (err) {
     console.error('Error writing DB file:', err);
@@ -3510,6 +3539,12 @@ async function startServer() {
   } else {
     const distPath = path.join(__dirname, 'dist');
     app.use(express.static(distPath));
+
+    // API 404 handler (prevents API route misses from returning index.html)
+    app.all('/api/*', (req: Request, res: Response) => {
+      res.status(404).json({ error: 'API endpoint not found', path: req.path });
+    });
+
     app.get('*', (req: Request, res: Response) => {
       res.sendFile(path.join(distPath, 'index.html'));
     });

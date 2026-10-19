@@ -1,4 +1,4 @@
-import { Product } from '../types';
+import type { Product } from '../types/index.ts';
 
 /**
  * BillFlow Comprehensive Predefined Product Catalogue (360+ Items)
