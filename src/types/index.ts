@@ -440,7 +440,12 @@ export interface AuthSessionResponse {
 
 export interface SetupStatusResponse {
   isSetupRequired: boolean;
+  setupRequired?: boolean;
+  isInitialized?: boolean;
+  initialized?: boolean;
+  hasSuperAdmin?: boolean;
   totalUsers: number;
+  superAdminCount?: number;
 }
 
 export interface MfaChallengeResponse {

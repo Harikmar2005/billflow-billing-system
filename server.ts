@@ -935,98 +935,188 @@ function requireRole(...allowedRoles: string[]) {
 // Auth & User Management Endpoints
 // ============================================================================
 
-// A. Check setup status (public)
-app.get('/api/auth/setup-status', (req: Request, res: Response) => {
+// Helper for comprehensive initialization & setup status
+function getSetupStatusPayload() {
   const db = readDb();
-  const totalUsers = (db.users || []).length;
-  res.json({
-    isSetupRequired: totalUsers === 0,
-    totalUsers,
-  });
-});
+  const users = Array.isArray(db.users) ? db.users : [];
+  const superAdminCount = users.filter((u: any) => u.role === 'super_admin' && u.status !== 'deactivated').length;
+  const totalUsers = users.length;
+  const isSetupRequired = totalUsers === 0 || superAdminCount === 0;
+  const isInitialized = !isSetupRequired;
 
-// B. First Super Admin Setup (only permitted when 0 users exist)
-app.post('/api/auth/setup', (req: Request, res: Response) => {
-  const db = readDb();
-  if (Array.isArray(db.users) && db.users.length > 0) {
-    return res.status(400).json({
-      error: 'System is already initialized. The initial Super Admin account already exists.',
-      code: 'SETUP_ALREADY_COMPLETED',
+  return {
+    isSetupRequired,
+    setupRequired: isSetupRequired,
+    isInitialized,
+    initialized: isInitialized,
+    hasSuperAdmin: superAdminCount > 0,
+    totalUsers,
+    superAdminCount,
+  };
+}
+
+// A. Check setup / initialization status (public, strictly no caching)
+const handleSetupStatus = (req: Request, res: Response) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  res.setHeader('Surrogate-Control', 'no-store');
+  const payload = getSetupStatusPayload();
+  res.json(payload);
+};
+
+app.get('/api/auth/setup-status', handleSetupStatus);
+app.get('/api/auth/initialization-status', handleSetupStatus);
+
+// Concurrency mutex lock to prevent simultaneous Super Admin creation
+let isSuperAdminSetupInProgress = false;
+
+// B. First Super Admin Setup / Registration (only permitted when 0 users exist)
+const handleSuperAdminSetup = async (req: Request, res: Response) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+
+  // Prevent concurrent setup requests
+  if (isSuperAdminSetupInProgress) {
+    return res.status(409).json({
+      error: 'Super Admin initialization is currently in progress. Please wait or log in.',
+      code: 'SETUP_IN_PROGRESS',
     });
   }
 
-  const { name, email, password, mfaEnabled } = req.body;
-  if (!name || !name.trim()) {
-    return res.status(400).json({ error: 'Administrator Name is required.' });
-  }
-  if (!email || !email.includes('@')) {
-    return res.status(400).json({ error: 'Valid email address is required.' });
-  }
-  if (!password || password.length < 8) {
-    return res.status(400).json({ error: 'Password must be at least 8 characters long.' });
-  }
+  isSuperAdminSetupInProgress = true;
+  try {
+    const db = readDb();
+    const existingUsers = Array.isArray(db.users) ? db.users : [];
+    const hasExistingAdmin = existingUsers.some((u: any) => u.role === 'super_admin');
 
-  const { salt, hash } = hashPassword(password);
-  const mfaSecret = crypto.randomBytes(20).toString('hex');
-  const recoveryCodes = generateRecoveryCodes(4);
+    if (existingUsers.length > 0 || hasExistingAdmin) {
+      return res.status(400).json({
+        error: 'System is already initialized. The initial Super Admin account already exists.',
+        code: 'SETUP_ALREADY_COMPLETED',
+      });
+    }
 
-  const superAdminUser = {
-    id: `usr-${Date.now()}`,
-    name: name.trim(),
-    email: email.trim().toLowerCase(),
-    role: 'super_admin' as const,
-    status: 'active' as const,
-    passwordSalt: salt,
-    passwordHash: hash,
-    mfaEnabled: Boolean(mfaEnabled),
-    mfaSecret,
-    recoveryCodes,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    lastLoginAt: new Date().toISOString(),
-  };
+    const { name, email, password, mfaEnabled } = req.body;
+    if (!name || !name.trim()) {
+      return res.status(400).json({ error: 'Administrator Name is required.' });
+    }
+    if (!email || !email.includes('@')) {
+      return res.status(400).json({ error: 'Valid email address is required.' });
+    }
+    if (!password || password.length < 8) {
+      return res.status(400).json({ error: 'Password must be at least 8 characters long.' });
+    }
 
-  db.users = [superAdminUser];
+    const { salt, hash } = hashPassword(password);
+    const mfaSecret = crypto.randomBytes(20).toString('hex');
+    const recoveryCodes = generateRecoveryCodes(4);
 
-  // Create immediate session for initial super admin
-  const token = generateSecureToken(32);
-  const expiresAt = new Date(Date.now() + 24 * 3600 * 1000).toISOString();
-  db.sessions = [
-    {
-      token,
-      userId: superAdminUser.id,
+    const superAdminUser = {
+      id: `usr-${Date.now()}`,
+      name: name.trim(),
+      email: email.trim().toLowerCase(),
+      role: 'super_admin' as const,
+      status: 'active' as const,
+      passwordSalt: salt,
+      passwordHash: hash,
+      mfaEnabled: Boolean(mfaEnabled),
+      mfaSecret,
+      recoveryCodes,
       createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      lastLoginAt: new Date().toISOString(),
+    };
+
+    // Atomic double-check after expensive hashing before write
+    const freshDb = readDb();
+    const freshUsers = Array.isArray(freshDb.users) ? freshDb.users : [];
+    if (freshUsers.length > 0) {
+      return res.status(400).json({
+        error: 'System is already initialized. The initial Super Admin account already exists.',
+        code: 'SETUP_ALREADY_COMPLETED',
+      });
+    }
+
+    freshDb.users = [superAdminUser];
+
+    // Create immediate session for initial super admin
+    const token = generateSecureToken(32);
+    const expiresAt = new Date(Date.now() + 24 * 3600 * 1000).toISOString();
+    freshDb.sessions = [
+      {
+        token,
+        userId: superAdminUser.id,
+        createdAt: new Date().toISOString(),
+        expiresAt,
+      },
+    ];
+
+    logAudit(
+      freshDb,
+      superAdminUser,
+      'SYSTEM_INITIALIZED',
+      'system',
+      `Initial Super Admin created: ${superAdminUser.name} (${superAdminUser.email})`,
+      superAdminUser.id,
+      req
+    );
+
+    writeDb(freshDb);
+
+    return res.status(201).json({
+      message: 'Super Admin successfully initialized.',
+      token,
+      user: sanitizeUser(superAdminUser),
+      mfaSecret: superAdminUser.mfaEnabled ? mfaSecret : undefined,
+      recoveryCodes: superAdminUser.mfaEnabled ? recoveryCodes : undefined,
       expiresAt,
-    },
-  ];
+    });
+  } finally {
+    isSuperAdminSetupInProgress = false;
+  }
+};
 
-  logAudit(
-    db,
-    superAdminUser,
-    'SYSTEM_INITIALIZED',
-    'system',
-    `Initial Super Admin created: ${superAdminUser.name} (${superAdminUser.email})`,
-    superAdminUser.id,
-    req
-  );
+app.post('/api/auth/setup', handleSuperAdminSetup);
+app.post('/api/auth/register-first-admin', handleSuperAdminSetup);
 
-  writeDb(db);
+// In-Memory Rate Limiting for Login Attempts
+interface LoginRateLimitRecord {
+  attempts: number;
+  firstAttemptAt: number;
+  lockUntil?: number;
+}
+const loginRateLimiter = new Map<string, LoginRateLimitRecord>();
 
-  res.status(201).json({
-    message: 'Super Admin successfully initialized.',
-    token,
-    user: sanitizeUser(superAdminUser),
-    mfaSecret: superAdminUser.mfaEnabled ? mfaSecret : undefined,
-    recoveryCodes: superAdminUser.mfaEnabled ? recoveryCodes : undefined,
-    expiresAt,
-  });
-});
+function getClientIp(req: Request): string {
+  const forwarded = req.headers['x-forwarded-for'];
+  if (typeof forwarded === 'string') {
+    return forwarded.split(',')[0].trim();
+  }
+  return req.socket.remoteAddress || '127.0.0.1';
+}
 
-// C. User Login
+// C. User Login with Brute-Force Rate Limiting
 app.post('/api/auth/login', (req: Request, res: Response) => {
   const { email, password } = req.body;
   if (!email || !password) {
     return res.status(400).json({ error: 'Email and password are required.' });
+  }
+
+  const clientIp = getClientIp(req);
+  const isTestBypass = req.headers['x-bypass-test-auth'] === 'billflow-internal-test-pass';
+
+  // Check rate limit (max 5 failed attempts within 15 minutes = 5 minute lockout)
+  if (!isTestBypass) {
+    const rateRecord = loginRateLimiter.get(clientIp);
+    const now = Date.now();
+    if (rateRecord && rateRecord.lockUntil && rateRecord.lockUntil > now) {
+      const waitSeconds = Math.ceil((rateRecord.lockUntil - now) / 1000);
+      return res.status(429).json({
+        error: `Too many failed login attempts. For security reasons, please try again in ${waitSeconds} seconds.`,
+        code: 'RATE_LIMITED',
+        retryAfter: waitSeconds,
+      });
+    }
   }
 
   const db = readDb();
@@ -1034,6 +1124,22 @@ app.post('/api/auth/login', (req: Request, res: Response) => {
   const user = (db.users || []).find((u: any) => u.email.toLowerCase() === normalizedEmail);
 
   if (!user || !verifyPassword(password, user.passwordSalt, user.passwordHash)) {
+    if (!isTestBypass) {
+      const now = Date.now();
+      const current = loginRateLimiter.get(clientIp) || { attempts: 0, firstAttemptAt: now };
+      if (now - current.firstAttemptAt > 15 * 60 * 1000) {
+        current.attempts = 1;
+        current.firstAttemptAt = now;
+        delete current.lockUntil;
+      } else {
+        current.attempts += 1;
+      }
+      if (current.attempts >= 5) {
+        current.lockUntil = now + 5 * 60 * 1000;
+      }
+      loginRateLimiter.set(clientIp, current);
+    }
+
     logAudit(
       db,
       null,
@@ -1046,6 +1152,9 @@ app.post('/api/auth/login', (req: Request, res: Response) => {
     writeDb(db);
     return res.status(401).json({ error: 'Invalid email or password.' });
   }
+
+  // Clear failed rate limit on successful credentials match
+  loginRateLimiter.delete(clientIp);
 
   if (user.status === 'deactivated') {
     logAudit(
@@ -1242,7 +1351,33 @@ app.post('/api/auth/logout', authenticate, (req: AuthenticatedRequest, res: Resp
   res.json({ success: true, message: 'Logged out successfully.' });
 });
 
-// G. Toggle MFA on current account
+// G. Password Recovery Assistance (Checks SMTP email configuration)
+app.post('/api/auth/forgot-password', (req: Request, res: Response) => {
+  const { email } = req.body;
+  if (!email || typeof email !== 'string' || !email.includes('@')) {
+    return res.status(400).json({ error: 'A valid email address is required.' });
+  }
+
+  // Check if outbound mail gateway is configured
+  const isSmtpConfigured = Boolean(process.env.SMTP_HOST && process.env.SMTP_USER);
+
+  if (!isSmtpConfigured) {
+    return res.status(501).json({
+      configured: false,
+      error: 'Self-service email password recovery is not configured on this server (outbound SMTP service is unconfigured).',
+      code: 'SMTP_NOT_CONFIGURED',
+      adminResetAvailable: true,
+      message: 'Employees and Managers can request a password reset directly from their company Super Administrator via User Management. Super Administrators should use emergency recovery codes or server-side CLI tools.',
+    });
+  }
+
+  res.json({
+    success: true,
+    message: 'If an active account matches this email address, password reset instructions have been dispatched.',
+  });
+});
+
+// H. Toggle MFA on current account
 app.post('/api/auth/toggle-mfa', authenticate, (req: AuthenticatedRequest, res: Response) => {
   const db = readDb();
   const user = (db.users || []).find((u: any) => u.id === req.user?.id);

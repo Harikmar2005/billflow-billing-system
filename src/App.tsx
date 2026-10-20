@@ -32,6 +32,7 @@ import { CancelInvoiceModal } from './components/modals/CancelInvoiceModal';
 import { DeleteInvoiceModal } from './components/modals/DeleteInvoiceModal';
 import { InvoicePreviewModal } from './components/invoices/InvoicePreviewModal';
 import { AuthModal } from './components/modals/AuthModal';
+import { LoginPage } from './components/auth/LoginPage';
 
 import { Customer, Product, Invoice } from './types';
 import { Shield, Lock, AlertTriangle, RefreshCw } from 'lucide-react';
@@ -141,6 +142,66 @@ const BillingApp: React.FC = () => {
     setIsCancelInvoiceModalOpen(true);
   };
 
+  // 1. Initial Authentication Status Checking Splash Screen
+  if (authStatus === 'checking') {
+    return (
+      <div className="min-h-screen bg-slate-50 dark:bg-[#020617] flex flex-col items-center justify-center p-4 selection:bg-blue-500 selection:text-white">
+        <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-teal-500 text-white flex items-center justify-center font-bold text-2xl shadow-lg shadow-blue-500/25 animate-pulse mb-4">
+          ₹
+        </div>
+        <div className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
+          <RefreshCw className="w-4 h-4 animate-spin text-blue-600 dark:text-blue-400" />
+          <span>Connecting to BillFlow...</span>
+        </div>
+        <ToastContainer />
+      </div>
+    );
+  }
+
+  // 2. Unauthenticated Entry Point: Login Page
+  const isPublicLegalView = currentView === 'privacy-policy' || currentView === 'terms-conditions';
+
+  if (authStatus !== 'authenticated' && !isPublicLegalView) {
+    return (
+      <>
+        <LoginPage onSuccess={() => setCurrentView('dashboard')} />
+        <ToastContainer />
+      </>
+    );
+  }
+
+  // If public legal view is accessed while unauthenticated
+  if (authStatus !== 'authenticated' && isPublicLegalView) {
+    return (
+      <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#020617] text-[#0F172A] dark:text-[#F8FAFC] flex flex-col font-sans transition-colors duration-200">
+        <header className="px-4 sm:px-8 py-4 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0F172A] flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-blue-600 to-teal-500 text-white flex items-center justify-center font-bold text-base shadow-xs">
+              ₹
+            </div>
+            <span className="font-bold text-base tracking-tight text-slate-900 dark:text-white">
+              BillFlow India
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setCurrentView('login')}
+            className="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs transition-colors shadow-xs"
+          >
+            Sign In →
+          </button>
+        </header>
+
+        <main className="flex-1 max-w-4xl w-full mx-auto p-4 md:p-8">
+          {currentView === 'privacy-policy' && <PrivacyPolicyView />}
+          {currentView === 'terms-conditions' && <TermsConditionsView />}
+        </main>
+        <ToastContainer />
+      </div>
+    );
+  }
+
+  // 3. Authenticated Application
   return (
     <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#020617] text-[#0F172A] dark:text-[#F8FAFC] flex flex-col font-sans transition-colors duration-200">
       <Navbar />
@@ -192,7 +253,7 @@ const BillingApp: React.FC = () => {
             </div>
           )}
 
-          {currentView === 'dashboard' && <DashboardView />}
+          {(currentView === 'dashboard' || currentView === 'login') && <DashboardView />}
 
           {currentView === 'invoices' && (
             <InvoiceListView

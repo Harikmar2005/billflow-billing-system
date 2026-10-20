@@ -110,7 +110,27 @@ class ApiService {
 
   // Authentication & Access Control
   async getSetupStatus(): Promise<SetupStatusResponse> {
-    return this.request('/auth/setup-status');
+    try {
+      return await this.request<SetupStatusResponse>('/auth/initialization-status', {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+        },
+      });
+    } catch {
+      return await this.request<SetupStatusResponse>('/auth/setup-status', {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+        },
+      });
+    }
+  }
+
+  async getInitializationStatus(): Promise<SetupStatusResponse> {
+    return this.getSetupStatus();
   }
 
   async setupSuperAdmin(data: {
@@ -119,17 +139,35 @@ class ApiService {
     password: string;
     mfaEnabled?: boolean;
   }): Promise<AuthSessionResponse & { mfaSecret?: string; recoveryCodes?: string[] }> {
-    const res = await this.request<AuthSessionResponse & { mfaSecret?: string; recoveryCodes?: string[] }>(
-      '/auth/setup',
-      {
-        method: 'POST',
-        body: JSON.stringify(data),
+    try {
+      const res = await this.request<AuthSessionResponse & { mfaSecret?: string; recoveryCodes?: string[] }>(
+        '/auth/register-first-admin',
+        {
+          method: 'POST',
+          body: JSON.stringify(data),
+        }
+      );
+      if (res && res.token) {
+        this.setAuthToken(res.token);
       }
-    );
-    if (res && res.token) {
-      this.setAuthToken(res.token);
+      return res;
+    } catch (err: any) {
+      // Fallback to legacy /auth/setup if running on a deployment with only /auth/setup
+      if (err?.status === 404) {
+        const res = await this.request<AuthSessionResponse & { mfaSecret?: string; recoveryCodes?: string[] }>(
+          '/auth/setup',
+          {
+            method: 'POST',
+            body: JSON.stringify(data),
+          }
+        );
+        if (res && res.token) {
+          this.setAuthToken(res.token);
+        }
+        return res;
+      }
+      throw err;
     }
-    return res;
   }
 
   async login(credentials: {
@@ -170,6 +208,13 @@ class ApiService {
     } finally {
       this.setAuthToken(null);
     }
+  }
+
+  async forgotPassword(email: string): Promise<{ success?: boolean; configured?: boolean; message?: string; error?: string }> {
+    return this.request('/auth/forgot-password', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
   }
 
   async toggleMfa(enable: boolean): Promise<{

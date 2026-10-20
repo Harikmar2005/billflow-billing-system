@@ -17,6 +17,7 @@ import { api } from '../services/api';
 
 export type BillingView =
   | 'dashboard'
+  | 'login'
   | 'invoices'
   | 'create-invoice'
   | 'customers'
@@ -34,6 +35,12 @@ export type BillingView =
 export const VIEW_ROUTES: Record<string, BillingView> = {
   '/': 'dashboard',
   '/dashboard': 'dashboard',
+  '/login': 'login',
+  '/setup': 'login',
+  '/register': 'login',
+  '/register-first-admin': 'login',
+  '/signin': 'login',
+  '/sign-in': 'login',
   '/invoices': 'invoices',
   '/create-invoice': 'create-invoice',
   '/invoices/new': 'create-invoice',
@@ -51,6 +58,7 @@ export const VIEW_ROUTES: Record<string, BillingView> = {
 
 export const VIEW_PATHS: Record<BillingView, string> = {
   'dashboard': '/',
+  'login': '/login',
   'invoices': '/invoices',
   'create-invoice': '/create-invoice',
   'customers': '/customers',
@@ -68,6 +76,7 @@ export const VIEW_PATHS: Record<BillingView, string> = {
 
 export const VIEW_TITLES: Record<BillingView, string> = {
   'dashboard': 'BillFlow — Smart Billing Software for India',
+  'login': 'Sign In — BillFlow Smart Billing',
   'invoices': 'Tax Invoices & History — BillFlow',
   'create-invoice': 'Create GST Tax Invoice — BillFlow',
   'customers': 'Customer Ledger & Balances — BillFlow',
@@ -296,7 +305,7 @@ export const BillingProvider: React.FC<{ children: ReactNode }> = ({ children })
   const [userPermissions, setUserPermissions] = useState<UserPermissions | null>(null);
   const [connectionError, setConnectionError] = useState<string | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
-  const [authMode, setAuthMode] = useState<'setup' | 'login' | 'mfa'>('setup');
+  const [authMode, setAuthMode] = useState<'setup' | 'login' | 'mfa'>('login');
 
   const [settings, setSettings] = useState<BusinessSettings | null>(null);
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -356,7 +365,7 @@ export const BillingProvider: React.FC<{ children: ReactNode }> = ({ children })
       if (err?.code === 'SETUP_REQUIRED') {
         setAuthStatus('setup_required');
         setAuthMode('setup');
-        setIsAuthModalOpen(true);
+        setIsAuthModalOpen(false);
         return;
       }
       if (err?.code === 'UNAUTHENTICATED' || err?.code === 'SESSION_EXPIRED' || err?.code === 'SESSION_INVALID') {
@@ -364,7 +373,10 @@ export const BillingProvider: React.FC<{ children: ReactNode }> = ({ children })
         setCurrentUser(null);
         setAuthStatus('unauthenticated');
         setAuthMode('login');
-        setIsAuthModalOpen(true);
+        setIsAuthModalOpen(false);
+        if (currentView !== 'privacy-policy' && currentView !== 'terms-conditions') {
+          setCurrentView('login');
+        }
         return;
       }
       setError(err.message || 'Failed to connect to billing database');
@@ -397,13 +409,20 @@ export const BillingProvider: React.FC<{ children: ReactNode }> = ({ children })
       }
 
       // 2. Check if first-time Super Admin registration is required
-      if (statusRes.isSetupRequired) {
+      const isSetupRequired =
+        statusRes.isSetupRequired === true ||
+        statusRes.setupRequired === true ||
+        statusRes.initialized === false ||
+        statusRes.isInitialized === false ||
+        statusRes.totalUsers === 0;
+
+      if (isSetupRequired) {
         api.setAuthToken(null);
         setCurrentUser(null);
         setUserPermissions(null);
         setAuthStatus('setup_required');
         setAuthMode('setup');
-        setIsAuthModalOpen(true);
+        setIsAuthModalOpen(false);
         setLoading(false);
         return;
       }
@@ -425,12 +444,20 @@ export const BillingProvider: React.FC<{ children: ReactNode }> = ({ children })
         }
       }
 
-      // 4. Setup completed, but user needs to sign in
+      // 4. Setup completed, but user needs to sign in.
+      // Redirect unauthenticated users to the normal login page instead of displaying the first-admin registration form
       setCurrentUser(null);
       setUserPermissions(null);
       setAuthStatus('unauthenticated');
       setAuthMode('login');
-      setIsAuthModalOpen(true);
+      setIsAuthModalOpen(false);
+      if (
+        currentView !== 'login' &&
+        currentView !== 'privacy-policy' &&
+        currentView !== 'terms-conditions'
+      ) {
+        setCurrentView('login');
+      }
       setLoading(false);
     } catch (err: any) {
       console.error('Authentication status check failed:', err);
@@ -455,15 +482,29 @@ export const BillingProvider: React.FC<{ children: ReactNode }> = ({ children })
       const profile = await api.getMe().catch(() => null);
       if (profile) setUserPermissions(profile.permissions);
       setAuthStatus('authenticated');
-      if (!data.mfaEnabled) {
-        setIsAuthModalOpen(false);
-      }
+      setIsAuthModalOpen(false);
       addToast(`Super Admin "${res.user.name}" initialized successfully!`, 'success');
       await refreshAllData();
       return res;
     } catch (err: any) {
       console.error('Super Admin registration failed:', err);
-      addToast(err.message || 'Failed to initialize Super Admin account', 'error');
+      // If the backend confirms initialization is already complete:
+      if (
+        err?.code === 'SETUP_ALREADY_COMPLETED' ||
+        (err?.message && err.message.toLowerCase().includes('already initialized'))
+      ) {
+        setAuthStatus('unauthenticated');
+        setAuthMode('login');
+        setIsAuthModalOpen(false);
+        if (currentView !== 'login') {
+          setCurrentView('login');
+        }
+        addToast('System is already initialized. Please sign in with your credentials.', 'info');
+        // Refresh backend initialization state
+        checkAuthStatus();
+      } else {
+        addToast(err.message || 'Failed to initialize Super Admin account', 'error');
+      }
       throw err;
     } finally {
       setLoading(false);
@@ -486,6 +527,9 @@ export const BillingProvider: React.FC<{ children: ReactNode }> = ({ children })
       if (profile) setUserPermissions(profile.permissions);
       setAuthStatus('authenticated');
       setIsAuthModalOpen(false);
+      if (currentView === 'login') {
+        setCurrentView('dashboard');
+      }
       addToast(`Welcome back, ${sessionRes.user.name}!`, 'success');
       await refreshAllData();
       return sessionRes;
@@ -509,6 +553,9 @@ export const BillingProvider: React.FC<{ children: ReactNode }> = ({ children })
       if (profile) setUserPermissions(profile.permissions);
       setAuthStatus('authenticated');
       setIsAuthModalOpen(false);
+      if (currentView === 'login') {
+        setCurrentView('dashboard');
+      }
       addToast(`MFA verified. Welcome back, ${res.user.name}!`, 'success');
       await refreshAllData();
     } catch (err: any) {
@@ -532,7 +579,8 @@ export const BillingProvider: React.FC<{ children: ReactNode }> = ({ children })
       setUserPermissions(null);
       setAuthStatus('unauthenticated');
       setAuthMode('login');
-      setIsAuthModalOpen(true);
+      setIsAuthModalOpen(false);
+      setCurrentView('login');
       addToast('Logged out of BillFlow', 'info');
     }
   };
