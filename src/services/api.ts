@@ -195,6 +195,22 @@ class ApiService {
     return res;
   }
 
+  async recoverSuperAdmin(data: {
+    email?: string;
+    recoveryCode: string;
+    newPassword: string;
+    newEmail?: string;
+  }): Promise<AuthSessionResponse> {
+    const res = await this.request<AuthSessionResponse>('/auth/recover-admin', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+    if (res && res.token) {
+      this.setAuthToken(res.token);
+    }
+    return res;
+  }
+
   async getMe(): Promise<{ user: AppUser; permissions: UserPermissions }> {
     return this.request('/auth/me');
   }

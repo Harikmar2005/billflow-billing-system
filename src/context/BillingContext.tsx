@@ -138,6 +138,13 @@ interface BillingContextType {
     password: string;
   }) => Promise<{ mfaRequired?: boolean; tempToken?: string; email?: string } | AuthSessionResponse>;
   verifyMfa: (tempToken: string, code: string) => Promise<void>;
+  recoverSuperAdmin: (data: {
+    email?: string;
+    recoveryCode: string;
+    newPassword: string;
+    newEmail?: string;
+  }) => Promise<AuthSessionResponse>;
+  configuredSuperAdminEmail: string | null;
   logoutUser: () => Promise<void>;
 
   // Data
@@ -306,6 +313,7 @@ export const BillingProvider: React.FC<{ children: ReactNode }> = ({ children })
   const [connectionError, setConnectionError] = useState<string | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
   const [authMode, setAuthMode] = useState<'setup' | 'login' | 'mfa'>('login');
+  const [configuredSuperAdminEmail, setConfiguredSuperAdminEmail] = useState<string | null>(null);
 
   const [settings, setSettings] = useState<BusinessSettings | null>(null);
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -414,12 +422,15 @@ export const BillingProvider: React.FC<{ children: ReactNode }> = ({ children })
         statusRes.setupRequired === true ||
         statusRes.initialized === false ||
         statusRes.isInitialized === false ||
-        statusRes.totalUsers === 0;
+        statusRes.totalUsers === 0 ||
+        statusRes.hasSuperAdmin === false ||
+        (typeof statusRes.superAdminCount === 'number' && statusRes.superAdminCount === 0);
 
       if (isSetupRequired) {
         api.setAuthToken(null);
         setCurrentUser(null);
         setUserPermissions(null);
+        setConfiguredSuperAdminEmail(null);
         setAuthStatus('setup_required');
         setAuthMode('setup');
         setIsAuthModalOpen(false);
@@ -427,7 +438,8 @@ export const BillingProvider: React.FC<{ children: ReactNode }> = ({ children })
         return;
       }
 
-      // 3. Super Admin exists! Detect account and verify existing session token
+      // 3. Super Admin exists! Do not store or imply configured email to preserve security.
+      setConfiguredSuperAdminEmail(null);
       const existingToken = api.getAuthToken();
       if (existingToken) {
         try {
@@ -561,6 +573,37 @@ export const BillingProvider: React.FC<{ children: ReactNode }> = ({ children })
     } catch (err: any) {
       console.error('MFA verification error:', err);
       addToast(err.message || 'Invalid 6-digit MFA code or recovery code', 'error');
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Emergency Super Admin Recovery
+  const recoverSuperAdmin = async (data: {
+    email?: string;
+    recoveryCode: string;
+    newPassword: string;
+    newEmail?: string;
+  }) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await api.recoverSuperAdmin(data);
+      setCurrentUser(res.user);
+      const profile = await api.getMe().catch(() => null);
+      if (profile) setUserPermissions(profile.permissions);
+      setAuthStatus('authenticated');
+      setIsAuthModalOpen(false);
+      if (currentView === 'login') {
+        setCurrentView('dashboard');
+      }
+      addToast(`Super Admin credentials successfully recovered! Welcome back, ${res.user.name}.`, 'success');
+      await refreshAllData();
+      return res;
+    } catch (err: any) {
+      console.error('Super Admin recovery error:', err);
+      addToast(err?.message || 'Invalid recovery code. Please check your emergency codes.', 'error');
       throw err;
     } finally {
       setLoading(false);
@@ -944,6 +987,8 @@ export const BillingProvider: React.FC<{ children: ReactNode }> = ({ children })
         registerSuperAdmin,
         loginUser,
         verifyMfa,
+        recoverSuperAdmin,
+        configuredSuperAdminEmail,
         logoutUser,
         settings,
         customers,

@@ -438,6 +438,16 @@ export interface AuthSessionResponse {
   expiresAt: string;
 }
 
+export interface StorageDiagnostics {
+  configuredDataDir: string | null;
+  activeDataDir: string;
+  dbFile: string;
+  isDiskMounted: boolean;
+  isWritable: boolean;
+  mode: 'persistent_disk' | 'fallback_local' | 'local';
+  dbFileExists: boolean;
+}
+
 export interface SetupStatusResponse {
   isSetupRequired: boolean;
   setupRequired?: boolean;
@@ -446,6 +456,8 @@ export interface SetupStatusResponse {
   hasSuperAdmin?: boolean;
   totalUsers: number;
   superAdminCount?: number;
+  superAdminEmail?: string;
+  storage?: StorageDiagnostics;
 }
 
 export interface MfaChallengeResponse {

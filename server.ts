@@ -73,9 +73,55 @@ const ai = apiKey
   : null;
 
 // Database File & Persistent Storage Path (Supports Render Persistent Disks via DATA_DIR)
-const DATA_DIR = process.env.DATA_DIR || process.env.RENDER_DISK_PATH || __dirname;
-const DB_FILE = path.join(DATA_DIR, '.billflow-db.json');
-const DEFAULT_REPO_DB_FILE = path.join(__dirname, '.billflow-db.json');
+export function getStorageConfig() {
+  const configuredDir = process.env.DATA_DIR || process.env.RENDER_DISK_PATH;
+  const repoDir = __dirname;
+  const defaultRepoDbFile = path.join(repoDir, '.billflow-db.json');
+
+  let activeDir = repoDir;
+  let isDiskMounted = false;
+  let isWritable = false;
+
+  if (configuredDir) {
+    try {
+      if (!fs.existsSync(configuredDir)) {
+        fs.mkdirSync(configuredDir, { recursive: true });
+      }
+      // Probe writability with a temp test file
+      const probeFile = path.join(configuredDir, `.write-probe-${Date.now()}`);
+      fs.writeFileSync(probeFile, 'ok', 'utf8');
+      fs.unlinkSync(probeFile);
+      activeDir = configuredDir;
+      isDiskMounted = true;
+      isWritable = true;
+    } catch (diskErr: any) {
+      console.warn(`[STORAGE WARNING] Configured DATA_DIR "${configuredDir}" is unavailable or not writable (${diskErr?.message || diskErr}). Falling back to local directory "${repoDir}".`);
+      activeDir = repoDir;
+      isDiskMounted = false;
+      isWritable = false;
+    }
+  } else {
+    isWritable = true;
+  }
+
+  const activeDbFile = path.join(activeDir, '.billflow-db.json');
+  const activeBackupFile = path.join(activeDir, '.billflow-db.backup.json');
+
+  return {
+    configuredDir: configuredDir || null,
+    activeDir,
+    activeDbFile,
+    defaultRepoDbFile,
+    activeBackupFile,
+    isDiskMounted,
+    isWritable,
+  };
+}
+
+const DATA_DIR = getStorageConfig().activeDir;
+const DB_FILE = getStorageConfig().activeDbFile;
+const DEFAULT_REPO_DB_FILE = getStorageConfig().defaultRepoDbFile;
+
 
 // Initial seed data generator with realistic Indian business context
 function getInitialDbData() {
@@ -597,36 +643,43 @@ function getInitialDbData() {
 
 // Database Helper
 function readDb() {
+  const storage = getStorageConfig();
   try {
     let db: any;
-    if (!fs.existsSync(DB_FILE)) {
-      // If a persistent disk is configured and empty, copy existing repository database template
-      if (DB_FILE !== DEFAULT_REPO_DB_FILE && fs.existsSync(DEFAULT_REPO_DB_FILE)) {
+    if (!fs.existsSync(storage.activeDbFile)) {
+      // If a persistent disk is configured and active, copy existing repository database template
+      if (storage.activeDbFile !== storage.defaultRepoDbFile && fs.existsSync(storage.defaultRepoDbFile)) {
         try {
-          const defaultData = fs.readFileSync(DEFAULT_REPO_DB_FILE, 'utf8');
+          const defaultData = fs.readFileSync(storage.defaultRepoDbFile, 'utf8');
           db = JSON.parse(defaultData);
-          if (!fs.existsSync(DATA_DIR)) {
-            fs.mkdirSync(DATA_DIR, { recursive: true });
+          const dir = path.dirname(storage.activeDbFile);
+          if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
           }
-          fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2), 'utf8');
-          console.log(`[STORAGE] Initialized persistent database at ${DB_FILE} from repository template.`);
+          fs.writeFileSync(storage.activeDbFile, JSON.stringify(db, null, 2), 'utf8');
+          console.log(`[STORAGE] Initialized persistent database at ${storage.activeDbFile} from repository template.`);
         } catch (copyErr) {
-          console.warn('[STORAGE] Could not copy default database, using initial defaults:', copyErr);
-          db = getInitialDbData();
-          if (!fs.existsSync(path.dirname(DB_FILE))) {
-            fs.mkdirSync(path.dirname(DB_FILE), { recursive: true });
+          console.warn('[STORAGE] Could not initialize persistent database copy:', copyErr);
+          if (fs.existsSync(storage.defaultRepoDbFile)) {
+            const data = fs.readFileSync(storage.defaultRepoDbFile, 'utf8');
+            db = JSON.parse(data);
+          } else {
+            db = getInitialDbData();
           }
-          fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2), 'utf8');
         }
+      } else if (fs.existsSync(storage.defaultRepoDbFile)) {
+        const data = fs.readFileSync(storage.defaultRepoDbFile, 'utf8');
+        db = JSON.parse(data);
       } else {
         db = getInitialDbData();
-        if (!fs.existsSync(path.dirname(DB_FILE))) {
-          fs.mkdirSync(path.dirname(DB_FILE), { recursive: true });
+        const dir = path.dirname(storage.activeDbFile);
+        if (!fs.existsSync(dir)) {
+          fs.mkdirSync(dir, { recursive: true });
         }
-        fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2), 'utf8');
+        fs.writeFileSync(storage.activeDbFile, JSON.stringify(db, null, 2), 'utf8');
       }
     } else {
-      const data = fs.readFileSync(DB_FILE, 'utf8');
+      const data = fs.readFileSync(storage.activeDbFile, 'utf8');
       db = JSON.parse(data);
     }
 
@@ -664,7 +717,18 @@ function readDb() {
 
     return db;
   } catch (err) {
-    console.error('Error reading DB file, using defaults:', err);
+    console.error('Error reading DB file, using fallback template:', err);
+    try {
+      if (fs.existsSync(storage.defaultRepoDbFile)) {
+        const defaultData = fs.readFileSync(storage.defaultRepoDbFile, 'utf8');
+        const db = JSON.parse(defaultData);
+        if (!Array.isArray(db.users)) db.users = [];
+        if (!Array.isArray(db.sessions)) db.sessions = [];
+        if (!Array.isArray(db.auditLogs)) db.auditLogs = [];
+        if (!Array.isArray(db.backups)) db.backups = [];
+        return db;
+      }
+    } catch {}
     const db = getInitialDbData() as any;
     db.users = [];
     db.sessions = [];
@@ -675,14 +739,20 @@ function readDb() {
 }
 
 function writeDb(data: any) {
+  const storage = getStorageConfig();
   try {
-    const dir = path.dirname(DB_FILE);
+    const dir = path.dirname(storage.activeDbFile);
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
-    fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), 'utf8');
+    fs.writeFileSync(storage.activeDbFile, JSON.stringify(data, null, 2), 'utf8');
   } catch (err) {
-    console.error('Error writing DB file:', err);
+    console.error('Error writing DB file to active path, attempting fallback write:', err);
+    try {
+      fs.writeFileSync(storage.defaultRepoDbFile, JSON.stringify(data, null, 2), 'utf8');
+    } catch (fallbackErr) {
+      console.error('Critical: fallback DB write failed:', fallbackErr);
+    }
   }
 }
 
@@ -938,8 +1008,10 @@ function requireRole(...allowedRoles: string[]) {
 // Helper for comprehensive initialization & setup status
 function getSetupStatusPayload() {
   const db = readDb();
+  const storage = getStorageConfig();
   const users = Array.isArray(db.users) ? db.users : [];
-  const superAdminCount = users.filter((u: any) => u.role === 'super_admin' && u.status !== 'deactivated').length;
+  const superAdminUsers = users.filter((u: any) => u.role === 'super_admin' && u.status !== 'deactivated');
+  const superAdminCount = superAdminUsers.length;
   const totalUsers = users.length;
   const isSetupRequired = totalUsers === 0 || superAdminCount === 0;
   const isInitialized = !isSetupRequired;
@@ -952,6 +1024,16 @@ function getSetupStatusPayload() {
     hasSuperAdmin: superAdminCount > 0,
     totalUsers,
     superAdminCount,
+    superAdminEmail: superAdminCount > 0 ? superAdminUsers[0].email : undefined,
+    storage: {
+      configuredDataDir: storage.configuredDir,
+      activeDataDir: storage.activeDir,
+      dbFile: storage.activeDbFile,
+      isDiskMounted: storage.isDiskMounted,
+      isWritable: storage.isWritable,
+      mode: storage.configuredDir ? (storage.isDiskMounted ? 'persistent_disk' : 'fallback_local') : 'local',
+      dbFileExists: fs.existsSync(storage.activeDbFile),
+    },
   };
 }
 
@@ -1317,6 +1399,118 @@ app.post('/api/auth/verify-mfa', (req: Request, res: Response) => {
   res.json({
     token,
     user: sanitizeUser(user),
+    expiresAt,
+  });
+});
+
+// Emergency Super Admin Recovery Endpoint (Cryptographic Recovery Codes or Server Key)
+app.post(['/api/auth/recover-admin', '/api/auth/recover-super-admin'], (req: Request, res: Response) => {
+  const { email, recoveryCode, newPassword, newEmail } = req.body;
+
+  if (!recoveryCode || typeof recoveryCode !== 'string' || !recoveryCode.trim()) {
+    return res.status(400).json({ error: 'Valid emergency recovery code or server recovery key is required.' });
+  }
+
+  if (!newPassword || typeof newPassword !== 'string' || newPassword.length < 8) {
+    return res.status(400).json({ error: 'New password must be at least 8 characters long.' });
+  }
+
+  const db = readDb();
+  const users = Array.isArray(db.users) ? db.users : [];
+  const superAdminUsers = users.filter((u: any) => u.role === 'super_admin');
+
+  if (superAdminUsers.length === 0) {
+    return res.status(404).json({
+      error: 'No Super Admin account found in the database. Please complete initial setup.',
+      code: 'NO_ADMIN_FOUND',
+    });
+  }
+
+  let targetUser: any = null;
+  if (email && typeof email === 'string' && email.trim()) {
+    const cleanEmail = email.trim().toLowerCase();
+    targetUser = superAdminUsers.find((u: any) => u.email.toLowerCase() === cleanEmail);
+  } else if (superAdminUsers.length === 1) {
+    targetUser = superAdminUsers[0];
+  }
+
+  if (!targetUser) {
+    return res.status(404).json({
+      error: email
+        ? `Super Admin account with email "${email}" not found.`
+        : 'Multiple administrator accounts exist. Please specify the Super Admin email to recover.',
+      code: 'ADMIN_NOT_FOUND',
+    });
+  }
+
+  const cleanInputCode = recoveryCode.trim().toUpperCase();
+  const validCodes: string[] = Array.isArray(targetUser.recoveryCodes) ? targetUser.recoveryCodes : [];
+  const envRecoveryKey = process.env.ADMIN_RECOVERY_KEY ? process.env.ADMIN_RECOVERY_KEY.trim() : null;
+
+  const isCodeMatch = validCodes.some((c) => c.toUpperCase() === cleanInputCode);
+  const isEnvKeyMatch = Boolean(envRecoveryKey && envRecoveryKey === recoveryCode.trim());
+
+  if (!isCodeMatch && !isEnvKeyMatch) {
+    logAudit(
+      db,
+      targetUser,
+      'RECOVERY_FAILED',
+      'auth',
+      `Failed recovery attempt for Super Admin: ${targetUser.email}`,
+      targetUser.id,
+      req
+    );
+    writeDb(db);
+    return res.status(401).json({
+      error: 'Invalid recovery code. Please check your emergency recovery codes or server key.',
+      code: 'INVALID_RECOVERY_CODE',
+    });
+  }
+
+  // Consume used recovery code if matched from user's recovery list
+  if (isCodeMatch) {
+    targetUser.recoveryCodes = validCodes.filter((c: string) => c.toUpperCase() !== cleanInputCode);
+  }
+
+  // Update password with secure PBKDF2 hash (identical salt & 100,000 iterations pbkdf2Sync settings)
+  const { salt, hash } = hashPassword(newPassword);
+  targetUser.passwordSalt = salt;
+  targetUser.passwordHash = hash;
+  targetUser.updatedAt = new Date().toISOString();
+
+  // If newEmail is requested, update it
+  if (newEmail && typeof newEmail === 'string' && newEmail.includes('@')) {
+    targetUser.email = newEmail.trim().toLowerCase();
+  }
+
+  // Clear existing sessions and generate fresh session token
+  const token = generateSecureToken(32);
+  const expiresAt = new Date(Date.now() + 24 * 3600 * 1000).toISOString();
+  db.sessions = (db.sessions || []).filter((s: any) => s.userId !== targetUser.id);
+  db.sessions.push({
+    token,
+    userId: targetUser.id,
+    createdAt: new Date().toISOString(),
+    expiresAt,
+    ip: (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress,
+  });
+
+  logAudit(
+    db,
+    targetUser,
+    'SUPER_ADMIN_RECOVERED',
+    'auth',
+    `Super Admin credentials successfully recovered for: ${targetUser.email}`,
+    targetUser.id,
+    req
+  );
+
+  writeDb(db);
+
+  return res.json({
+    message: 'Super Admin credentials successfully recovered.',
+    token,
+    user: sanitizeUser(targetUser),
     expiresAt,
   });
 });
@@ -1765,10 +1959,18 @@ app.get('/api/backups/:id/download', authenticate, requireRole('super_admin'), (
 
 // 1. Health
 app.get('/api/health', (req: Request, res: Response) => {
+  const storage = getStorageConfig();
   res.json({
     status: 'ok',
     engine: 'billflow-fastapi-express',
     gemini_configured: Boolean(apiKey),
+    storage: {
+      mode: storage.configuredDir ? (storage.isDiskMounted ? 'persistent_disk' : 'fallback_local') : 'local',
+      activeDataDir: storage.activeDir,
+      isDiskMounted: storage.isDiskMounted,
+      isWritable: storage.isWritable,
+      dbFileExists: fs.existsSync(storage.activeDbFile),
+    },
     timestamp: new Date().toISOString(),
     locale: 'en-IN',
     currency: 'INR (₹)',
@@ -2643,7 +2845,7 @@ app.post('/api/products/clear-all', (req: Request, res: Response) => {
     // Write file backup for persistence and resilience
     try {
       fs.writeFileSync(
-        path.join(__dirname, '.billflow-db.backup.json'),
+        getStorageConfig().activeBackupFile,
         JSON.stringify(backupEntry, null, 2)
       );
     } catch (e) {
@@ -2735,7 +2937,7 @@ app.post('/api/products/replace-catalog', (req: Request, res: Response) => {
     // Write file backup for resilience
     try {
       fs.writeFileSync(
-        path.join(__dirname, '.billflow-db.backup.json'),
+        getStorageConfig().activeBackupFile,
         JSON.stringify(backupEntry, null, 2)
       );
     } catch (e) {
@@ -2868,7 +3070,9 @@ app.post('/api/products/restore-backup', (req: Request, res: Response) => {
 
     if (!Array.isArray(db.productBackups) || db.productBackups.length === 0) {
       try {
-        const fileBackup = JSON.parse(fs.readFileSync(path.join(__dirname, '.billflow-db.backup.json'), 'utf8'));
+        const backupPath = getStorageConfig().activeBackupFile;
+        const backupTarget = fs.existsSync(backupPath) ? backupPath : path.join(__dirname, '.billflow-db.backup.json');
+        const fileBackup = JSON.parse(fs.readFileSync(backupTarget, 'utf8'));
         if (fileBackup && Array.isArray(fileBackup.products)) {
           db.products = fileBackup.products;
           writeDb(db);

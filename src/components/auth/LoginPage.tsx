@@ -40,6 +40,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess }) => {
     checkAuthStatus,
     connectionError,
     setCurrentView,
+    recoverSuperAdmin,
   } = useBilling();
 
   // Mode: 'login' | 'setup' | 'mfa'
@@ -47,14 +48,14 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess }) => {
     return authStatus === 'setup_required' ? 'setup' : 'login';
   });
 
-  // Keep mode in sync: if initialized, always direct unauthenticated users to login
+  // Keep mode in sync: if setup is required, direct user to setup; if initialized, always direct unauthenticated users to login
   useEffect(() => {
     if (authStatus === 'setup_required') {
       setMode('setup');
-    } else if (authStatus === 'unauthenticated' || authStatus === 'authenticated') {
+    } else if (mode === 'setup') {
       setMode('login');
     }
-  }, [authStatus]);
+  }, [authStatus, mode]);
 
   // Login Form State
   const [loginEmail, setLoginEmail] = useState(() => {
@@ -86,8 +87,18 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess }) => {
   const [loginError, setLoginError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Forgot Password Modal State
+
+  // Forgot Password & Emergency Recovery Modal State
   const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
+  const [recoveryTab, setRecoveryTab] = useState<'emergency' | 'smtp'>('emergency');
+  const [recoverEmail, setRecoverEmail] = useState('');
+  const [recoverCode, setRecoverCode] = useState('');
+  const [recoverNewPassword, setRecoverNewPassword] = useState('');
+  const [recoverNewEmail, setRecoverNewEmail] = useState('');
+  const [recoveryError, setRecoveryError] = useState<string | null>(null);
+  const [recoverySuccess, setRecoverySuccess] = useState<string | null>(null);
+  const [isRecovering, setIsRecovering] = useState(false);
+
   const [forgotEmail, setForgotEmail] = useState('');
   const [forgotStatus, setForgotStatus] = useState<{
     loading: boolean;
@@ -333,6 +344,45 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess }) => {
     }
   };
 
+  // Emergency Super Admin Recovery Submit
+  const handleRecoverSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setRecoveryError(null);
+    setRecoverySuccess(null);
+
+    const emailToUse = (recoverEmail || loginEmail || '').trim();
+    const cleanCode = recoverCode.trim().toUpperCase();
+
+    if (!cleanCode) {
+      setRecoveryError('Emergency recovery code is required.');
+      return;
+    }
+
+    if (recoverNewPassword.length < 8) {
+      setRecoveryError('New password must be at least 8 characters long.');
+      return;
+    }
+
+    try {
+      setIsRecovering(true);
+      await recoverSuperAdmin({
+        email: emailToUse || undefined,
+        recoveryCode: cleanCode,
+        newPassword: recoverNewPassword,
+        newEmail: recoverNewEmail.trim() ? recoverNewEmail.trim().toLowerCase() : undefined,
+      });
+      setRecoverySuccess('Super Admin account recovered successfully! Redirecting...');
+      setTimeout(() => {
+        setIsForgotPasswordOpen(false);
+        if (onSuccess) onSuccess();
+      }, 1000);
+    } catch (err: any) {
+      setRecoveryError(err?.message || 'Invalid recovery code. Please check your emergency credentials.');
+    } finally {
+      setIsRecovering(false);
+    }
+  };
+
   const handleCopyCodes = () => {
     if (mfaSetupData?.recoveryCodes) {
       navigator.clipboard.writeText(mfaSetupData.recoveryCodes.join('\n'));
@@ -472,10 +522,28 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess }) => {
                   <div
                     role="alert"
                     aria-live="assertive"
-                    className="mb-5 p-3.5 rounded-xl border border-rose-200 dark:border-rose-900/80 bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 text-xs flex items-start gap-2.5 animate-in fade-in duration-150"
+                    className="mb-5 p-3.5 rounded-xl border border-rose-200 dark:border-rose-900/80 bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 text-xs space-y-1.5 animate-in fade-in duration-150"
                   >
-                    <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
-                    <span className="leading-relaxed font-medium">{loginError}</span>
+                    <div className="flex items-start gap-2.5">
+                      <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
+                      <span className="leading-relaxed font-medium">{loginError}</span>
+                    </div>
+                    <div className="pl-6.5 text-[11px] text-rose-600 dark:text-rose-400">
+                      Lost access?{' '}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setRecoverEmail(loginEmail || '');
+                          setForgotEmail(loginEmail || '');
+                          setRecoveryError(null);
+                          setRecoverySuccess(null);
+                          setIsForgotPasswordOpen(true);
+                        }}
+                        className="font-bold underline hover:text-rose-800 dark:hover:text-rose-200"
+                      >
+                        Reset password using Emergency Recovery Code or Server Key
+                      </button>
+                    </div>
                   </div>
                 )}
 
@@ -532,7 +600,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess }) => {
                       <button
                         type="button"
                         onClick={() => {
-                          setForgotEmail(loginEmail);
+                          setForgotEmail(loginEmail || '');
+                          setRecoverEmail(loginEmail || '');
+                          setRecoveryError(null);
+                          setRecoverySuccess(null);
                           setIsForgotPasswordOpen(true);
                         }}
                         className="text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline focus:outline-none focus:underline transition-colors"
@@ -720,7 +791,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess }) => {
             {/* ------------------------------------------------------------- */}
             {/* MODE 3: FIRST-TIME SUPER ADMIN INITIALIZATION                */}
             {/* ------------------------------------------------------------- */}
-            {mode === 'setup' && (
+            {mode === 'setup' && authStatus === 'setup_required' && (
               <div>
                 {/* If setup just succeeded and MFA credentials need saving */}
                 {mfaSetupData ? (
@@ -996,92 +1067,226 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess }) => {
               </button>
             </div>
 
+            {/* Modal Tabs */}
+            <div className="flex border-b border-slate-200 dark:border-slate-800 px-6 pt-3 gap-4">
+              <button
+                type="button"
+                onClick={() => setRecoveryTab('emergency')}
+                className={`pb-2.5 text-xs font-semibold border-b-2 transition-all flex items-center gap-1.5 ${
+                  recoveryTab === 'emergency'
+                    ? 'border-blue-600 text-blue-600 dark:text-blue-400'
+                    : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+                }`}
+              >
+                <KeyRound className="w-3.5 h-3.5" />
+                <span>Emergency Recovery Code</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setRecoveryTab('smtp')}
+                className={`pb-2.5 text-xs font-semibold border-b-2 transition-all flex items-center gap-1.5 ${
+                  recoveryTab === 'smtp'
+                    ? 'border-blue-600 text-blue-600 dark:text-blue-400'
+                    : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+                }`}
+              >
+                <Mail className="w-3.5 h-3.5" />
+                <span>Role Help &amp; Gateway</span>
+              </button>
+            </div>
+
             <div className="py-4 space-y-3.5 text-xs text-slate-600 dark:text-slate-300">
-              <p>
-                To reset your account password, check with your administrator or query the system recovery status:
-              </p>
+              {recoveryTab === 'emergency' && (
+                <div className="space-y-3">
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                    Reset your Super Admin password using one of the 4 emergency recovery codes generated during initialization or your server environment key.
+                  </p>
 
-              {/* Status or Details Banner */}
-              {forgotStatus.error && (
-                <div className="p-3 rounded-xl border border-amber-200 dark:border-amber-900/70 bg-amber-50 dark:bg-amber-950/60 text-amber-900 dark:text-amber-200 text-xs space-y-1.5">
-                  <div className="flex items-center gap-2 font-bold text-amber-800 dark:text-amber-300">
-                    <AlertCircle className="w-4 h-4 shrink-0" />
-                    <span>{forgotStatus.error}</span>
-                  </div>
-                  {forgotStatus.details && (
-                    <p className="text-[11px] text-amber-700 dark:text-amber-300/90 leading-relaxed">
-                      {forgotStatus.details}
-                    </p>
+                  {recoveryError && (
+                    <div className="p-3 rounded-xl border border-rose-200 dark:border-rose-900 bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 text-xs flex items-start gap-2">
+                      <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                      <span>{recoveryError}</span>
+                    </div>
                   )}
+
+                  {recoverySuccess && (
+                    <div className="p-3 rounded-xl border border-emerald-200 dark:border-emerald-900 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-200 text-xs flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <span>{recoverySuccess}</span>
+                    </div>
+                  )}
+
+                  <form onSubmit={handleRecoverSubmit} className="space-y-3">
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between">
+                        <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                          Super Admin Email
+                        </label>
+                        <span className="text-[10px] text-slate-400 dark:text-slate-500 font-normal">
+                          Optional if single admin
+                        </span>
+                      </div>
+                      <input
+                        type="email"
+                        value={recoverEmail}
+                        onChange={(e) => setRecoverEmail(e.target.value)}
+                        placeholder="e.g., admin@yourbusiness.in"
+                        className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#0A0F1D] text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                        Emergency Recovery Code (or Server Key)
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={recoverCode}
+                        onChange={(e) => setRecoverCode(e.target.value)}
+                        placeholder="e.g., A19D-04D2"
+                        className="w-full px-3 py-2 text-xs font-mono uppercase tracking-wider rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#0A0F1D] text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                        New Password (min 8 chars)
+                      </label>
+                      <input
+                        type="password"
+                        required
+                        minLength={8}
+                        value={recoverNewPassword}
+                        onChange={(e) => setRecoverNewPassword(e.target.value)}
+                        placeholder="Create new password"
+                        className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#0A0F1D] text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                        Update to New Email <span className="font-normal text-slate-400">(optional)</span>
+                      </label>
+                      <input
+                        type="email"
+                        value={recoverNewEmail}
+                        onChange={(e) => setRecoverNewEmail(e.target.value)}
+                        placeholder="e.g., your.actual.email@company.in"
+                        className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#0A0F1D] text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                      />
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={isRecovering}
+                      className="w-full mt-2 py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-md shadow-blue-500/25 transition-all flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer"
+                    >
+                      {isRecovering ? (
+                        <>
+                          <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                          <span>Recovering Account...</span>
+                        </>
+                      ) : (
+                        <>
+                          <ShieldCheck className="w-4 h-4" />
+                          <span>Reset Password &amp; Sign In</span>
+                        </>
+                      )}
+                    </button>
+                  </form>
                 </div>
               )}
 
-              {forgotStatus.info && (
-                <div className="p-3 rounded-xl border border-emerald-200 dark:border-emerald-900/70 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-200 text-xs flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>{forgotStatus.info}</span>
+              {recoveryTab === 'smtp' && (
+                <div className="space-y-3.5">
+                  <p>
+                    Check role-based password recovery guidance or query the outbound SMTP email gateway:
+                  </p>
+
+                  {/* Status or Details Banner */}
+                  {forgotStatus.error && (
+                    <div className="p-3 rounded-xl border border-amber-200 dark:border-amber-900/70 bg-amber-50 dark:bg-amber-950/60 text-amber-900 dark:text-amber-200 text-xs space-y-1.5">
+                      <div className="flex items-center gap-2 font-bold text-amber-800 dark:text-amber-300">
+                        <AlertCircle className="w-4 h-4 shrink-0" />
+                        <span>{forgotStatus.error}</span>
+                      </div>
+                      {forgotStatus.details && (
+                        <p className="text-[11px] text-amber-700 dark:text-amber-300/90 leading-relaxed">
+                          {forgotStatus.details}
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {forgotStatus.info && (
+                    <div className="p-3 rounded-xl border border-emerald-200 dark:border-emerald-900/70 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-200 text-xs flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <span>{forgotStatus.info}</span>
+                    </div>
+                  )}
+
+                  {/* Recovery Guidance by Role */}
+                  <div className="p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#0A0F1D] space-y-2.5">
+                    <div className="flex items-start gap-2.5">
+                      <User className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
+                      <div>
+                        <h5 className="font-bold text-slate-900 dark:text-slate-100">
+                          Employees &amp; Managers
+                        </h5>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                          Your company Super Administrator can reset your password instantly from the{' '}
+                          <span className="font-semibold text-slate-700 dark:text-slate-300">
+                            Settings &gt; User Management
+                          </span>{' '}
+                          panel.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="h-px bg-slate-200 dark:bg-slate-800" />
+
+                    <div className="flex items-start gap-2.5">
+                      <ShieldCheck className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0 mt-0.5" />
+                      <div>
+                        <h5 className="font-bold text-slate-900 dark:text-slate-100">
+                          Super Administrator
+                        </h5>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                          Use the <strong>Emergency Recovery Code</strong> tab with any of your initial emergency recovery codes, or run the server CLI tool: <code className="font-mono text-blue-600 dark:text-blue-400">npx tsx scripts/recover-admin.ts</code>.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Email Gateway Check Form */}
+                  <form onSubmit={handleForgotPasswordSubmit} className="space-y-2 pt-1">
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                      Verify Outbound Gateway for Email:
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="email"
+                        value={forgotEmail}
+                        onChange={(e) => setForgotEmail(e.target.value)}
+                        placeholder="Enter account email"
+                        className="flex-1 px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#0A0F1D] text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                      />
+                      <button
+                        type="submit"
+                        disabled={forgotStatus.loading}
+                        className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-900 text-white dark:bg-slate-700 dark:hover:bg-slate-600 font-semibold text-xs shrink-0 transition-colors flex items-center gap-1.5"
+                      >
+                        {forgotStatus.loading ? (
+                          <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <span>Check Gateway</span>
+                        )}
+                      </button>
+                    </div>
+                  </form>
                 </div>
               )}
-
-              {/* Recovery Guidance by Role */}
-              <div className="p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#0A0F1D] space-y-2.5">
-                <div className="flex items-start gap-2.5">
-                  <User className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
-                  <div>
-                    <h5 className="font-bold text-slate-900 dark:text-slate-100">
-                      Employees &amp; Managers
-                    </h5>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                      Your company Super Administrator can reset your password instantly from the{' '}
-                      <span className="font-semibold text-slate-700 dark:text-slate-300">
-                        Settings &gt; User Management
-                      </span>{' '}
-                      panel. Please contact them directly.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="h-px bg-slate-200 dark:bg-slate-800" />
-
-                <div className="flex items-start gap-2.5">
-                  <ShieldCheck className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0 mt-0.5" />
-                  <div>
-                    <h5 className="font-bold text-slate-900 dark:text-slate-100">
-                      Super Administrator
-                    </h5>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                      If you lost your Super Admin password, use the emergency recovery codes generated during initial system initialization or use server-side management.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Email Gateway Check Form */}
-              <form onSubmit={handleForgotPasswordSubmit} className="space-y-2 pt-1">
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
-                  Verify Outbound Gateway for Email:
-                </label>
-                <div className="flex gap-2">
-                  <input
-                    type="email"
-                    value={forgotEmail}
-                    onChange={(e) => setForgotEmail(e.target.value)}
-                    placeholder="Enter account email"
-                    className="flex-1 px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#0A0F1D] text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                  />
-                  <button
-                    type="submit"
-                    disabled={forgotStatus.loading}
-                    className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-900 text-white dark:bg-slate-700 dark:hover:bg-slate-600 font-semibold text-xs shrink-0 transition-colors flex items-center gap-1.5"
-                  >
-                    {forgotStatus.loading ? (
-                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                    ) : (
-                      <span>Check Gateway</span>
-                    )}
-                  </button>
-                </div>
-              </form>
             </div>
 
             <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex justify-end">

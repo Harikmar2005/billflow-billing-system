@@ -3697,7 +3697,7 @@
       ],
       "createdAt": "2026-10-20T12:17:18.683Z",
       "updatedAt": "2026-10-20T12:17:18.683Z",
-      "lastLoginAt": "2026-10-20T12:17:18.683Z"
+      "lastLoginAt": "2026-10-20T13:17:59.623Z"
     }
   ],
   "sessions": [
@@ -3706,9 +3706,169 @@
       "userId": "usr-1792498638683",
       "createdAt": "2026-10-20T12:17:18.683Z",
       "expiresAt": "2026-10-21T12:17:18.683Z"
+    },
+    {
+      "token": "d1f16240cf4a7b6de8656716124df4d6c41bbda54fa5f65ad85e347ade5bebac",
+      "userId": "usr-1792498638683",
+      "createdAt": "2026-10-20T12:46:50.107Z",
+      "expiresAt": "2026-10-21T12:46:50.107Z",
+      "ip": "127.0.0.1"
     }
   ],
   "auditLogs": [
+    {
+      "id": "audit-1792502279789-077e4e",
+      "timestamp": "2026-10-20T13:17:59.789Z",
+      "userId": "usr-1792498638683",
+      "userName": "Admin",
+      "userRole": "super_admin",
+      "action": "USER_LOGOUT",
+      "entityType": "auth",
+      "entityId": "usr-1792498638683",
+      "details": "User logged out: Admin (admin@test.com)",
+      "ip": "127.0.0.1"
+    },
+    {
+      "id": "audit-1792502279745-7f5145",
+      "timestamp": "2026-10-20T13:17:59.746Z",
+      "userId": "usr-1792498638683",
+      "userName": "Admin",
+      "userRole": "super_admin",
+      "action": "RECOVERY_FAILED",
+      "entityType": "auth",
+      "entityId": "usr-1792498638683",
+      "details": "Failed recovery attempt for Super Admin: admin@test.com",
+      "ip": "127.0.0.1"
+    },
+    {
+      "id": "audit-1792502279734-162908",
+      "timestamp": "2026-10-20T13:17:59.734Z",
+      "userId": "system",
+      "userName": "System / Unauthenticated",
+      "userRole": "anonymous",
+      "action": "LOGIN_FAILED",
+      "entityType": "auth",
+      "details": "Failed login attempt for email: admin@test.com",
+      "ip": "127.0.0.1"
+    },
+    {
+      "id": "audit-1792502279624-52a6ba",
+      "timestamp": "2026-10-20T13:17:59.624Z",
+      "userId": "usr-1792498638683",
+      "userName": "Admin",
+      "userRole": "super_admin",
+      "action": "USER_LOGIN",
+      "entityType": "auth",
+      "entityId": "usr-1792498638683",
+      "details": "User logged in: Admin (SUPER_ADMIN)",
+      "ip": "127.0.0.1"
+    },
+    {
+      "id": "audit-1792501918375-f719d6",
+      "timestamp": "2026-10-20T13:11:58.375Z",
+      "userId": "usr-1792498638683",
+      "userName": "Admin",
+      "userRole": "super_admin",
+      "action": "USER_LOGOUT",
+      "entityType": "auth",
+      "entityId": "usr-1792498638683",
+      "details": "User logged out: Admin (admin@test.com)",
+      "ip": "127.0.0.1"
+    },
+    {
+      "id": "audit-1792501918330-f2611a",
+      "timestamp": "2026-10-20T13:11:58.330Z",
+      "userId": "usr-1792498638683",
+      "userName": "Admin",
+      "userRole": "super_admin",
+      "action": "RECOVERY_FAILED",
+      "entityType": "auth",
+      "entityId": "usr-1792498638683",
+      "details": "Failed recovery attempt for Super Admin: admin@test.com",
+      "ip": "127.0.0.1"
+    },
+    {
+      "id": "audit-1792501918319-47cf6b",
+      "timestamp": "2026-10-20T13:11:58.319Z",
+      "userId": "system",
+      "userName": "System / Unauthenticated",
+      "userRole": "anonymous",
+      "action": "LOGIN_FAILED",
+      "entityType": "auth",
+      "details": "Failed login attempt for email: admin@test.com",
+      "ip": "127.0.0.1"
+    },
+    {
+      "id": "audit-1792501918207-57337c",
+      "timestamp": "2026-10-20T13:11:58.207Z",
+      "userId": "usr-1792498638683",
+      "userName": "Admin",
+      "userRole": "super_admin",
+      "action": "USER_LOGIN",
+      "entityType": "auth",
+      "entityId": "usr-1792498638683",
+      "details": "User logged in: Admin (SUPER_ADMIN)",
+      "ip": "127.0.0.1"
+    },
+    {
+      "id": "audit-1792500951043-0e26cf",
+      "timestamp": "2026-10-20T12:55:51.043Z",
+      "userId": "usr-1792498638683",
+      "userName": "Admin",
+      "userRole": "super_admin",
+      "action": "USER_LOGOUT",
+      "entityType": "auth",
+      "entityId": "usr-1792498638683",
+      "details": "User logged out: Admin (admin@test.com)",
+      "ip": "127.0.0.1"
+    },
+    {
+      "id": "audit-1792500950996-bad3ae",
+      "timestamp": "2026-10-20T12:55:50.996Z",
+      "userId": "usr-1792498638683",
+      "userName": "Admin",
+      "userRole": "super_admin",
+      "action": "RECOVERY_FAILED",
+      "entityType": "auth",
+      "entityId": "usr-1792498638683",
+      "details": "Failed recovery attempt for Super Admin: admin@test.com",
+      "ip": "127.0.0.1"
+    },
+    {
+      "id": "audit-1792500950984-bf1c91",
+      "timestamp": "2026-10-20T12:55:50.984Z",
+      "userId": "system",
+      "userName": "System / Unauthenticated",
+      "userRole": "anonymous",
+      "action": "LOGIN_FAILED",
+      "entityType": "auth",
+      "details": "Failed login attempt for email: admin@test.com",
+      "ip": "127.0.0.1"
+    },
+    {
+      "id": "audit-1792500950877-6f4736",
+      "timestamp": "2026-10-20T12:55:50.877Z",
+      "userId": "usr-1792498638683",
+      "userName": "Admin",
+      "userRole": "super_admin",
+      "action": "USER_LOGIN",
+      "entityType": "auth",
+      "entityId": "usr-1792498638683",
+      "details": "User logged in: Admin (SUPER_ADMIN)",
+      "ip": "127.0.0.1"
+    },
+    {
+      "id": "audit-1792500410107-37b23a",
+      "timestamp": "2026-10-20T12:46:50.107Z",
+      "userId": "usr-1792498638683",
+      "userName": "Admin",
+      "userRole": "super_admin",
+      "action": "USER_LOGIN",
+      "entityType": "auth",
+      "entityId": "usr-1792498638683",
+      "details": "User logged in: Admin (SUPER_ADMIN)",
+      "ip": "127.0.0.1"
+    },
     {
       "id": "audit-1792498638684-345798",
       "timestamp": "2026-10-20T12:17:18.684Z",
