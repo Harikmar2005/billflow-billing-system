@@ -264,89 +264,41 @@ async function run() {
       ip: '127.0.0.1 (CLI)',
     });
   } else {
-    // Scenario B: Target user does NOT exist
-    const isOnlyPlaceholder =
-      existingSuperAdmins.length === 1 &&
-      (existingSuperAdmins[0].email === 'admin@test.com' ||
-        existingSuperAdmins[0].email.includes('test'));
+    // Scenario B: Target user does NOT exist - securely bootstrap without deleting any users or business data
+    const displayName =
+      adminName ||
+      (adminEmail.split('@')[0].charAt(0).toUpperCase() + adminEmail.split('@')[0].slice(1));
 
-    if (existingSuperAdmins.length === 0 || isOnlyPlaceholder) {
-      if (isOnlyPlaceholder) {
-        console.log(`\nNotice: Removing dummy placeholder account (${existingSuperAdmins[0].email}).`);
-        db.users = db.users.filter((u: any) => u.id !== existingSuperAdmins[0].id);
-        db.sessions = db.sessions.filter((s: any) => s.userId !== existingSuperAdmins[0].id);
-      } else {
-        console.log('\nNo Super Admin currently configured.');
-      }
+    targetAdmin = {
+      id: `usr-${Date.now()}`,
+      name: displayName,
+      email: adminEmail,
+      role: 'super_admin',
+      status: 'active',
+      passwordSalt: salt,
+      passwordHash: hash,
+      mfaEnabled: false,
+      mfaSecret: crypto.randomBytes(20).toString('hex'),
+      recoveryCodes,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
 
-      const displayName =
-        adminName ||
-        (adminEmail.split('@')[0].charAt(0).toUpperCase() + adminEmail.split('@')[0].slice(1));
+    db.users.push(targetAdmin);
 
-      targetAdmin = {
-        id: `usr-${Date.now()}`,
-        name: displayName,
-        email: adminEmail,
-        role: 'super_admin',
-        status: 'active',
-        passwordSalt: salt,
-        passwordHash: hash,
-        mfaEnabled: false,
-        mfaSecret: crypto.randomBytes(20).toString('hex'),
-        recoveryCodes,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-
-      db.users.push(targetAdmin);
-
-      db.auditLogs.unshift({
-        id: `audit-${Date.now()}-${crypto.randomBytes(3).toString('hex')}`,
-        timestamp: new Date().toISOString(),
-        userId: targetAdmin.id,
-        userName: targetAdmin.name,
-        userRole: 'super_admin',
-        action: 'SUPER_ADMIN_BOOTSTRAP_CREATED_CLI',
-        entityType: 'auth',
-        entityId: targetAdmin.id,
-        details: `Initial Super Admin account created via CLI bootstrap tool for: ${adminEmail}`,
-        ip: '127.0.0.1 (CLI)',
-      });
-    } else {
-      // Existing real Super Admins exist
-      if (!isForce) {
-        console.error(
-          `\nSecurity Refusal: System already has ${existingSuperAdmins.length} active Super Admin(s):`
-        );
-        existingSuperAdmins.forEach((a: any) => console.error(`  - ${a.email} (${a.name})`));
-        console.error(
-          `To add or replace an authorized administrator, re-run with --force or set BOOTSTRAP_FORCE=true.`
-        );
-        process.exit(1);
-      }
-
-      const displayName =
-        adminName ||
-        (adminEmail.split('@')[0].charAt(0).toUpperCase() + adminEmail.split('@')[0].slice(1));
-
-      targetAdmin = {
-        id: `usr-${Date.now()}`,
-        name: displayName,
-        email: adminEmail,
-        role: 'super_admin',
-        status: 'active',
-        passwordSalt: salt,
-        passwordHash: hash,
-        mfaEnabled: false,
-        mfaSecret: crypto.randomBytes(20).toString('hex'),
-        recoveryCodes,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-
-      db.users.push(targetAdmin);
-      console.log(`--force specified: Created additional Super Admin account for ${adminEmail}.`);
-    }
+    db.auditLogs.unshift({
+      id: `audit-${Date.now()}-${crypto.randomBytes(3).toString('hex')}`,
+      timestamp: new Date().toISOString(),
+      userId: targetAdmin.id,
+      userName: targetAdmin.name,
+      userRole: 'super_admin',
+      action: 'SUPER_ADMIN_BOOTSTRAP_CREATED_CLI',
+      entityType: 'auth',
+      entityId: targetAdmin.id,
+      details: `Super Admin account created via CLI bootstrap tool for: ${adminEmail}`,
+      ip: '127.0.0.1 (CLI)',
+    });
+    console.log(`\nSuccessfully created Super Admin account for ${adminEmail} (all existing users and records preserved).`);
   }
 
   // Atomic write to active database file

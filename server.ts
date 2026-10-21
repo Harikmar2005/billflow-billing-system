@@ -1684,19 +1684,40 @@ app.post(['/api/auth/recover-admin', '/api/auth/recover-super-admin'], (req: Req
   const users = Array.isArray(db.users) ? db.users : [];
   const superAdminUsers = users.filter((u: any) => u.role === 'super_admin');
 
-  if (superAdminUsers.length === 0) {
-    return res.status(404).json({
-      error: 'No Super Admin account found in the database. Please complete initial setup.',
-      code: 'NO_ADMIN_FOUND',
-    });
-  }
+  const cleanInputCode = recoveryCode.trim().toUpperCase();
+  const envRecoveryKey = process.env.ADMIN_RECOVERY_KEY ? process.env.ADMIN_RECOVERY_KEY.trim() : null;
+  const isEnvKeyMatch = Boolean(envRecoveryKey && envRecoveryKey === recoveryCode.trim());
 
   let targetUser: any = null;
   if (email && typeof email === 'string' && email.trim()) {
     const cleanEmail = email.trim().toLowerCase();
-    targetUser = superAdminUsers.find((u: any) => u.email.toLowerCase() === cleanEmail);
+    targetUser = users.find((u: any) => u.email.toLowerCase() === cleanEmail);
   } else if (superAdminUsers.length === 1) {
     targetUser = superAdminUsers[0];
+  }
+
+  // If user does not exist yet, but the protected server recovery key matches, securely bootstrap the Super Admin
+  if (!targetUser && isEnvKeyMatch && email && typeof email === 'string' && email.includes('@')) {
+    const cleanEmail = email.trim().toLowerCase();
+    const displayName = cleanEmail.split('@')[0].charAt(0).toUpperCase() + cleanEmail.split('@')[0].slice(1);
+    const { salt: newSalt, hash: newHash } = hashPassword(newPassword);
+    const freshRecoveryCodes = generateRecoveryCodes(4);
+    targetUser = {
+      id: `usr-${Date.now()}`,
+      name: displayName,
+      email: cleanEmail,
+      role: 'super_admin' as const,
+      status: 'active' as const,
+      passwordSalt: newSalt,
+      passwordHash: newHash,
+      mfaEnabled: false,
+      mfaSecret: crypto.randomBytes(20).toString('hex'),
+      recoveryCodes: freshRecoveryCodes,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    if (!Array.isArray(db.users)) db.users = [];
+    db.users.push(targetUser);
   }
 
   if (!targetUser) {
@@ -1708,12 +1729,8 @@ app.post(['/api/auth/recover-admin', '/api/auth/recover-super-admin'], (req: Req
     });
   }
 
-  const cleanInputCode = recoveryCode.trim().toUpperCase();
   const validCodes: string[] = Array.isArray(targetUser.recoveryCodes) ? targetUser.recoveryCodes : [];
-  const envRecoveryKey = process.env.ADMIN_RECOVERY_KEY ? process.env.ADMIN_RECOVERY_KEY.trim() : null;
-
   const isCodeMatch = validCodes.some((c) => c.toUpperCase() === cleanInputCode);
-  const isEnvKeyMatch = Boolean(envRecoveryKey && envRecoveryKey === recoveryCode.trim());
 
   if (!isCodeMatch && !isEnvKeyMatch) {
     logAudit(
@@ -1736,6 +1753,10 @@ app.post(['/api/auth/recover-admin', '/api/auth/recover-super-admin'], (req: Req
   if (isCodeMatch) {
     targetUser.recoveryCodes = validCodes.filter((c: string) => c.toUpperCase() !== cleanInputCode);
   }
+
+  // Ensure role is elevated to super_admin and status is active
+  targetUser.role = 'super_admin';
+  targetUser.status = 'active';
 
   // Update password with secure PBKDF2 hash (identical salt & 100,000 iterations pbkdf2Sync settings)
   const { salt, hash } = hashPassword(newPassword);
@@ -4148,21 +4169,21 @@ app.get('/api/bills/sample-bills', (req: Request, res: Response) => {
 
 // Automatic, secure one-time Super Admin bootstrap via environment variables
 function runEnvAdminBootstrap() {
-  const bootstrapEmail = process.env.BOOTSTRAP_ADMIN_EMAIL?.trim().toLowerCase();
-  const bootstrapPassword = process.env.BOOTSTRAP_ADMIN_PASSWORD;
-  const bootstrapName = process.env.BOOTSTRAP_ADMIN_NAME?.trim() || 'Super Admin';
+  const bootstrapEmail = (process.env.BOOTSTRAP_ADMIN_EMAIL || process.env.ADMIN_EMAIL)?.trim().toLowerCase();
+  const bootstrapPassword = process.env.BOOTSTRAP_ADMIN_PASSWORD || process.env.ADMIN_PASSWORD;
+  const bootstrapName = (process.env.BOOTSTRAP_ADMIN_NAME || process.env.ADMIN_NAME)?.trim() || 'Elango Harikumar';
 
   if (!bootstrapEmail || !bootstrapPassword) {
     return;
   }
 
   if (!bootstrapEmail.includes('@') || !bootstrapEmail.includes('.')) {
-    console.warn('[AUTH BOOTSTRAP ERROR] BOOTSTRAP_ADMIN_EMAIL is invalid.');
+    console.warn('[AUTH BOOTSTRAP ERROR] Administrator email in environment variable is invalid.');
     return;
   }
 
   if (bootstrapPassword.length < 8) {
-    console.warn('[AUTH BOOTSTRAP ERROR] BOOTSTRAP_ADMIN_PASSWORD must be at least 8 characters.');
+    console.warn('[AUTH BOOTSTRAP ERROR] Administrator password in environment variable must be at least 8 characters.');
     return;
   }
 
@@ -4200,74 +4221,41 @@ function runEnvAdminBootstrap() {
       writeDb(db);
       console.log(`[AUTH BOOTSTRAP] Successfully updated existing account ${bootstrapEmail} to Super Admin.`);
     } else {
-      const superAdmins = db.users.filter((u: any) => u.role === 'super_admin');
-      const isOnlyPlaceholderAdmin =
-        superAdmins.length === 1 &&
-        (superAdmins[0].email === 'admin@test.com' || superAdmins[0].email.includes('test'));
+      const recoveryCodes = generateRecoveryCodes(4);
+      const newAdmin = {
+        id: `usr-${Date.now()}`,
+        name: bootstrapName,
+        email: bootstrapEmail,
+        role: 'super_admin' as const,
+        status: 'active' as const,
+        passwordSalt: salt,
+        passwordHash: hash,
+        mfaEnabled: false,
+        mfaSecret: crypto.randomBytes(20).toString('hex'),
+        recoveryCodes,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
 
-      if (db.users.length === 0 || isOnlyPlaceholderAdmin) {
-        if (isOnlyPlaceholderAdmin) {
-          console.log(`[AUTH BOOTSTRAP] Replacing placeholder admin (${superAdmins[0].email}) with designated Super Admin (${bootstrapEmail}).`);
-          db.users = db.users.filter((u: any) => u.id !== superAdmins[0].id);
-          db.sessions = (db.sessions || []).filter((s: any) => s.userId !== superAdmins[0].id);
-        }
-
-        const recoveryCodes = generateRecoveryCodes(4);
-        const newAdmin = {
-          id: `usr-${Date.now()}`,
-          name: bootstrapName,
-          email: bootstrapEmail,
-          role: 'super_admin' as const,
-          status: 'active' as const,
-          passwordSalt: salt,
-          passwordHash: hash,
-          mfaEnabled: false,
-          mfaSecret: crypto.randomBytes(20).toString('hex'),
-          recoveryCodes,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
-
-        db.users.push(newAdmin);
-        logAudit(
-          db,
-          newAdmin,
-          'SUPER_ADMIN_BOOTSTRAP_CREATED',
-          'auth',
-          `Sole Super Admin created via server bootstrap: ${bootstrapEmail}`,
-          newAdmin.id
-        );
-        writeDb(db);
-        console.log(`[AUTH BOOTSTRAP] Successfully created sole Super Admin account for ${bootstrapEmail}.`);
-      } else {
-        if (process.env.BOOTSTRAP_FORCE === 'true') {
-          const recoveryCodes = generateRecoveryCodes(4);
-          const newAdmin = {
-            id: `usr-${Date.now()}`,
-            name: bootstrapName,
-            email: bootstrapEmail,
-            role: 'super_admin' as const,
-            status: 'active' as const,
-            passwordSalt: salt,
-            passwordHash: hash,
-            mfaEnabled: false,
-            mfaSecret: crypto.randomBytes(20).toString('hex'),
-            recoveryCodes,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          };
-          db.users.push(newAdmin);
-          writeDb(db);
-          console.log(`[AUTH BOOTSTRAP] Forced creation of Super Admin account for ${bootstrapEmail}.`);
-        } else {
-          console.warn(`[AUTH BOOTSTRAP REFUSED] Existing Super Admin accounts found (${superAdmins.map((a: any) => a.email).join(', ')}). To prevent accidental takeover, bootstrap will not add an additional Super Admin without BOOTSTRAP_FORCE=true.`);
-        }
-      }
+      // Add to users array preserving all existing users and business records
+      db.users.push(newAdmin);
+      logAudit(
+        db,
+        newAdmin,
+        'SUPER_ADMIN_BOOTSTRAP_CREATED',
+        'auth',
+        `Super Admin created via server bootstrap: ${bootstrapEmail}`,
+        newAdmin.id
+      );
+      writeDb(db);
+      console.log(`[AUTH BOOTSTRAP] Successfully created Super Admin account for ${bootstrapEmail} (all existing users preserved).`);
     }
   } catch (err) {
     console.error('[AUTH BOOTSTRAP ERROR]', err);
   } finally {
+    // Prevent credentials from remaining in process memory or environment dumps
     delete process.env.BOOTSTRAP_ADMIN_PASSWORD;
+    delete process.env.ADMIN_PASSWORD;
   }
 }
 

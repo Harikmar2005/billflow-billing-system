@@ -15,7 +15,7 @@
     "isGstRegistered": true,
     "gstScheme": "regular",
     "invoicePrefix": "BF/2026-27/",
-    "nextInvoiceNumber": 115,
+    "nextInvoiceNumber": 116,
     "currency": "₹",
     "bankName": "HDFC Bank Ltd",
     "accountNumber": "50200049281734",
@@ -152,10 +152,10 @@
       "stockQuantity": 32,
       "lowStockThreshold": 5,
       "createdAt": "2026-08-12T10:40:44.390Z",
-      "updatedAt": "2026-10-21T13:41:52.987Z",
+      "updatedAt": "2026-10-21T15:11:12.007Z",
       "status": "archived",
       "isHistoricalInvoiceReference": true,
-      "archivedAt": "2026-10-21T13:41:52.937Z"
+      "archivedAt": "2026-10-21T15:11:11.959Z"
     },
     {
       "id": "prod-2",
@@ -171,10 +171,10 @@
       "stockQuantity": 18,
       "lowStockThreshold": 4,
       "createdAt": "2026-08-22T10:40:44.390Z",
-      "updatedAt": "2026-10-21T13:41:52.987Z",
+      "updatedAt": "2026-10-21T15:11:12.007Z",
       "status": "archived",
       "isHistoricalInvoiceReference": true,
-      "archivedAt": "2026-10-21T13:41:52.937Z"
+      "archivedAt": "2026-10-21T15:11:11.959Z"
     },
     {
       "id": "prod-3",
@@ -190,10 +190,10 @@
       "stockQuantity": 3,
       "lowStockThreshold": 5,
       "createdAt": "2026-09-01T10:40:44.390Z",
-      "updatedAt": "2026-10-21T13:41:52.987Z",
+      "updatedAt": "2026-10-21T15:11:12.007Z",
       "status": "archived",
       "isHistoricalInvoiceReference": true,
-      "archivedAt": "2026-10-21T13:41:52.937Z"
+      "archivedAt": "2026-10-21T15:11:11.959Z"
     },
     {
       "id": "prod-4",
@@ -209,10 +209,10 @@
       "stockQuantity": 14,
       "lowStockThreshold": 3,
       "createdAt": "2026-09-01T10:40:44.390Z",
-      "updatedAt": "2026-10-21T13:41:52.987Z",
+      "updatedAt": "2026-10-21T15:11:12.007Z",
       "status": "archived",
       "isHistoricalInvoiceReference": true,
-      "archivedAt": "2026-10-21T13:41:52.937Z"
+      "archivedAt": "2026-10-21T15:11:11.959Z"
     },
     {
       "id": "prod-5",
@@ -228,10 +228,10 @@
       "stockQuantity": 0,
       "lowStockThreshold": 0,
       "createdAt": "2026-09-01T10:40:44.390Z",
-      "updatedAt": "2026-10-21T13:41:52.987Z",
+      "updatedAt": "2026-10-21T15:11:12.007Z",
       "status": "archived",
       "isHistoricalInvoiceReference": true,
-      "archivedAt": "2026-10-21T13:41:52.937Z"
+      "archivedAt": "2026-10-21T15:11:11.959Z"
     },
     {
       "id": "prod-seed-61",
@@ -257,9 +257,9 @@
         }
       ],
       "createdAt": "2026-08-13T13:03:20.209Z",
-      "updatedAt": "2026-10-21T13:41:52.987Z",
+      "updatedAt": "2026-10-21T15:11:12.007Z",
       "isHistoricalInvoiceReference": true,
-      "archivedAt": "2026-10-21T13:41:52.937Z"
+      "archivedAt": "2026-10-21T15:11:11.959Z"
     },
     {
       "id": "prod-seed-95",
@@ -285,9 +285,9 @@
         }
       ],
       "createdAt": "2026-08-13T13:03:20.209Z",
-      "updatedAt": "2026-10-21T13:41:52.987Z",
+      "updatedAt": "2026-10-21T15:11:12.007Z",
       "isHistoricalInvoiceReference": true,
-      "archivedAt": "2026-10-21T13:41:52.937Z"
+      "archivedAt": "2026-10-21T15:11:11.959Z"
     },
     {
       "id": "prod-seed-128",
@@ -313,9 +313,9 @@
         }
       ],
       "createdAt": "2026-08-13T13:03:20.209Z",
-      "updatedAt": "2026-10-21T13:41:52.987Z",
+      "updatedAt": "2026-10-21T15:11:12.007Z",
       "isHistoricalInvoiceReference": true,
-      "archivedAt": "2026-10-21T13:41:52.937Z"
+      "archivedAt": "2026-10-21T15:11:11.959Z"
     },
     {
       "id": "prod-seed-135",
@@ -341,9 +341,9 @@
         }
       ],
       "createdAt": "2026-08-13T13:03:20.209Z",
-      "updatedAt": "2026-10-21T13:41:52.988Z",
+      "updatedAt": "2026-10-21T15:11:12.007Z",
       "isHistoricalInvoiceReference": true,
-      "archivedAt": "2026-10-21T13:41:52.937Z"
+      "archivedAt": "2026-10-21T15:11:11.959Z"
     },
     {
       "id": "prod-seed-136",
@@ -369,9 +369,9 @@
         }
       ],
       "createdAt": "2026-08-13T13:03:20.209Z",
-      "updatedAt": "2026-10-21T13:41:52.988Z",
+      "updatedAt": "2026-10-21T15:11:12.007Z",
       "isHistoricalInvoiceReference": true,
-      "archivedAt": "2026-10-21T13:41:52.937Z"
+      "archivedAt": "2026-10-21T15:11:11.959Z"
     },
     {
       "id": "prod-imp-0002",
@@ -400,9 +400,9 @@
         }
       ],
       "createdAt": "2026-10-19T10:30:14.250Z",
-      "updatedAt": "2026-10-21T13:41:52.988Z",
+      "updatedAt": "2026-10-21T15:11:12.007Z",
       "isHistoricalInvoiceReference": true,
-      "archivedAt": "2026-10-21T13:41:52.937Z"
+      "archivedAt": "2026-10-21T15:11:11.959Z"
     },
     {
       "id": "prod-imp-0002",
@@ -431,9 +431,9 @@
         }
       ],
       "createdAt": "2026-10-19T10:36:13.578Z",
-      "updatedAt": "2026-10-21T13:41:52.988Z",
+      "updatedAt": "2026-10-21T15:11:12.007Z",
       "isHistoricalInvoiceReference": true,
-      "archivedAt": "2026-10-21T13:41:52.937Z"
+      "archivedAt": "2026-10-21T15:11:11.959Z"
     },
     {
       "id": "prod-imp-0002",
@@ -462,9 +462,9 @@
         }
       ],
       "createdAt": "2026-10-19T11:20:09.928Z",
-      "updatedAt": "2026-10-21T13:41:52.988Z",
+      "updatedAt": "2026-10-21T15:11:12.007Z",
       "isHistoricalInvoiceReference": true,
-      "archivedAt": "2026-10-21T13:41:52.937Z"
+      "archivedAt": "2026-10-21T15:11:11.959Z"
     },
     {
       "id": "prod-imp-0002",
@@ -493,9 +493,9 @@
         }
       ],
       "createdAt": "2026-10-19T11:44:13.148Z",
-      "updatedAt": "2026-10-21T13:41:52.988Z",
+      "updatedAt": "2026-10-21T15:11:12.007Z",
       "isHistoricalInvoiceReference": true,
-      "archivedAt": "2026-10-21T13:41:52.937Z"
+      "archivedAt": "2026-10-21T15:11:11.959Z"
     },
     {
       "id": "prod-imp-0002",
@@ -524,9 +524,9 @@
         }
       ],
       "createdAt": "2026-10-20T11:53:18.396Z",
-      "updatedAt": "2026-10-21T13:41:52.988Z",
+      "updatedAt": "2026-10-21T15:11:12.007Z",
       "isHistoricalInvoiceReference": true,
-      "archivedAt": "2026-10-21T13:41:52.937Z"
+      "archivedAt": "2026-10-21T15:11:11.959Z"
     },
     {
       "id": "prod-imp-0002",
@@ -555,9 +555,40 @@
         }
       ],
       "createdAt": "2026-10-20T12:01:03.287Z",
-      "updatedAt": "2026-10-21T13:41:52.988Z",
+      "updatedAt": "2026-10-21T15:11:12.007Z",
       "isHistoricalInvoiceReference": true,
-      "archivedAt": "2026-10-21T13:41:52.937Z"
+      "archivedAt": "2026-10-21T15:11:11.959Z"
+    },
+    {
+      "id": "prod-imp-0002",
+      "sno": 2,
+      "name": "Nylon Lock Nut SS 304 M8 DIN 985",
+      "description": "Nylon Lock Nut SS 304 M8 DIN 985",
+      "type": "product",
+      "sku": "SKU-0002",
+      "hsnSacCode": "8517",
+      "unit": "Pcs",
+      "sellingPrice": 6.2,
+      "purchasePrice": 4.34,
+      "gstRate": 18,
+      "category": "General",
+      "stockQuantity": 100,
+      "lowStockThreshold": 10,
+      "status": "archived",
+      "requiresManualRateVerification": false,
+      "isIncomplete": false,
+      "rateHistory": [
+        {
+          "oldPrice": 6.2,
+          "newPrice": 6.2,
+          "changedAt": "2026-10-21T13:41:52.988Z",
+          "reason": "Imported via replacement catalog"
+        }
+      ],
+      "createdAt": "2026-10-21T13:41:52.988Z",
+      "updatedAt": "2026-10-21T15:11:12.007Z",
+      "isHistoricalInvoiceReference": true,
+      "archivedAt": "2026-10-21T15:11:11.959Z"
     },
     {
       "id": "prod-imp-0001",
@@ -581,12 +612,12 @@
         {
           "oldPrice": 3.5,
           "newPrice": 3.5,
-          "changedAt": "2026-10-21T13:41:52.988Z",
+          "changedAt": "2026-10-21T15:11:12.007Z",
           "reason": "Imported via replacement catalog"
         }
       ],
-      "createdAt": "2026-10-21T13:41:52.988Z",
-      "updatedAt": "2026-10-21T13:41:52.988Z"
+      "createdAt": "2026-10-21T15:11:12.007Z",
+      "updatedAt": "2026-10-21T15:11:12.007Z"
     },
     {
       "id": "prod-imp-0002",
@@ -610,12 +641,12 @@
         {
           "oldPrice": 6.2,
           "newPrice": 6.2,
-          "changedAt": "2026-10-21T13:41:52.988Z",
+          "changedAt": "2026-10-21T15:11:12.007Z",
           "reason": "Imported via replacement catalog"
         }
       ],
-      "createdAt": "2026-10-21T13:41:52.988Z",
-      "updatedAt": "2026-10-21T13:41:52.988Z"
+      "createdAt": "2026-10-21T15:11:12.007Z",
+      "updatedAt": "2026-10-21T15:11:12.007Z"
     },
     {
       "id": "prod-imp-0003",
@@ -640,12 +671,12 @@
         {
           "oldPrice": 0,
           "newPrice": 0,
-          "changedAt": "2026-10-21T13:41:52.988Z",
+          "changedAt": "2026-10-21T15:11:12.007Z",
           "reason": "Imported via replacement catalog"
         }
       ],
-      "createdAt": "2026-10-21T13:41:52.988Z",
-      "updatedAt": "2026-10-21T13:41:52.988Z"
+      "createdAt": "2026-10-21T15:11:12.007Z",
+      "updatedAt": "2026-10-21T15:11:12.007Z"
     },
     {
       "id": "prod-imp-0004",
@@ -669,15 +700,69 @@
         {
           "oldPrice": 4.8,
           "newPrice": 4.8,
-          "changedAt": "2026-10-21T13:41:52.988Z",
+          "changedAt": "2026-10-21T15:11:12.007Z",
           "reason": "Imported via replacement catalog"
         }
       ],
-      "createdAt": "2026-10-21T13:41:52.988Z",
-      "updatedAt": "2026-10-21T13:41:52.988Z"
+      "createdAt": "2026-10-21T15:11:12.007Z",
+      "updatedAt": "2026-10-21T15:11:12.007Z"
     }
   ],
   "invoices": [
+    {
+      "id": "inv-1792595472026",
+      "customerId": "cust-1791813189046",
+      "customerName": "Client To Archive",
+      "customerPhone": "+91 98888 22222",
+      "customerEmail": "",
+      "customerGstin": "",
+      "billingAddress": "",
+      "placeOfSupply": "Karnataka",
+      "placeOfSupplyCode": "27",
+      "isInterState": false,
+      "invoiceDate": "2026-10-21",
+      "dueDate": "2026-11-04",
+      "items": [
+        {
+          "id": "item-test-1792595472021",
+          "productId": "prod-imp-0002",
+          "productName": "Nylon Lock Nut SS 304 M8 DIN 985",
+          "type": "product",
+          "hsnSac": "8517",
+          "quantity": 50,
+          "unit": "Pcs",
+          "unitPrice": 6.2,
+          "discountPercent": 0,
+          "discountAmount": 0,
+          "isTaxInclusive": false,
+          "taxableAmount": 310,
+          "gstRate": 18,
+          "cgstRate": 9,
+          "cgstAmount": 27.9,
+          "sgstRate": 9,
+          "sgstAmount": 27.9,
+          "igstRate": 0,
+          "igstAmount": 0,
+          "totalAmount": 365.8
+        }
+      ],
+      "subtotal": 310,
+      "totalDiscount": 0,
+      "totalTaxableAmount": 310,
+      "totalCgst": 27.9,
+      "totalSgst": 27.9,
+      "totalIgst": 0,
+      "totalTax": 55.8,
+      "roundOff": 0,
+      "totalAmount": 365.8,
+      "amountPaid": 0,
+      "balanceDue": 365.8,
+      "status": "issued",
+      "invoiceNumber": "BF/2026-27/115",
+      "paymentStatus": "unpaid",
+      "createdAt": "2026-10-21T15:11:12.026Z",
+      "updatedAt": "2026-10-21T15:11:12.026Z"
+    },
     {
       "id": "inv-1792590113006",
       "customerId": "cust-1791813189046",
@@ -1577,6 +1662,18 @@
   ],
   "inventoryMovements": [
     {
+      "id": "mov-1792595472026-prod-imp-0002",
+      "productId": "prod-imp-0002",
+      "productName": "Nylon Lock Nut SS 304 M8 DIN 985",
+      "type": "sale",
+      "quantity": -50,
+      "previousStock": 0,
+      "newStock": 0,
+      "referenceId": "BF/2026-27/115",
+      "reason": "Invoice BF/2026-27/115 issued",
+      "createdAt": "2026-10-21T15:11:12.026Z"
+    },
+    {
       "id": "mov-1792590113006-prod-imp-0002",
       "productId": "prod-imp-0002",
       "productName": "Nylon Lock Nut SS 304 M8 DIN 985",
@@ -1734,6 +1831,1012 @@
     }
   ],
   "productBackups": [
+    {
+      "id": "backup-1792595472007",
+      "timestamp": "2026-10-21T15:11:12.007Z",
+      "note": "Import user catalog after clearing defaults",
+      "productCount": 17,
+      "products": [
+        {
+          "id": "prod-1",
+          "name": "Enterprise Router Dual-Band AC1200",
+          "type": "product",
+          "sku": "RTR-AC1200",
+          "hsnSacCode": "8517",
+          "description": "High-throughput gigabit router with VPN tunnel support",
+          "unit": "Pcs",
+          "sellingPrice": 4500,
+          "purchasePrice": 3200,
+          "gstRate": 18,
+          "stockQuantity": 32,
+          "lowStockThreshold": 5,
+          "createdAt": "2026-08-12T10:40:44.390Z",
+          "updatedAt": "2026-10-21T15:11:11.959Z",
+          "status": "archived",
+          "isHistoricalInvoiceReference": true,
+          "archivedAt": "2026-10-21T15:11:11.959Z"
+        },
+        {
+          "id": "prod-2",
+          "name": "Cat6 Shielded Ethernet Spool (305m)",
+          "type": "product",
+          "sku": "CBL-CAT6-305",
+          "hsnSacCode": "8544",
+          "description": "Pure copper 23AWG high-speed network cable reel",
+          "unit": "Box",
+          "sellingPrice": 6800,
+          "purchasePrice": 4900,
+          "gstRate": 18,
+          "stockQuantity": 18,
+          "lowStockThreshold": 4,
+          "createdAt": "2026-08-22T10:40:44.390Z",
+          "updatedAt": "2026-10-21T15:11:11.959Z",
+          "status": "archived",
+          "isHistoricalInvoiceReference": true,
+          "archivedAt": "2026-10-21T15:11:11.959Z"
+        },
+        {
+          "id": "prod-3",
+          "name": "CCTV Surveillance Camera 4MP IP PoE",
+          "type": "product",
+          "sku": "CAM-4MP-POE",
+          "hsnSacCode": "8525",
+          "description": "Night vision IR weatherproof bullet camera",
+          "unit": "Pcs",
+          "sellingPrice": 2400,
+          "purchasePrice": 1700,
+          "gstRate": 18,
+          "stockQuantity": 3,
+          "lowStockThreshold": 5,
+          "createdAt": "2026-09-01T10:40:44.390Z",
+          "updatedAt": "2026-10-21T15:11:11.959Z",
+          "status": "archived",
+          "isHistoricalInvoiceReference": true,
+          "archivedAt": "2026-10-21T15:11:11.959Z"
+        },
+        {
+          "id": "prod-4",
+          "name": "Biometric Attendance & Access Terminal",
+          "type": "product",
+          "sku": "BIO-ATT-900",
+          "hsnSacCode": "8471",
+          "description": "Fingerprint + RFID cloud connected employee attendance unit",
+          "unit": "Pcs",
+          "sellingPrice": 8900,
+          "purchasePrice": 6400,
+          "gstRate": 18,
+          "stockQuantity": 14,
+          "lowStockThreshold": 3,
+          "createdAt": "2026-09-01T10:40:44.390Z",
+          "updatedAt": "2026-10-21T15:11:11.959Z",
+          "status": "archived",
+          "isHistoricalInvoiceReference": true,
+          "archivedAt": "2026-10-21T15:11:11.959Z"
+        },
+        {
+          "id": "prod-5",
+          "name": "Network Infrastructure Setup & Security Audit",
+          "type": "service",
+          "sku": "SRV-NET-AUDIT",
+          "hsnSacCode": "998313",
+          "description": "Onsite structured cabling, firewall configuration, and vulnerability scan",
+          "unit": "Set",
+          "sellingPrice": 25000,
+          "purchasePrice": 0,
+          "gstRate": 18,
+          "stockQuantity": 0,
+          "lowStockThreshold": 0,
+          "createdAt": "2026-09-01T10:40:44.390Z",
+          "updatedAt": "2026-10-21T15:11:11.959Z",
+          "status": "archived",
+          "isHistoricalInvoiceReference": true,
+          "archivedAt": "2026-10-21T15:11:11.959Z"
+        },
+        {
+          "id": "prod-seed-61",
+          "name": "Angle Grinder 4-Inch 850W Heavy Duty 11000 RPM",
+          "sku": "JET-TL-001",
+          "type": "product",
+          "hsnSacCode": "84672900",
+          "description": "Compact metal cutting & grinding machine with auxiliary handle",
+          "unit": "Pcs",
+          "sellingPrice": 2200,
+          "purchasePrice": 1550,
+          "gstRate": 18,
+          "category": "Industrial Tools",
+          "stockQuantity": 28,
+          "lowStockThreshold": 5,
+          "status": "archived",
+          "rateHistory": [
+            {
+              "oldPrice": 2200,
+              "newPrice": 2200,
+              "changedAt": "2026-09-12T13:03:20.209Z",
+              "reason": "Initial master catalog rate setup"
+            }
+          ],
+          "createdAt": "2026-08-13T13:03:20.209Z",
+          "updatedAt": "2026-10-21T15:11:11.959Z",
+          "isHistoricalInvoiceReference": true,
+          "archivedAt": "2026-10-21T15:11:11.959Z"
+        },
+        {
+          "id": "prod-seed-95",
+          "name": "24-Port Gigabit PoE Managed Network Switch Rackmount",
+          "sku": "SW-POE-24G",
+          "type": "product",
+          "hsnSacCode": "85176290",
+          "description": "370W total PoE budget smart managed Layer-2 switch with 2 SFP fiber ports",
+          "unit": "Pcs",
+          "sellingPrice": 18500,
+          "purchasePrice": 13900,
+          "gstRate": 18,
+          "category": "IT & Networking",
+          "stockQuantity": 9,
+          "lowStockThreshold": 2,
+          "status": "archived",
+          "rateHistory": [
+            {
+              "oldPrice": 18500,
+              "newPrice": 18500,
+              "changedAt": "2026-09-12T13:03:20.209Z",
+              "reason": "Initial master catalog rate setup"
+            }
+          ],
+          "createdAt": "2026-08-13T13:03:20.209Z",
+          "updatedAt": "2026-10-21T15:11:11.959Z",
+          "isHistoricalInvoiceReference": true,
+          "archivedAt": "2026-10-21T15:11:11.959Z"
+        },
+        {
+          "id": "prod-seed-128",
+          "name": "Allen Socket Head Cap Screw SS 304 DIN 912 (M4 x 20mm)",
+          "sku": "JET-SCK-002",
+          "type": "product",
+          "hsnSacCode": "73181500",
+          "description": "Standard commercial grade allen socket head cap screw ss 304 din 912 specification M4 x 20mm",
+          "unit": "Pcs",
+          "sellingPrice": 5.6,
+          "purchasePrice": 3.9,
+          "gstRate": 18,
+          "category": "Fasteners & Hardware",
+          "stockQuantity": 1200,
+          "lowStockThreshold": 180,
+          "status": "archived",
+          "rateHistory": [
+            {
+              "oldPrice": 5.6,
+              "newPrice": 5.6,
+              "changedAt": "2026-09-12T13:03:20.209Z",
+              "reason": "Initial master catalog rate setup"
+            }
+          ],
+          "createdAt": "2026-08-13T13:03:20.209Z",
+          "updatedAt": "2026-10-21T15:11:11.959Z",
+          "isHistoricalInvoiceReference": true,
+          "archivedAt": "2026-10-21T15:11:11.959Z"
+        },
+        {
+          "id": "prod-seed-135",
+          "name": "Allen Socket Head Cap Screw SS 304 DIN 912 (M8 x 35mm)",
+          "sku": "JET-SCK-009",
+          "type": "product",
+          "hsnSacCode": "73181500",
+          "description": "Standard commercial grade allen socket head cap screw ss 304 din 912 specification M8 x 35mm",
+          "unit": "Pcs",
+          "sellingPrice": 24.8,
+          "purchasePrice": 17.4,
+          "gstRate": 18,
+          "category": "Fasteners & Hardware",
+          "stockQuantity": 601,
+          "lowStockThreshold": 90,
+          "status": "archived",
+          "rateHistory": [
+            {
+              "oldPrice": 24.8,
+              "newPrice": 24.8,
+              "changedAt": "2026-09-12T13:03:20.209Z",
+              "reason": "Initial master catalog rate setup"
+            }
+          ],
+          "createdAt": "2026-08-13T13:03:20.209Z",
+          "updatedAt": "2026-10-21T15:11:11.959Z",
+          "isHistoricalInvoiceReference": true,
+          "archivedAt": "2026-10-21T15:11:11.959Z"
+        },
+        {
+          "id": "prod-seed-136",
+          "name": "Allen Socket Head Cap Screw SS 304 DIN 912 (M8 x 50mm)",
+          "sku": "JET-SCK-010",
+          "type": "product",
+          "hsnSacCode": "73181500",
+          "description": "Standard commercial grade allen socket head cap screw ss 304 din 912 specification M8 x 50mm",
+          "unit": "Pcs",
+          "sellingPrice": 30.4,
+          "purchasePrice": 21.3,
+          "gstRate": 18,
+          "category": "Fasteners & Hardware",
+          "stockQuantity": 500,
+          "lowStockThreshold": 75,
+          "status": "archived",
+          "rateHistory": [
+            {
+              "oldPrice": 30.4,
+              "newPrice": 30.4,
+              "changedAt": "2026-09-12T13:03:20.209Z",
+              "reason": "Initial master catalog rate setup"
+            }
+          ],
+          "createdAt": "2026-08-13T13:03:20.209Z",
+          "updatedAt": "2026-10-21T15:11:11.959Z",
+          "isHistoricalInvoiceReference": true,
+          "archivedAt": "2026-10-21T15:11:11.959Z"
+        },
+        {
+          "id": "prod-imp-0002",
+          "sno": 2,
+          "name": "Nylon Lock Nut SS 304 M8 DIN 985",
+          "description": "Nylon Lock Nut SS 304 M8 DIN 985",
+          "type": "product",
+          "sku": "SKU-0002",
+          "hsnSacCode": "8517",
+          "unit": "Pcs",
+          "sellingPrice": 6.2,
+          "purchasePrice": 4.34,
+          "gstRate": 18,
+          "category": "General",
+          "stockQuantity": 0,
+          "lowStockThreshold": 10,
+          "status": "archived",
+          "requiresManualRateVerification": false,
+          "isIncomplete": false,
+          "rateHistory": [
+            {
+              "oldPrice": 6.2,
+              "newPrice": 6.2,
+              "changedAt": "2026-10-19T10:30:14.249Z",
+              "reason": "Imported via replacement catalog"
+            }
+          ],
+          "createdAt": "2026-10-19T10:30:14.250Z",
+          "updatedAt": "2026-10-21T15:11:11.959Z",
+          "isHistoricalInvoiceReference": true,
+          "archivedAt": "2026-10-21T15:11:11.959Z"
+        },
+        {
+          "id": "prod-imp-0002",
+          "sno": 2,
+          "name": "Nylon Lock Nut SS 304 M8 DIN 985",
+          "description": "Nylon Lock Nut SS 304 M8 DIN 985",
+          "type": "product",
+          "sku": "SKU-0002",
+          "hsnSacCode": "8517",
+          "unit": "Pcs",
+          "sellingPrice": 6.2,
+          "purchasePrice": 4.34,
+          "gstRate": 18,
+          "category": "General",
+          "stockQuantity": 100,
+          "lowStockThreshold": 10,
+          "status": "archived",
+          "requiresManualRateVerification": false,
+          "isIncomplete": false,
+          "rateHistory": [
+            {
+              "oldPrice": 6.2,
+              "newPrice": 6.2,
+              "changedAt": "2026-10-19T10:36:13.578Z",
+              "reason": "Imported via replacement catalog"
+            }
+          ],
+          "createdAt": "2026-10-19T10:36:13.578Z",
+          "updatedAt": "2026-10-21T15:11:11.959Z",
+          "isHistoricalInvoiceReference": true,
+          "archivedAt": "2026-10-21T15:11:11.959Z"
+        },
+        {
+          "id": "prod-imp-0002",
+          "sno": 2,
+          "name": "Nylon Lock Nut SS 304 M8 DIN 985",
+          "description": "Nylon Lock Nut SS 304 M8 DIN 985",
+          "type": "product",
+          "sku": "SKU-0002",
+          "hsnSacCode": "8517",
+          "unit": "Pcs",
+          "sellingPrice": 6.2,
+          "purchasePrice": 4.34,
+          "gstRate": 18,
+          "category": "General",
+          "stockQuantity": 100,
+          "lowStockThreshold": 10,
+          "status": "archived",
+          "requiresManualRateVerification": false,
+          "isIncomplete": false,
+          "rateHistory": [
+            {
+              "oldPrice": 6.2,
+              "newPrice": 6.2,
+              "changedAt": "2026-10-19T11:20:09.928Z",
+              "reason": "Imported via replacement catalog"
+            }
+          ],
+          "createdAt": "2026-10-19T11:20:09.928Z",
+          "updatedAt": "2026-10-21T15:11:11.959Z",
+          "isHistoricalInvoiceReference": true,
+          "archivedAt": "2026-10-21T15:11:11.959Z"
+        },
+        {
+          "id": "prod-imp-0002",
+          "sno": 2,
+          "name": "Nylon Lock Nut SS 304 M8 DIN 985",
+          "description": "Nylon Lock Nut SS 304 M8 DIN 985",
+          "type": "product",
+          "sku": "SKU-0002",
+          "hsnSacCode": "8517",
+          "unit": "Pcs",
+          "sellingPrice": 6.2,
+          "purchasePrice": 4.34,
+          "gstRate": 18,
+          "category": "General",
+          "stockQuantity": 100,
+          "lowStockThreshold": 10,
+          "status": "archived",
+          "requiresManualRateVerification": false,
+          "isIncomplete": false,
+          "rateHistory": [
+            {
+              "oldPrice": 6.2,
+              "newPrice": 6.2,
+              "changedAt": "2026-10-19T11:44:13.148Z",
+              "reason": "Imported via replacement catalog"
+            }
+          ],
+          "createdAt": "2026-10-19T11:44:13.148Z",
+          "updatedAt": "2026-10-21T15:11:11.959Z",
+          "isHistoricalInvoiceReference": true,
+          "archivedAt": "2026-10-21T15:11:11.959Z"
+        },
+        {
+          "id": "prod-imp-0002",
+          "sno": 2,
+          "name": "Nylon Lock Nut SS 304 M8 DIN 985",
+          "description": "Nylon Lock Nut SS 304 M8 DIN 985",
+          "type": "product",
+          "sku": "SKU-0002",
+          "hsnSacCode": "8517",
+          "unit": "Pcs",
+          "sellingPrice": 6.2,
+          "purchasePrice": 4.34,
+          "gstRate": 18,
+          "category": "General",
+          "stockQuantity": 100,
+          "lowStockThreshold": 10,
+          "status": "archived",
+          "requiresManualRateVerification": false,
+          "isIncomplete": false,
+          "rateHistory": [
+            {
+              "oldPrice": 6.2,
+              "newPrice": 6.2,
+              "changedAt": "2026-10-20T11:53:18.396Z",
+              "reason": "Imported via replacement catalog"
+            }
+          ],
+          "createdAt": "2026-10-20T11:53:18.396Z",
+          "updatedAt": "2026-10-21T15:11:11.959Z",
+          "isHistoricalInvoiceReference": true,
+          "archivedAt": "2026-10-21T15:11:11.959Z"
+        },
+        {
+          "id": "prod-imp-0002",
+          "sno": 2,
+          "name": "Nylon Lock Nut SS 304 M8 DIN 985",
+          "description": "Nylon Lock Nut SS 304 M8 DIN 985",
+          "type": "product",
+          "sku": "SKU-0002",
+          "hsnSacCode": "8517",
+          "unit": "Pcs",
+          "sellingPrice": 6.2,
+          "purchasePrice": 4.34,
+          "gstRate": 18,
+          "category": "General",
+          "stockQuantity": 100,
+          "lowStockThreshold": 10,
+          "status": "archived",
+          "requiresManualRateVerification": false,
+          "isIncomplete": false,
+          "rateHistory": [
+            {
+              "oldPrice": 6.2,
+              "newPrice": 6.2,
+              "changedAt": "2026-10-20T12:01:03.287Z",
+              "reason": "Imported via replacement catalog"
+            }
+          ],
+          "createdAt": "2026-10-20T12:01:03.287Z",
+          "updatedAt": "2026-10-21T15:11:11.959Z",
+          "isHistoricalInvoiceReference": true,
+          "archivedAt": "2026-10-21T15:11:11.959Z"
+        },
+        {
+          "id": "prod-imp-0002",
+          "sno": 2,
+          "name": "Nylon Lock Nut SS 304 M8 DIN 985",
+          "description": "Nylon Lock Nut SS 304 M8 DIN 985",
+          "type": "product",
+          "sku": "SKU-0002",
+          "hsnSacCode": "8517",
+          "unit": "Pcs",
+          "sellingPrice": 6.2,
+          "purchasePrice": 4.34,
+          "gstRate": 18,
+          "category": "General",
+          "stockQuantity": 100,
+          "lowStockThreshold": 10,
+          "status": "archived",
+          "requiresManualRateVerification": false,
+          "isIncomplete": false,
+          "rateHistory": [
+            {
+              "oldPrice": 6.2,
+              "newPrice": 6.2,
+              "changedAt": "2026-10-21T13:41:52.988Z",
+              "reason": "Imported via replacement catalog"
+            }
+          ],
+          "createdAt": "2026-10-21T13:41:52.988Z",
+          "updatedAt": "2026-10-21T15:11:11.959Z",
+          "isHistoricalInvoiceReference": true,
+          "archivedAt": "2026-10-21T15:11:11.959Z"
+        }
+      ]
+    },
+    {
+      "id": "backup-1792595471958",
+      "timestamp": "2026-10-21T15:11:11.958Z",
+      "note": "Automated test backup before clearing inventory",
+      "productCount": 20,
+      "products": [
+        {
+          "id": "prod-1",
+          "name": "Enterprise Router Dual-Band AC1200",
+          "type": "product",
+          "sku": "RTR-AC1200",
+          "hsnSacCode": "8517",
+          "description": "High-throughput gigabit router with VPN tunnel support",
+          "unit": "Pcs",
+          "sellingPrice": 4500,
+          "purchasePrice": 3200,
+          "gstRate": 18,
+          "stockQuantity": 32,
+          "lowStockThreshold": 5,
+          "createdAt": "2026-08-12T10:40:44.390Z",
+          "updatedAt": "2026-10-21T13:41:52.987Z",
+          "status": "archived",
+          "isHistoricalInvoiceReference": true,
+          "archivedAt": "2026-10-21T13:41:52.937Z"
+        },
+        {
+          "id": "prod-2",
+          "name": "Cat6 Shielded Ethernet Spool (305m)",
+          "type": "product",
+          "sku": "CBL-CAT6-305",
+          "hsnSacCode": "8544",
+          "description": "Pure copper 23AWG high-speed network cable reel",
+          "unit": "Box",
+          "sellingPrice": 6800,
+          "purchasePrice": 4900,
+          "gstRate": 18,
+          "stockQuantity": 18,
+          "lowStockThreshold": 4,
+          "createdAt": "2026-08-22T10:40:44.390Z",
+          "updatedAt": "2026-10-21T13:41:52.987Z",
+          "status": "archived",
+          "isHistoricalInvoiceReference": true,
+          "archivedAt": "2026-10-21T13:41:52.937Z"
+        },
+        {
+          "id": "prod-3",
+          "name": "CCTV Surveillance Camera 4MP IP PoE",
+          "type": "product",
+          "sku": "CAM-4MP-POE",
+          "hsnSacCode": "8525",
+          "description": "Night vision IR weatherproof bullet camera",
+          "unit": "Pcs",
+          "sellingPrice": 2400,
+          "purchasePrice": 1700,
+          "gstRate": 18,
+          "stockQuantity": 3,
+          "lowStockThreshold": 5,
+          "createdAt": "2026-09-01T10:40:44.390Z",
+          "updatedAt": "2026-10-21T13:41:52.987Z",
+          "status": "archived",
+          "isHistoricalInvoiceReference": true,
+          "archivedAt": "2026-10-21T13:41:52.937Z"
+        },
+        {
+          "id": "prod-4",
+          "name": "Biometric Attendance & Access Terminal",
+          "type": "product",
+          "sku": "BIO-ATT-900",
+          "hsnSacCode": "8471",
+          "description": "Fingerprint + RFID cloud connected employee attendance unit",
+          "unit": "Pcs",
+          "sellingPrice": 8900,
+          "purchasePrice": 6400,
+          "gstRate": 18,
+          "stockQuantity": 14,
+          "lowStockThreshold": 3,
+          "createdAt": "2026-09-01T10:40:44.390Z",
+          "updatedAt": "2026-10-21T13:41:52.987Z",
+          "status": "archived",
+          "isHistoricalInvoiceReference": true,
+          "archivedAt": "2026-10-21T13:41:52.937Z"
+        },
+        {
+          "id": "prod-5",
+          "name": "Network Infrastructure Setup & Security Audit",
+          "type": "service",
+          "sku": "SRV-NET-AUDIT",
+          "hsnSacCode": "998313",
+          "description": "Onsite structured cabling, firewall configuration, and vulnerability scan",
+          "unit": "Set",
+          "sellingPrice": 25000,
+          "purchasePrice": 0,
+          "gstRate": 18,
+          "stockQuantity": 0,
+          "lowStockThreshold": 0,
+          "createdAt": "2026-09-01T10:40:44.390Z",
+          "updatedAt": "2026-10-21T13:41:52.987Z",
+          "status": "archived",
+          "isHistoricalInvoiceReference": true,
+          "archivedAt": "2026-10-21T13:41:52.937Z"
+        },
+        {
+          "id": "prod-seed-61",
+          "name": "Angle Grinder 4-Inch 850W Heavy Duty 11000 RPM",
+          "sku": "JET-TL-001",
+          "type": "product",
+          "hsnSacCode": "84672900",
+          "description": "Compact metal cutting & grinding machine with auxiliary handle",
+          "unit": "Pcs",
+          "sellingPrice": 2200,
+          "purchasePrice": 1550,
+          "gstRate": 18,
+          "category": "Industrial Tools",
+          "stockQuantity": 28,
+          "lowStockThreshold": 5,
+          "status": "archived",
+          "rateHistory": [
+            {
+              "oldPrice": 2200,
+              "newPrice": 2200,
+              "changedAt": "2026-09-12T13:03:20.209Z",
+              "reason": "Initial master catalog rate setup"
+            }
+          ],
+          "createdAt": "2026-08-13T13:03:20.209Z",
+          "updatedAt": "2026-10-21T13:41:52.987Z",
+          "isHistoricalInvoiceReference": true,
+          "archivedAt": "2026-10-21T13:41:52.937Z"
+        },
+        {
+          "id": "prod-seed-95",
+          "name": "24-Port Gigabit PoE Managed Network Switch Rackmount",
+          "sku": "SW-POE-24G",
+          "type": "product",
+          "hsnSacCode": "85176290",
+          "description": "370W total PoE budget smart managed Layer-2 switch with 2 SFP fiber ports",
+          "unit": "Pcs",
+          "sellingPrice": 18500,
+          "purchasePrice": 13900,
+          "gstRate": 18,
+          "category": "IT & Networking",
+          "stockQuantity": 9,
+          "lowStockThreshold": 2,
+          "status": "archived",
+          "rateHistory": [
+            {
+              "oldPrice": 18500,
+              "newPrice": 18500,
+              "changedAt": "2026-09-12T13:03:20.209Z",
+              "reason": "Initial master catalog rate setup"
+            }
+          ],
+          "createdAt": "2026-08-13T13:03:20.209Z",
+          "updatedAt": "2026-10-21T13:41:52.987Z",
+          "isHistoricalInvoiceReference": true,
+          "archivedAt": "2026-10-21T13:41:52.937Z"
+        },
+        {
+          "id": "prod-seed-128",
+          "name": "Allen Socket Head Cap Screw SS 304 DIN 912 (M4 x 20mm)",
+          "sku": "JET-SCK-002",
+          "type": "product",
+          "hsnSacCode": "73181500",
+          "description": "Standard commercial grade allen socket head cap screw ss 304 din 912 specification M4 x 20mm",
+          "unit": "Pcs",
+          "sellingPrice": 5.6,
+          "purchasePrice": 3.9,
+          "gstRate": 18,
+          "category": "Fasteners & Hardware",
+          "stockQuantity": 1200,
+          "lowStockThreshold": 180,
+          "status": "archived",
+          "rateHistory": [
+            {
+              "oldPrice": 5.6,
+              "newPrice": 5.6,
+              "changedAt": "2026-09-12T13:03:20.209Z",
+              "reason": "Initial master catalog rate setup"
+            }
+          ],
+          "createdAt": "2026-08-13T13:03:20.209Z",
+          "updatedAt": "2026-10-21T13:41:52.987Z",
+          "isHistoricalInvoiceReference": true,
+          "archivedAt": "2026-10-21T13:41:52.937Z"
+        },
+        {
+          "id": "prod-seed-135",
+          "name": "Allen Socket Head Cap Screw SS 304 DIN 912 (M8 x 35mm)",
+          "sku": "JET-SCK-009",
+          "type": "product",
+          "hsnSacCode": "73181500",
+          "description": "Standard commercial grade allen socket head cap screw ss 304 din 912 specification M8 x 35mm",
+          "unit": "Pcs",
+          "sellingPrice": 24.8,
+          "purchasePrice": 17.4,
+          "gstRate": 18,
+          "category": "Fasteners & Hardware",
+          "stockQuantity": 601,
+          "lowStockThreshold": 90,
+          "status": "archived",
+          "rateHistory": [
+            {
+              "oldPrice": 24.8,
+              "newPrice": 24.8,
+              "changedAt": "2026-09-12T13:03:20.209Z",
+              "reason": "Initial master catalog rate setup"
+            }
+          ],
+          "createdAt": "2026-08-13T13:03:20.209Z",
+          "updatedAt": "2026-10-21T13:41:52.988Z",
+          "isHistoricalInvoiceReference": true,
+          "archivedAt": "2026-10-21T13:41:52.937Z"
+        },
+        {
+          "id": "prod-seed-136",
+          "name": "Allen Socket Head Cap Screw SS 304 DIN 912 (M8 x 50mm)",
+          "sku": "JET-SCK-010",
+          "type": "product",
+          "hsnSacCode": "73181500",
+          "description": "Standard commercial grade allen socket head cap screw ss 304 din 912 specification M8 x 50mm",
+          "unit": "Pcs",
+          "sellingPrice": 30.4,
+          "purchasePrice": 21.3,
+          "gstRate": 18,
+          "category": "Fasteners & Hardware",
+          "stockQuantity": 500,
+          "lowStockThreshold": 75,
+          "status": "archived",
+          "rateHistory": [
+            {
+              "oldPrice": 30.4,
+              "newPrice": 30.4,
+              "changedAt": "2026-09-12T13:03:20.209Z",
+              "reason": "Initial master catalog rate setup"
+            }
+          ],
+          "createdAt": "2026-08-13T13:03:20.209Z",
+          "updatedAt": "2026-10-21T13:41:52.988Z",
+          "isHistoricalInvoiceReference": true,
+          "archivedAt": "2026-10-21T13:41:52.937Z"
+        },
+        {
+          "id": "prod-imp-0002",
+          "sno": 2,
+          "name": "Nylon Lock Nut SS 304 M8 DIN 985",
+          "description": "Nylon Lock Nut SS 304 M8 DIN 985",
+          "type": "product",
+          "sku": "SKU-0002",
+          "hsnSacCode": "8517",
+          "unit": "Pcs",
+          "sellingPrice": 6.2,
+          "purchasePrice": 4.34,
+          "gstRate": 18,
+          "category": "General",
+          "stockQuantity": 0,
+          "lowStockThreshold": 10,
+          "status": "archived",
+          "requiresManualRateVerification": false,
+          "isIncomplete": false,
+          "rateHistory": [
+            {
+              "oldPrice": 6.2,
+              "newPrice": 6.2,
+              "changedAt": "2026-10-19T10:30:14.249Z",
+              "reason": "Imported via replacement catalog"
+            }
+          ],
+          "createdAt": "2026-10-19T10:30:14.250Z",
+          "updatedAt": "2026-10-21T13:41:52.988Z",
+          "isHistoricalInvoiceReference": true,
+          "archivedAt": "2026-10-21T13:41:52.937Z"
+        },
+        {
+          "id": "prod-imp-0002",
+          "sno": 2,
+          "name": "Nylon Lock Nut SS 304 M8 DIN 985",
+          "description": "Nylon Lock Nut SS 304 M8 DIN 985",
+          "type": "product",
+          "sku": "SKU-0002",
+          "hsnSacCode": "8517",
+          "unit": "Pcs",
+          "sellingPrice": 6.2,
+          "purchasePrice": 4.34,
+          "gstRate": 18,
+          "category": "General",
+          "stockQuantity": 100,
+          "lowStockThreshold": 10,
+          "status": "archived",
+          "requiresManualRateVerification": false,
+          "isIncomplete": false,
+          "rateHistory": [
+            {
+              "oldPrice": 6.2,
+              "newPrice": 6.2,
+              "changedAt": "2026-10-19T10:36:13.578Z",
+              "reason": "Imported via replacement catalog"
+            }
+          ],
+          "createdAt": "2026-10-19T10:36:13.578Z",
+          "updatedAt": "2026-10-21T13:41:52.988Z",
+          "isHistoricalInvoiceReference": true,
+          "archivedAt": "2026-10-21T13:41:52.937Z"
+        },
+        {
+          "id": "prod-imp-0002",
+          "sno": 2,
+          "name": "Nylon Lock Nut SS 304 M8 DIN 985",
+          "description": "Nylon Lock Nut SS 304 M8 DIN 985",
+          "type": "product",
+          "sku": "SKU-0002",
+          "hsnSacCode": "8517",
+          "unit": "Pcs",
+          "sellingPrice": 6.2,
+          "purchasePrice": 4.34,
+          "gstRate": 18,
+          "category": "General",
+          "stockQuantity": 100,
+          "lowStockThreshold": 10,
+          "status": "archived",
+          "requiresManualRateVerification": false,
+          "isIncomplete": false,
+          "rateHistory": [
+            {
+              "oldPrice": 6.2,
+              "newPrice": 6.2,
+              "changedAt": "2026-10-19T11:20:09.928Z",
+              "reason": "Imported via replacement catalog"
+            }
+          ],
+          "createdAt": "2026-10-19T11:20:09.928Z",
+          "updatedAt": "2026-10-21T13:41:52.988Z",
+          "isHistoricalInvoiceReference": true,
+          "archivedAt": "2026-10-21T13:41:52.937Z"
+        },
+        {
+          "id": "prod-imp-0002",
+          "sno": 2,
+          "name": "Nylon Lock Nut SS 304 M8 DIN 985",
+          "description": "Nylon Lock Nut SS 304 M8 DIN 985",
+          "type": "product",
+          "sku": "SKU-0002",
+          "hsnSacCode": "8517",
+          "unit": "Pcs",
+          "sellingPrice": 6.2,
+          "purchasePrice": 4.34,
+          "gstRate": 18,
+          "category": "General",
+          "stockQuantity": 100,
+          "lowStockThreshold": 10,
+          "status": "archived",
+          "requiresManualRateVerification": false,
+          "isIncomplete": false,
+          "rateHistory": [
+            {
+              "oldPrice": 6.2,
+              "newPrice": 6.2,
+              "changedAt": "2026-10-19T11:44:13.148Z",
+              "reason": "Imported via replacement catalog"
+            }
+          ],
+          "createdAt": "2026-10-19T11:44:13.148Z",
+          "updatedAt": "2026-10-21T13:41:52.988Z",
+          "isHistoricalInvoiceReference": true,
+          "archivedAt": "2026-10-21T13:41:52.937Z"
+        },
+        {
+          "id": "prod-imp-0002",
+          "sno": 2,
+          "name": "Nylon Lock Nut SS 304 M8 DIN 985",
+          "description": "Nylon Lock Nut SS 304 M8 DIN 985",
+          "type": "product",
+          "sku": "SKU-0002",
+          "hsnSacCode": "8517",
+          "unit": "Pcs",
+          "sellingPrice": 6.2,
+          "purchasePrice": 4.34,
+          "gstRate": 18,
+          "category": "General",
+          "stockQuantity": 100,
+          "lowStockThreshold": 10,
+          "status": "archived",
+          "requiresManualRateVerification": false,
+          "isIncomplete": false,
+          "rateHistory": [
+            {
+              "oldPrice": 6.2,
+              "newPrice": 6.2,
+              "changedAt": "2026-10-20T11:53:18.396Z",
+              "reason": "Imported via replacement catalog"
+            }
+          ],
+          "createdAt": "2026-10-20T11:53:18.396Z",
+          "updatedAt": "2026-10-21T13:41:52.988Z",
+          "isHistoricalInvoiceReference": true,
+          "archivedAt": "2026-10-21T13:41:52.937Z"
+        },
+        {
+          "id": "prod-imp-0002",
+          "sno": 2,
+          "name": "Nylon Lock Nut SS 304 M8 DIN 985",
+          "description": "Nylon Lock Nut SS 304 M8 DIN 985",
+          "type": "product",
+          "sku": "SKU-0002",
+          "hsnSacCode": "8517",
+          "unit": "Pcs",
+          "sellingPrice": 6.2,
+          "purchasePrice": 4.34,
+          "gstRate": 18,
+          "category": "General",
+          "stockQuantity": 100,
+          "lowStockThreshold": 10,
+          "status": "archived",
+          "requiresManualRateVerification": false,
+          "isIncomplete": false,
+          "rateHistory": [
+            {
+              "oldPrice": 6.2,
+              "newPrice": 6.2,
+              "changedAt": "2026-10-20T12:01:03.287Z",
+              "reason": "Imported via replacement catalog"
+            }
+          ],
+          "createdAt": "2026-10-20T12:01:03.287Z",
+          "updatedAt": "2026-10-21T13:41:52.988Z",
+          "isHistoricalInvoiceReference": true,
+          "archivedAt": "2026-10-21T13:41:52.937Z"
+        },
+        {
+          "id": "prod-imp-0001",
+          "sno": 1,
+          "name": "Hex Head Bolt MS Grade 4.6 M6 x 25mm Half Thread Zinc Plated",
+          "description": "Hex Head Bolt MS Grade 4.6 M6 x 25mm Half Thread Zinc Plated",
+          "type": "product",
+          "sku": "SKU-0001",
+          "hsnSacCode": "8517",
+          "unit": "Pcs",
+          "sellingPrice": 3.5,
+          "purchasePrice": 2.45,
+          "gstRate": 18,
+          "category": "General",
+          "stockQuantity": 100,
+          "lowStockThreshold": 10,
+          "status": "active",
+          "requiresManualRateVerification": false,
+          "isIncomplete": false,
+          "rateHistory": [
+            {
+              "oldPrice": 3.5,
+              "newPrice": 3.5,
+              "changedAt": "2026-10-21T13:41:52.988Z",
+              "reason": "Imported via replacement catalog"
+            }
+          ],
+          "createdAt": "2026-10-21T13:41:52.988Z",
+          "updatedAt": "2026-10-21T13:41:52.988Z"
+        },
+        {
+          "id": "prod-imp-0002",
+          "sno": 2,
+          "name": "Nylon Lock Nut SS 304 M8 DIN 985",
+          "description": "Nylon Lock Nut SS 304 M8 DIN 985",
+          "type": "product",
+          "sku": "SKU-0002",
+          "hsnSacCode": "8517",
+          "unit": "Pcs",
+          "sellingPrice": 6.2,
+          "purchasePrice": 4.34,
+          "gstRate": 18,
+          "category": "General",
+          "stockQuantity": 100,
+          "lowStockThreshold": 10,
+          "status": "active",
+          "requiresManualRateVerification": false,
+          "isIncomplete": false,
+          "rateHistory": [
+            {
+              "oldPrice": 6.2,
+              "newPrice": 6.2,
+              "changedAt": "2026-10-21T13:41:52.988Z",
+              "reason": "Imported via replacement catalog"
+            }
+          ],
+          "createdAt": "2026-10-21T13:41:52.988Z",
+          "updatedAt": "2026-10-21T13:41:52.988Z"
+        },
+        {
+          "id": "prod-imp-0003",
+          "sno": 3,
+          "name": "Special Heavy Industrial Casting Part Batch X",
+          "description": "Special Heavy Industrial Casting Part Batch X",
+          "type": "product",
+          "sku": "SKU-0003",
+          "hsnSacCode": "8517",
+          "unit": "Pcs",
+          "sellingPrice": 0,
+          "purchasePrice": 0,
+          "gstRate": 18,
+          "category": "General",
+          "stockQuantity": 100,
+          "lowStockThreshold": 10,
+          "status": "active",
+          "requiresManualRateVerification": true,
+          "rawFinalRate": "31KG",
+          "isIncomplete": false,
+          "rateHistory": [
+            {
+              "oldPrice": 0,
+              "newPrice": 0,
+              "changedAt": "2026-10-21T13:41:52.988Z",
+              "reason": "Imported via replacement catalog"
+            }
+          ],
+          "createdAt": "2026-10-21T13:41:52.988Z",
+          "updatedAt": "2026-10-21T13:41:52.988Z"
+        },
+        {
+          "id": "prod-imp-0004",
+          "sno": 4,
+          "name": "Spring Washer High Tensile B7 M10",
+          "description": "Spring Washer High Tensile B7 M10",
+          "type": "product",
+          "sku": "SKU-0004",
+          "hsnSacCode": "8517",
+          "unit": "Pcs",
+          "sellingPrice": 4.8,
+          "purchasePrice": 3.36,
+          "gstRate": 18,
+          "category": "General",
+          "stockQuantity": 100,
+          "lowStockThreshold": 10,
+          "status": "active",
+          "requiresManualRateVerification": false,
+          "isIncomplete": false,
+          "rateHistory": [
+            {
+              "oldPrice": 4.8,
+              "newPrice": 4.8,
+              "changedAt": "2026-10-21T13:41:52.988Z",
+              "reason": "Imported via replacement catalog"
+            }
+          ],
+          "createdAt": "2026-10-21T13:41:52.988Z",
+          "updatedAt": "2026-10-21T13:41:52.988Z"
+        }
+      ]
+    },
     {
       "id": "backup-1792590112987",
       "timestamp": "2026-10-21T13:41:52.987Z",
@@ -3075,857 +4178,6 @@
           "archivedAt": "2026-10-20T12:01:03.208Z"
         }
       ]
-    },
-    {
-      "id": "backup-1792497663207",
-      "timestamp": "2026-10-20T12:01:03.207Z",
-      "note": "Automated test backup before clearing inventory",
-      "productCount": 18,
-      "products": [
-        {
-          "id": "prod-1",
-          "name": "Enterprise Router Dual-Band AC1200",
-          "type": "product",
-          "sku": "RTR-AC1200",
-          "hsnSacCode": "8517",
-          "description": "High-throughput gigabit router with VPN tunnel support",
-          "unit": "Pcs",
-          "sellingPrice": 4500,
-          "purchasePrice": 3200,
-          "gstRate": 18,
-          "stockQuantity": 32,
-          "lowStockThreshold": 5,
-          "createdAt": "2026-08-12T10:40:44.390Z",
-          "updatedAt": "2026-10-20T11:53:18.395Z",
-          "status": "archived",
-          "isHistoricalInvoiceReference": true,
-          "archivedAt": "2026-10-20T11:53:18.355Z"
-        },
-        {
-          "id": "prod-2",
-          "name": "Cat6 Shielded Ethernet Spool (305m)",
-          "type": "product",
-          "sku": "CBL-CAT6-305",
-          "hsnSacCode": "8544",
-          "description": "Pure copper 23AWG high-speed network cable reel",
-          "unit": "Box",
-          "sellingPrice": 6800,
-          "purchasePrice": 4900,
-          "gstRate": 18,
-          "stockQuantity": 18,
-          "lowStockThreshold": 4,
-          "createdAt": "2026-08-22T10:40:44.390Z",
-          "updatedAt": "2026-10-20T11:53:18.395Z",
-          "status": "archived",
-          "isHistoricalInvoiceReference": true,
-          "archivedAt": "2026-10-20T11:53:18.355Z"
-        },
-        {
-          "id": "prod-3",
-          "name": "CCTV Surveillance Camera 4MP IP PoE",
-          "type": "product",
-          "sku": "CAM-4MP-POE",
-          "hsnSacCode": "8525",
-          "description": "Night vision IR weatherproof bullet camera",
-          "unit": "Pcs",
-          "sellingPrice": 2400,
-          "purchasePrice": 1700,
-          "gstRate": 18,
-          "stockQuantity": 3,
-          "lowStockThreshold": 5,
-          "createdAt": "2026-09-01T10:40:44.390Z",
-          "updatedAt": "2026-10-20T11:53:18.395Z",
-          "status": "archived",
-          "isHistoricalInvoiceReference": true,
-          "archivedAt": "2026-10-20T11:53:18.355Z"
-        },
-        {
-          "id": "prod-4",
-          "name": "Biometric Attendance & Access Terminal",
-          "type": "product",
-          "sku": "BIO-ATT-900",
-          "hsnSacCode": "8471",
-          "description": "Fingerprint + RFID cloud connected employee attendance unit",
-          "unit": "Pcs",
-          "sellingPrice": 8900,
-          "purchasePrice": 6400,
-          "gstRate": 18,
-          "stockQuantity": 14,
-          "lowStockThreshold": 3,
-          "createdAt": "2026-09-01T10:40:44.390Z",
-          "updatedAt": "2026-10-20T11:53:18.395Z",
-          "status": "archived",
-          "isHistoricalInvoiceReference": true,
-          "archivedAt": "2026-10-20T11:53:18.355Z"
-        },
-        {
-          "id": "prod-5",
-          "name": "Network Infrastructure Setup & Security Audit",
-          "type": "service",
-          "sku": "SRV-NET-AUDIT",
-          "hsnSacCode": "998313",
-          "description": "Onsite structured cabling, firewall configuration, and vulnerability scan",
-          "unit": "Set",
-          "sellingPrice": 25000,
-          "purchasePrice": 0,
-          "gstRate": 18,
-          "stockQuantity": 0,
-          "lowStockThreshold": 0,
-          "createdAt": "2026-09-01T10:40:44.390Z",
-          "updatedAt": "2026-10-20T11:53:18.395Z",
-          "status": "archived",
-          "isHistoricalInvoiceReference": true,
-          "archivedAt": "2026-10-20T11:53:18.355Z"
-        },
-        {
-          "id": "prod-seed-61",
-          "name": "Angle Grinder 4-Inch 850W Heavy Duty 11000 RPM",
-          "sku": "JET-TL-001",
-          "type": "product",
-          "hsnSacCode": "84672900",
-          "description": "Compact metal cutting & grinding machine with auxiliary handle",
-          "unit": "Pcs",
-          "sellingPrice": 2200,
-          "purchasePrice": 1550,
-          "gstRate": 18,
-          "category": "Industrial Tools",
-          "stockQuantity": 28,
-          "lowStockThreshold": 5,
-          "status": "archived",
-          "rateHistory": [
-            {
-              "oldPrice": 2200,
-              "newPrice": 2200,
-              "changedAt": "2026-09-12T13:03:20.209Z",
-              "reason": "Initial master catalog rate setup"
-            }
-          ],
-          "createdAt": "2026-08-13T13:03:20.209Z",
-          "updatedAt": "2026-10-20T11:53:18.395Z",
-          "isHistoricalInvoiceReference": true,
-          "archivedAt": "2026-10-20T11:53:18.355Z"
-        },
-        {
-          "id": "prod-seed-95",
-          "name": "24-Port Gigabit PoE Managed Network Switch Rackmount",
-          "sku": "SW-POE-24G",
-          "type": "product",
-          "hsnSacCode": "85176290",
-          "description": "370W total PoE budget smart managed Layer-2 switch with 2 SFP fiber ports",
-          "unit": "Pcs",
-          "sellingPrice": 18500,
-          "purchasePrice": 13900,
-          "gstRate": 18,
-          "category": "IT & Networking",
-          "stockQuantity": 9,
-          "lowStockThreshold": 2,
-          "status": "archived",
-          "rateHistory": [
-            {
-              "oldPrice": 18500,
-              "newPrice": 18500,
-              "changedAt": "2026-09-12T13:03:20.209Z",
-              "reason": "Initial master catalog rate setup"
-            }
-          ],
-          "createdAt": "2026-08-13T13:03:20.209Z",
-          "updatedAt": "2026-10-20T11:53:18.395Z",
-          "isHistoricalInvoiceReference": true,
-          "archivedAt": "2026-10-20T11:53:18.355Z"
-        },
-        {
-          "id": "prod-seed-128",
-          "name": "Allen Socket Head Cap Screw SS 304 DIN 912 (M4 x 20mm)",
-          "sku": "JET-SCK-002",
-          "type": "product",
-          "hsnSacCode": "73181500",
-          "description": "Standard commercial grade allen socket head cap screw ss 304 din 912 specification M4 x 20mm",
-          "unit": "Pcs",
-          "sellingPrice": 5.6,
-          "purchasePrice": 3.9,
-          "gstRate": 18,
-          "category": "Fasteners & Hardware",
-          "stockQuantity": 1200,
-          "lowStockThreshold": 180,
-          "status": "archived",
-          "rateHistory": [
-            {
-              "oldPrice": 5.6,
-              "newPrice": 5.6,
-              "changedAt": "2026-09-12T13:03:20.209Z",
-              "reason": "Initial master catalog rate setup"
-            }
-          ],
-          "createdAt": "2026-08-13T13:03:20.209Z",
-          "updatedAt": "2026-10-20T11:53:18.395Z",
-          "isHistoricalInvoiceReference": true,
-          "archivedAt": "2026-10-20T11:53:18.355Z"
-        },
-        {
-          "id": "prod-seed-135",
-          "name": "Allen Socket Head Cap Screw SS 304 DIN 912 (M8 x 35mm)",
-          "sku": "JET-SCK-009",
-          "type": "product",
-          "hsnSacCode": "73181500",
-          "description": "Standard commercial grade allen socket head cap screw ss 304 din 912 specification M8 x 35mm",
-          "unit": "Pcs",
-          "sellingPrice": 24.8,
-          "purchasePrice": 17.4,
-          "gstRate": 18,
-          "category": "Fasteners & Hardware",
-          "stockQuantity": 601,
-          "lowStockThreshold": 90,
-          "status": "archived",
-          "rateHistory": [
-            {
-              "oldPrice": 24.8,
-              "newPrice": 24.8,
-              "changedAt": "2026-09-12T13:03:20.209Z",
-              "reason": "Initial master catalog rate setup"
-            }
-          ],
-          "createdAt": "2026-08-13T13:03:20.209Z",
-          "updatedAt": "2026-10-20T11:53:18.395Z",
-          "isHistoricalInvoiceReference": true,
-          "archivedAt": "2026-10-20T11:53:18.355Z"
-        },
-        {
-          "id": "prod-seed-136",
-          "name": "Allen Socket Head Cap Screw SS 304 DIN 912 (M8 x 50mm)",
-          "sku": "JET-SCK-010",
-          "type": "product",
-          "hsnSacCode": "73181500",
-          "description": "Standard commercial grade allen socket head cap screw ss 304 din 912 specification M8 x 50mm",
-          "unit": "Pcs",
-          "sellingPrice": 30.4,
-          "purchasePrice": 21.3,
-          "gstRate": 18,
-          "category": "Fasteners & Hardware",
-          "stockQuantity": 500,
-          "lowStockThreshold": 75,
-          "status": "archived",
-          "rateHistory": [
-            {
-              "oldPrice": 30.4,
-              "newPrice": 30.4,
-              "changedAt": "2026-09-12T13:03:20.209Z",
-              "reason": "Initial master catalog rate setup"
-            }
-          ],
-          "createdAt": "2026-08-13T13:03:20.209Z",
-          "updatedAt": "2026-10-20T11:53:18.395Z",
-          "isHistoricalInvoiceReference": true,
-          "archivedAt": "2026-10-20T11:53:18.355Z"
-        },
-        {
-          "id": "prod-imp-0002",
-          "sno": 2,
-          "name": "Nylon Lock Nut SS 304 M8 DIN 985",
-          "description": "Nylon Lock Nut SS 304 M8 DIN 985",
-          "type": "product",
-          "sku": "SKU-0002",
-          "hsnSacCode": "8517",
-          "unit": "Pcs",
-          "sellingPrice": 6.2,
-          "purchasePrice": 4.34,
-          "gstRate": 18,
-          "category": "General",
-          "stockQuantity": 0,
-          "lowStockThreshold": 10,
-          "status": "archived",
-          "requiresManualRateVerification": false,
-          "isIncomplete": false,
-          "rateHistory": [
-            {
-              "oldPrice": 6.2,
-              "newPrice": 6.2,
-              "changedAt": "2026-10-19T10:30:14.249Z",
-              "reason": "Imported via replacement catalog"
-            }
-          ],
-          "createdAt": "2026-10-19T10:30:14.250Z",
-          "updatedAt": "2026-10-20T11:53:18.395Z",
-          "isHistoricalInvoiceReference": true,
-          "archivedAt": "2026-10-20T11:53:18.355Z"
-        },
-        {
-          "id": "prod-imp-0002",
-          "sno": 2,
-          "name": "Nylon Lock Nut SS 304 M8 DIN 985",
-          "description": "Nylon Lock Nut SS 304 M8 DIN 985",
-          "type": "product",
-          "sku": "SKU-0002",
-          "hsnSacCode": "8517",
-          "unit": "Pcs",
-          "sellingPrice": 6.2,
-          "purchasePrice": 4.34,
-          "gstRate": 18,
-          "category": "General",
-          "stockQuantity": 100,
-          "lowStockThreshold": 10,
-          "status": "archived",
-          "requiresManualRateVerification": false,
-          "isIncomplete": false,
-          "rateHistory": [
-            {
-              "oldPrice": 6.2,
-              "newPrice": 6.2,
-              "changedAt": "2026-10-19T10:36:13.578Z",
-              "reason": "Imported via replacement catalog"
-            }
-          ],
-          "createdAt": "2026-10-19T10:36:13.578Z",
-          "updatedAt": "2026-10-20T11:53:18.395Z",
-          "isHistoricalInvoiceReference": true,
-          "archivedAt": "2026-10-20T11:53:18.355Z"
-        },
-        {
-          "id": "prod-imp-0002",
-          "sno": 2,
-          "name": "Nylon Lock Nut SS 304 M8 DIN 985",
-          "description": "Nylon Lock Nut SS 304 M8 DIN 985",
-          "type": "product",
-          "sku": "SKU-0002",
-          "hsnSacCode": "8517",
-          "unit": "Pcs",
-          "sellingPrice": 6.2,
-          "purchasePrice": 4.34,
-          "gstRate": 18,
-          "category": "General",
-          "stockQuantity": 100,
-          "lowStockThreshold": 10,
-          "status": "archived",
-          "requiresManualRateVerification": false,
-          "isIncomplete": false,
-          "rateHistory": [
-            {
-              "oldPrice": 6.2,
-              "newPrice": 6.2,
-              "changedAt": "2026-10-19T11:20:09.928Z",
-              "reason": "Imported via replacement catalog"
-            }
-          ],
-          "createdAt": "2026-10-19T11:20:09.928Z",
-          "updatedAt": "2026-10-20T11:53:18.395Z",
-          "isHistoricalInvoiceReference": true,
-          "archivedAt": "2026-10-20T11:53:18.355Z"
-        },
-        {
-          "id": "prod-imp-0002",
-          "sno": 2,
-          "name": "Nylon Lock Nut SS 304 M8 DIN 985",
-          "description": "Nylon Lock Nut SS 304 M8 DIN 985",
-          "type": "product",
-          "sku": "SKU-0002",
-          "hsnSacCode": "8517",
-          "unit": "Pcs",
-          "sellingPrice": 6.2,
-          "purchasePrice": 4.34,
-          "gstRate": 18,
-          "category": "General",
-          "stockQuantity": 100,
-          "lowStockThreshold": 10,
-          "status": "archived",
-          "requiresManualRateVerification": false,
-          "isIncomplete": false,
-          "rateHistory": [
-            {
-              "oldPrice": 6.2,
-              "newPrice": 6.2,
-              "changedAt": "2026-10-19T11:44:13.148Z",
-              "reason": "Imported via replacement catalog"
-            }
-          ],
-          "createdAt": "2026-10-19T11:44:13.148Z",
-          "updatedAt": "2026-10-20T11:53:18.395Z",
-          "isHistoricalInvoiceReference": true,
-          "archivedAt": "2026-10-20T11:53:18.355Z"
-        },
-        {
-          "id": "prod-imp-0001",
-          "sno": 1,
-          "name": "Hex Head Bolt MS Grade 4.6 M6 x 25mm Half Thread Zinc Plated",
-          "description": "Hex Head Bolt MS Grade 4.6 M6 x 25mm Half Thread Zinc Plated",
-          "type": "product",
-          "sku": "SKU-0001",
-          "hsnSacCode": "8517",
-          "unit": "Pcs",
-          "sellingPrice": 3.5,
-          "purchasePrice": 2.45,
-          "gstRate": 18,
-          "category": "General",
-          "stockQuantity": 100,
-          "lowStockThreshold": 10,
-          "status": "active",
-          "requiresManualRateVerification": false,
-          "isIncomplete": false,
-          "rateHistory": [
-            {
-              "oldPrice": 3.5,
-              "newPrice": 3.5,
-              "changedAt": "2026-10-20T11:53:18.396Z",
-              "reason": "Imported via replacement catalog"
-            }
-          ],
-          "createdAt": "2026-10-20T11:53:18.396Z",
-          "updatedAt": "2026-10-20T11:53:18.396Z"
-        },
-        {
-          "id": "prod-imp-0002",
-          "sno": 2,
-          "name": "Nylon Lock Nut SS 304 M8 DIN 985",
-          "description": "Nylon Lock Nut SS 304 M8 DIN 985",
-          "type": "product",
-          "sku": "SKU-0002",
-          "hsnSacCode": "8517",
-          "unit": "Pcs",
-          "sellingPrice": 6.2,
-          "purchasePrice": 4.34,
-          "gstRate": 18,
-          "category": "General",
-          "stockQuantity": 100,
-          "lowStockThreshold": 10,
-          "status": "active",
-          "requiresManualRateVerification": false,
-          "isIncomplete": false,
-          "rateHistory": [
-            {
-              "oldPrice": 6.2,
-              "newPrice": 6.2,
-              "changedAt": "2026-10-20T11:53:18.396Z",
-              "reason": "Imported via replacement catalog"
-            }
-          ],
-          "createdAt": "2026-10-20T11:53:18.396Z",
-          "updatedAt": "2026-10-20T11:53:18.396Z"
-        },
-        {
-          "id": "prod-imp-0003",
-          "sno": 3,
-          "name": "Special Heavy Industrial Casting Part Batch X",
-          "description": "Special Heavy Industrial Casting Part Batch X",
-          "type": "product",
-          "sku": "SKU-0003",
-          "hsnSacCode": "8517",
-          "unit": "Pcs",
-          "sellingPrice": 0,
-          "purchasePrice": 0,
-          "gstRate": 18,
-          "category": "General",
-          "stockQuantity": 100,
-          "lowStockThreshold": 10,
-          "status": "active",
-          "requiresManualRateVerification": true,
-          "rawFinalRate": "31KG",
-          "isIncomplete": false,
-          "rateHistory": [
-            {
-              "oldPrice": 0,
-              "newPrice": 0,
-              "changedAt": "2026-10-20T11:53:18.396Z",
-              "reason": "Imported via replacement catalog"
-            }
-          ],
-          "createdAt": "2026-10-20T11:53:18.396Z",
-          "updatedAt": "2026-10-20T11:53:18.396Z"
-        },
-        {
-          "id": "prod-imp-0004",
-          "sno": 4,
-          "name": "Spring Washer High Tensile B7 M10",
-          "description": "Spring Washer High Tensile B7 M10",
-          "type": "product",
-          "sku": "SKU-0004",
-          "hsnSacCode": "8517",
-          "unit": "Pcs",
-          "sellingPrice": 4.8,
-          "purchasePrice": 3.36,
-          "gstRate": 18,
-          "category": "General",
-          "stockQuantity": 100,
-          "lowStockThreshold": 10,
-          "status": "active",
-          "requiresManualRateVerification": false,
-          "isIncomplete": false,
-          "rateHistory": [
-            {
-              "oldPrice": 4.8,
-              "newPrice": 4.8,
-              "changedAt": "2026-10-20T11:53:18.396Z",
-              "reason": "Imported via replacement catalog"
-            }
-          ],
-          "createdAt": "2026-10-20T11:53:18.396Z",
-          "updatedAt": "2026-10-20T11:53:18.396Z"
-        }
-      ]
-    },
-    {
-      "id": "backup-1792497198395",
-      "timestamp": "2026-10-20T11:53:18.395Z",
-      "note": "Import user catalog after clearing defaults",
-      "productCount": 14,
-      "products": [
-        {
-          "id": "prod-1",
-          "name": "Enterprise Router Dual-Band AC1200",
-          "type": "product",
-          "sku": "RTR-AC1200",
-          "hsnSacCode": "8517",
-          "description": "High-throughput gigabit router with VPN tunnel support",
-          "unit": "Pcs",
-          "sellingPrice": 4500,
-          "purchasePrice": 3200,
-          "gstRate": 18,
-          "stockQuantity": 32,
-          "lowStockThreshold": 5,
-          "createdAt": "2026-08-12T10:40:44.390Z",
-          "updatedAt": "2026-10-20T11:53:18.355Z",
-          "status": "archived",
-          "isHistoricalInvoiceReference": true,
-          "archivedAt": "2026-10-20T11:53:18.355Z"
-        },
-        {
-          "id": "prod-2",
-          "name": "Cat6 Shielded Ethernet Spool (305m)",
-          "type": "product",
-          "sku": "CBL-CAT6-305",
-          "hsnSacCode": "8544",
-          "description": "Pure copper 23AWG high-speed network cable reel",
-          "unit": "Box",
-          "sellingPrice": 6800,
-          "purchasePrice": 4900,
-          "gstRate": 18,
-          "stockQuantity": 18,
-          "lowStockThreshold": 4,
-          "createdAt": "2026-08-22T10:40:44.390Z",
-          "updatedAt": "2026-10-20T11:53:18.355Z",
-          "status": "archived",
-          "isHistoricalInvoiceReference": true,
-          "archivedAt": "2026-10-20T11:53:18.355Z"
-        },
-        {
-          "id": "prod-3",
-          "name": "CCTV Surveillance Camera 4MP IP PoE",
-          "type": "product",
-          "sku": "CAM-4MP-POE",
-          "hsnSacCode": "8525",
-          "description": "Night vision IR weatherproof bullet camera",
-          "unit": "Pcs",
-          "sellingPrice": 2400,
-          "purchasePrice": 1700,
-          "gstRate": 18,
-          "stockQuantity": 3,
-          "lowStockThreshold": 5,
-          "createdAt": "2026-09-01T10:40:44.390Z",
-          "updatedAt": "2026-10-20T11:53:18.355Z",
-          "status": "archived",
-          "isHistoricalInvoiceReference": true,
-          "archivedAt": "2026-10-20T11:53:18.355Z"
-        },
-        {
-          "id": "prod-4",
-          "name": "Biometric Attendance & Access Terminal",
-          "type": "product",
-          "sku": "BIO-ATT-900",
-          "hsnSacCode": "8471",
-          "description": "Fingerprint + RFID cloud connected employee attendance unit",
-          "unit": "Pcs",
-          "sellingPrice": 8900,
-          "purchasePrice": 6400,
-          "gstRate": 18,
-          "stockQuantity": 14,
-          "lowStockThreshold": 3,
-          "createdAt": "2026-09-01T10:40:44.390Z",
-          "updatedAt": "2026-10-20T11:53:18.355Z",
-          "status": "archived",
-          "isHistoricalInvoiceReference": true,
-          "archivedAt": "2026-10-20T11:53:18.355Z"
-        },
-        {
-          "id": "prod-5",
-          "name": "Network Infrastructure Setup & Security Audit",
-          "type": "service",
-          "sku": "SRV-NET-AUDIT",
-          "hsnSacCode": "998313",
-          "description": "Onsite structured cabling, firewall configuration, and vulnerability scan",
-          "unit": "Set",
-          "sellingPrice": 25000,
-          "purchasePrice": 0,
-          "gstRate": 18,
-          "stockQuantity": 0,
-          "lowStockThreshold": 0,
-          "createdAt": "2026-09-01T10:40:44.390Z",
-          "updatedAt": "2026-10-20T11:53:18.355Z",
-          "status": "archived",
-          "isHistoricalInvoiceReference": true,
-          "archivedAt": "2026-10-20T11:53:18.355Z"
-        },
-        {
-          "id": "prod-seed-61",
-          "name": "Angle Grinder 4-Inch 850W Heavy Duty 11000 RPM",
-          "sku": "JET-TL-001",
-          "type": "product",
-          "hsnSacCode": "84672900",
-          "description": "Compact metal cutting & grinding machine with auxiliary handle",
-          "unit": "Pcs",
-          "sellingPrice": 2200,
-          "purchasePrice": 1550,
-          "gstRate": 18,
-          "category": "Industrial Tools",
-          "stockQuantity": 28,
-          "lowStockThreshold": 5,
-          "status": "archived",
-          "rateHistory": [
-            {
-              "oldPrice": 2200,
-              "newPrice": 2200,
-              "changedAt": "2026-09-12T13:03:20.209Z",
-              "reason": "Initial master catalog rate setup"
-            }
-          ],
-          "createdAt": "2026-08-13T13:03:20.209Z",
-          "updatedAt": "2026-10-20T11:53:18.355Z",
-          "isHistoricalInvoiceReference": true,
-          "archivedAt": "2026-10-20T11:53:18.355Z"
-        },
-        {
-          "id": "prod-seed-95",
-          "name": "24-Port Gigabit PoE Managed Network Switch Rackmount",
-          "sku": "SW-POE-24G",
-          "type": "product",
-          "hsnSacCode": "85176290",
-          "description": "370W total PoE budget smart managed Layer-2 switch with 2 SFP fiber ports",
-          "unit": "Pcs",
-          "sellingPrice": 18500,
-          "purchasePrice": 13900,
-          "gstRate": 18,
-          "category": "IT & Networking",
-          "stockQuantity": 9,
-          "lowStockThreshold": 2,
-          "status": "archived",
-          "rateHistory": [
-            {
-              "oldPrice": 18500,
-              "newPrice": 18500,
-              "changedAt": "2026-09-12T13:03:20.209Z",
-              "reason": "Initial master catalog rate setup"
-            }
-          ],
-          "createdAt": "2026-08-13T13:03:20.209Z",
-          "updatedAt": "2026-10-20T11:53:18.355Z",
-          "isHistoricalInvoiceReference": true,
-          "archivedAt": "2026-10-20T11:53:18.355Z"
-        },
-        {
-          "id": "prod-seed-128",
-          "name": "Allen Socket Head Cap Screw SS 304 DIN 912 (M4 x 20mm)",
-          "sku": "JET-SCK-002",
-          "type": "product",
-          "hsnSacCode": "73181500",
-          "description": "Standard commercial grade allen socket head cap screw ss 304 din 912 specification M4 x 20mm",
-          "unit": "Pcs",
-          "sellingPrice": 5.6,
-          "purchasePrice": 3.9,
-          "gstRate": 18,
-          "category": "Fasteners & Hardware",
-          "stockQuantity": 1200,
-          "lowStockThreshold": 180,
-          "status": "archived",
-          "rateHistory": [
-            {
-              "oldPrice": 5.6,
-              "newPrice": 5.6,
-              "changedAt": "2026-09-12T13:03:20.209Z",
-              "reason": "Initial master catalog rate setup"
-            }
-          ],
-          "createdAt": "2026-08-13T13:03:20.209Z",
-          "updatedAt": "2026-10-20T11:53:18.355Z",
-          "isHistoricalInvoiceReference": true,
-          "archivedAt": "2026-10-20T11:53:18.355Z"
-        },
-        {
-          "id": "prod-seed-135",
-          "name": "Allen Socket Head Cap Screw SS 304 DIN 912 (M8 x 35mm)",
-          "sku": "JET-SCK-009",
-          "type": "product",
-          "hsnSacCode": "73181500",
-          "description": "Standard commercial grade allen socket head cap screw ss 304 din 912 specification M8 x 35mm",
-          "unit": "Pcs",
-          "sellingPrice": 24.8,
-          "purchasePrice": 17.4,
-          "gstRate": 18,
-          "category": "Fasteners & Hardware",
-          "stockQuantity": 601,
-          "lowStockThreshold": 90,
-          "status": "archived",
-          "rateHistory": [
-            {
-              "oldPrice": 24.8,
-              "newPrice": 24.8,
-              "changedAt": "2026-09-12T13:03:20.209Z",
-              "reason": "Initial master catalog rate setup"
-            }
-          ],
-          "createdAt": "2026-08-13T13:03:20.209Z",
-          "updatedAt": "2026-10-20T11:53:18.355Z",
-          "isHistoricalInvoiceReference": true,
-          "archivedAt": "2026-10-20T11:53:18.355Z"
-        },
-        {
-          "id": "prod-seed-136",
-          "name": "Allen Socket Head Cap Screw SS 304 DIN 912 (M8 x 50mm)",
-          "sku": "JET-SCK-010",
-          "type": "product",
-          "hsnSacCode": "73181500",
-          "description": "Standard commercial grade allen socket head cap screw ss 304 din 912 specification M8 x 50mm",
-          "unit": "Pcs",
-          "sellingPrice": 30.4,
-          "purchasePrice": 21.3,
-          "gstRate": 18,
-          "category": "Fasteners & Hardware",
-          "stockQuantity": 500,
-          "lowStockThreshold": 75,
-          "status": "archived",
-          "rateHistory": [
-            {
-              "oldPrice": 30.4,
-              "newPrice": 30.4,
-              "changedAt": "2026-09-12T13:03:20.209Z",
-              "reason": "Initial master catalog rate setup"
-            }
-          ],
-          "createdAt": "2026-08-13T13:03:20.209Z",
-          "updatedAt": "2026-10-20T11:53:18.355Z",
-          "isHistoricalInvoiceReference": true,
-          "archivedAt": "2026-10-20T11:53:18.355Z"
-        },
-        {
-          "id": "prod-imp-0002",
-          "sno": 2,
-          "name": "Nylon Lock Nut SS 304 M8 DIN 985",
-          "description": "Nylon Lock Nut SS 304 M8 DIN 985",
-          "type": "product",
-          "sku": "SKU-0002",
-          "hsnSacCode": "8517",
-          "unit": "Pcs",
-          "sellingPrice": 6.2,
-          "purchasePrice": 4.34,
-          "gstRate": 18,
-          "category": "General",
-          "stockQuantity": 0,
-          "lowStockThreshold": 10,
-          "status": "archived",
-          "requiresManualRateVerification": false,
-          "isIncomplete": false,
-          "rateHistory": [
-            {
-              "oldPrice": 6.2,
-              "newPrice": 6.2,
-              "changedAt": "2026-10-19T10:30:14.249Z",
-              "reason": "Imported via replacement catalog"
-            }
-          ],
-          "createdAt": "2026-10-19T10:30:14.250Z",
-          "updatedAt": "2026-10-20T11:53:18.355Z",
-          "isHistoricalInvoiceReference": true,
-          "archivedAt": "2026-10-20T11:53:18.355Z"
-        },
-        {
-          "id": "prod-imp-0002",
-          "sno": 2,
-          "name": "Nylon Lock Nut SS 304 M8 DIN 985",
-          "description": "Nylon Lock Nut SS 304 M8 DIN 985",
-          "type": "product",
-          "sku": "SKU-0002",
-          "hsnSacCode": "8517",
-          "unit": "Pcs",
-          "sellingPrice": 6.2,
-          "purchasePrice": 4.34,
-          "gstRate": 18,
-          "category": "General",
-          "stockQuantity": 100,
-          "lowStockThreshold": 10,
-          "status": "archived",
-          "requiresManualRateVerification": false,
-          "isIncomplete": false,
-          "rateHistory": [
-            {
-              "oldPrice": 6.2,
-              "newPrice": 6.2,
-              "changedAt": "2026-10-19T10:36:13.578Z",
-              "reason": "Imported via replacement catalog"
-            }
-          ],
-          "createdAt": "2026-10-19T10:36:13.578Z",
-          "updatedAt": "2026-10-20T11:53:18.355Z",
-          "isHistoricalInvoiceReference": true,
-          "archivedAt": "2026-10-20T11:53:18.355Z"
-        },
-        {
-          "id": "prod-imp-0002",
-          "sno": 2,
-          "name": "Nylon Lock Nut SS 304 M8 DIN 985",
-          "description": "Nylon Lock Nut SS 304 M8 DIN 985",
-          "type": "product",
-          "sku": "SKU-0002",
-          "hsnSacCode": "8517",
-          "unit": "Pcs",
-          "sellingPrice": 6.2,
-          "purchasePrice": 4.34,
-          "gstRate": 18,
-          "category": "General",
-          "stockQuantity": 100,
-          "lowStockThreshold": 10,
-          "status": "archived",
-          "requiresManualRateVerification": false,
-          "isIncomplete": false,
-          "rateHistory": [
-            {
-              "oldPrice": 6.2,
-              "newPrice": 6.2,
-              "changedAt": "2026-10-19T11:20:09.928Z",
-              "reason": "Imported via replacement catalog"
-            }
-          ],
-          "createdAt": "2026-10-19T11:20:09.928Z",
-          "updatedAt": "2026-10-20T11:53:18.355Z",
-          "isHistoricalInvoiceReference": true,
-          "archivedAt": "2026-10-20T11:53:18.355Z"
-        },
-        {
-          "id": "prod-imp-0002",
-          "sno": 2,
-          "name": "Nylon Lock Nut SS 304 M8 DIN 985",
-          "description": "Nylon Lock Nut SS 304 M8 DIN 985",
-          "type": "product",
-          "sku": "SKU-0002",
-          "hsnSacCode": "8517",
-          "unit": "Pcs",
-          "sellingPrice": 6.2,
-          "purchasePrice": 4.34,
-          "gstRate": 18,
-          "category": "General",
-          "stockQuantity": 100,
-          "lowStockThreshold": 10,
-          "status": "archived",
-          "requiresManualRateVerification": false,
-          "isIncomplete": false,
-          "rateHistory": [
-            {
-              "oldPrice": 6.2,
-              "newPrice": 6.2,
-              "changedAt": "2026-10-19T11:44:13.148Z",
-              "reason": "Imported via replacement catalog"
-            }
-          ],
-          "createdAt": "2026-10-19T11:44:13.148Z",
-          "updatedAt": "2026-10-20T11:53:18.355Z",
-          "isHistoricalInvoiceReference": true,
-          "archivedAt": "2026-10-20T11:53:18.355Z"
-        }
-      ]
     }
   ],
   "isCatalogCleared": false,
@@ -3949,7 +4201,7 @@
       ],
       "createdAt": "2026-10-20T12:17:18.683Z",
       "updatedAt": "2026-10-20T12:17:18.683Z",
-      "lastLoginAt": "2026-10-21T14:13:54.665Z"
+      "lastLoginAt": "2026-10-21T15:15:47.496Z"
     },
     {
       "id": "usr-1792592034759-2eb292",
@@ -3962,6 +4214,70 @@
       "mfaEnabled": false,
       "createdAt": "2026-10-21T14:13:54.759Z",
       "updatedAt": "2026-10-21T14:13:54.759Z"
+    },
+    {
+      "id": "usr-1792595405898",
+      "name": "Elango Harikumar",
+      "email": "elangoharikumar@gmail.com",
+      "role": "super_admin",
+      "status": "active",
+      "passwordSalt": "e02c1ac0d152da6302bf568117aa50d2",
+      "passwordHash": "2fbcd241ab87f241461b56d69b2eafefbc21e50f98f28cde65c8dcafcfff2d59487513c85d0f7b3b8606d4c6f324c436fdc00b718359fb1ebef52bf7c75003cc",
+      "mfaEnabled": false,
+      "mfaSecret": "cf661bf008b8f59778a476640a4a61bdc68fe508",
+      "recoveryCodes": [
+        "7532-3F2A",
+        "561E-2B0C",
+        "4A5C-5151"
+      ],
+      "createdAt": "2026-10-21T15:10:05.898Z",
+      "updatedAt": "2026-10-21T15:10:32.681Z",
+      "lastLoginAt": "2026-10-21T15:17:10.998Z"
+    },
+    {
+      "id": "usr-1792595461602-8ee549",
+      "name": "Ramesh Patel 1792595461480",
+      "email": "employee-1792595461480@apexinfotech.in",
+      "role": "employee",
+      "status": "active",
+      "passwordSalt": "243fe7a550f6c7cc79b67a95b1f73212",
+      "passwordHash": "9f96beba3c4caeb28fcd20216ec0de5babe0f4816e13229670f39a1dc1f00092d450bf7ab29ec0551bce344c07a59ebec98794c3b7adbe75f14d5ab9376d6be2",
+      "mfaEnabled": false,
+      "createdAt": "2026-10-21T15:11:01.602Z",
+      "updatedAt": "2026-10-21T15:11:01.707Z",
+      "lastLoginAt": "2026-10-21T15:11:01.779Z"
+    },
+    {
+      "id": "usr-1792595711629-26e976",
+      "name": "kumar",
+      "email": "sit24sc014.@sairamtap.edu.in",
+      "role": "employee",
+      "status": "pending_approval",
+      "passwordSalt": "66f1b711d03994fef98334aa67e02175",
+      "passwordHash": "a5c0dddb5b559d6d714d7a1768d96f3f40991de80e1034c5696643ae7f60697e951cd92ad7805a83b5780b1b9911b2c42ca95c5b3f2f26bc3dd88c789482f430",
+      "mfaEnabled": false,
+      "createdAt": "2026-10-21T15:15:11.630Z",
+      "updatedAt": "2026-10-21T15:15:11.630Z"
+    },
+    {
+      "id": "usr-1792595816462-owner",
+      "name": "Application Owner",
+      "email": "jetentj1972@gmail.com",
+      "role": "super_admin",
+      "status": "active",
+      "passwordSalt": "aad9634ee29c98a1d1d88011fe452323",
+      "passwordHash": "3d8b5519fdbe7f39a55e50021434059e2ea5c4dcaf948a2e0cea56f461ad4787bbe90433dbdeb891074e8cd6a9f4e2dcd66b625201a077e90ee16cd84b9129fc",
+      "mfaEnabled": false,
+      "mfaSecret": "3ea4165436a00b00ebc0deb9e74e99132976d83a",
+      "recoveryCodes": [
+        "B201-9F12",
+        "C482-1D90",
+        "77EA-0012",
+        "33FA-8891"
+      ],
+      "createdAt": "2026-10-21T15:16:56.462Z",
+      "updatedAt": "2026-10-21T15:16:56.462Z",
+      "lastLoginAt": "2026-10-21T15:17:11.084Z"
     }
   ],
   "sessions": [
@@ -3984,9 +4300,315 @@
       "createdAt": "2026-10-21T14:13:54.665Z",
       "expiresAt": "2026-10-22T14:13:54.665Z",
       "ip": "127.0.0.1"
+    },
+    {
+      "token": "d0bf0662ea3ffdec17de1f87b276f0e22210a41bf8ee3be645d49e41aafb6d88",
+      "userId": "usr-1792595405898",
+      "createdAt": "2026-10-21T15:10:32.681Z",
+      "expiresAt": "2026-10-22T15:10:32.681Z",
+      "ip": "127.0.0.1"
+    },
+    {
+      "token": "80a7b8ab46ae0eb2f3bd039c03c4076d48cb7b1e422a9116ad29eb4a85a37602",
+      "userId": "usr-1792595405898",
+      "createdAt": "2026-10-21T15:10:38.857Z",
+      "expiresAt": "2026-10-22T15:10:38.857Z",
+      "ip": "127.0.0.1"
+    },
+    {
+      "token": "2972e2eaa3db7468fe6826e659c6e296ef71759b9ab35c9fac87e756b33d89db",
+      "userId": "usr-1792498638683",
+      "createdAt": "2026-10-21T15:11:01.461Z",
+      "expiresAt": "2026-10-22T15:11:01.461Z",
+      "ip": "127.0.0.1"
+    },
+    {
+      "token": "33fdbd720e95dfffeddc6b99fd38e101f7d6fe908d8d6eb6a865b55b6a41e29d",
+      "userId": "usr-1792595461602-8ee549",
+      "createdAt": "2026-10-21T15:11:01.779Z",
+      "expiresAt": "2026-10-22T15:11:01.779Z",
+      "ip": "127.0.0.1"
+    },
+    {
+      "token": "6b845882d6e48794bb29b29b36c11179e06112cac6037a596b8f8d804f93c6a8",
+      "userId": "usr-1792595405898",
+      "createdAt": "2026-10-21T15:15:38.289Z",
+      "expiresAt": "2026-10-22T15:15:38.289Z",
+      "ip": "127.0.0.1"
+    },
+    {
+      "token": "a8ce446f897724ddecfcdb0564fce5c18c0c7575691e8194860b3d34fcf77364",
+      "userId": "usr-1792498638683",
+      "createdAt": "2026-10-21T15:15:47.496Z",
+      "expiresAt": "2026-10-22T15:15:47.496Z",
+      "ip": "127.0.0.1"
+    },
+    {
+      "token": "08850f480353ffce0244892df91fb286b58cb28d9464491d3e631df39b93bbb7",
+      "userId": "usr-1792595405898",
+      "createdAt": "2026-10-21T15:17:10.998Z",
+      "expiresAt": "2026-10-22T15:17:10.998Z",
+      "ip": "127.0.0.1"
+    },
+    {
+      "token": "951af288a60fcbfeb7afbd052b91615bf82c1d27e8e43a78616924b73493f8ee",
+      "userId": "usr-1792595816462-owner",
+      "createdAt": "2026-10-21T15:17:11.084Z",
+      "expiresAt": "2026-10-22T15:17:11.084Z",
+      "ip": "127.0.0.1"
     }
   ],
   "auditLogs": [
+    {
+      "id": "audit-1792595831084-9b04bd",
+      "timestamp": "2026-10-21T15:17:11.085Z",
+      "userId": "usr-1792595816462-owner",
+      "userName": "Application Owner",
+      "userRole": "super_admin",
+      "action": "USER_LOGIN",
+      "entityType": "auth",
+      "entityId": "usr-1792595816462-owner",
+      "details": "User logged in: Application Owner (SUPER_ADMIN)",
+      "ip": "127.0.0.1"
+    },
+    {
+      "id": "audit-1792595830998-a426d0",
+      "timestamp": "2026-10-21T15:17:10.999Z",
+      "userId": "usr-1792595405898",
+      "userName": "Elango Harikumar",
+      "userRole": "super_admin",
+      "action": "USER_LOGIN",
+      "entityType": "auth",
+      "entityId": "usr-1792595405898",
+      "details": "User logged in: Elango Harikumar (SUPER_ADMIN)",
+      "ip": "127.0.0.1"
+    },
+    {
+      "id": "audit-1792595747496-231211",
+      "timestamp": "2026-10-21T15:15:47.496Z",
+      "userId": "usr-1792498638683",
+      "userName": "Admin",
+      "userRole": "super_admin",
+      "action": "USER_LOGIN",
+      "entityType": "auth",
+      "entityId": "usr-1792498638683",
+      "details": "User logged in: Admin (SUPER_ADMIN)",
+      "ip": "127.0.0.1"
+    },
+    {
+      "id": "audit-1792595738289-fbdd6c",
+      "timestamp": "2026-10-21T15:15:38.289Z",
+      "userId": "usr-1792595405898",
+      "userName": "Elango Harikumar",
+      "userRole": "super_admin",
+      "action": "USER_LOGIN",
+      "entityType": "auth",
+      "entityId": "usr-1792595405898",
+      "details": "User logged in: Elango Harikumar (SUPER_ADMIN)",
+      "ip": "127.0.0.1"
+    },
+    {
+      "id": "audit-1792595730807-545812",
+      "timestamp": "2026-10-21T15:15:30.807Z",
+      "userId": "usr-1792595711629-26e976",
+      "userName": "kumar",
+      "userRole": "employee",
+      "action": "LOGIN_BLOCKED",
+      "entityType": "auth",
+      "entityId": "usr-1792595711629-26e976",
+      "details": "Login blocked for pending approval account: sit24sc014.@sairamtap.edu.in",
+      "ip": "2405:201:e020:d00b:a1d5:48f7:9f56:8e54, 169.254.169.126"
+    },
+    {
+      "id": "audit-1792595711630-58f715",
+      "timestamp": "2026-10-21T15:15:11.630Z",
+      "userId": "usr-1792595711629-26e976",
+      "userName": "kumar",
+      "userRole": "employee",
+      "action": "USER_REGISTERED",
+      "entityType": "auth",
+      "entityId": "usr-1792595711629-26e976",
+      "details": "New public registration: kumar (sit24sc014.@sairamtap.edu.in) - Role: EMPLOYEE, Status: PENDING_APPROVAL",
+      "ip": "2405:201:e020:d00b:a1d5:48f7:9f56:8e54, 169.254.169.126"
+    },
+    {
+      "id": "audit-1792595461780-7d975b",
+      "timestamp": "2026-10-21T15:11:01.780Z",
+      "userId": "usr-1792595461602-8ee549",
+      "userName": "Ramesh Patel 1792595461480",
+      "userRole": "employee",
+      "action": "USER_LOGIN",
+      "entityType": "auth",
+      "entityId": "usr-1792595461602-8ee549",
+      "details": "User logged in: Ramesh Patel 1792595461480 (EMPLOYEE)",
+      "ip": "127.0.0.1"
+    },
+    {
+      "id": "audit-1792595461707-f6904e",
+      "timestamp": "2026-10-21T15:11:01.707Z",
+      "userId": "usr-1792498638683",
+      "userName": "Admin",
+      "userRole": "super_admin",
+      "action": "USER_UPDATED",
+      "entityType": "user",
+      "entityId": "usr-1792595461602-8ee549",
+      "details": "Updated user Ramesh Patel 1792595461480 (employee-1792595461480@apexinfotech.in): role employee -> employee, status pending_approval -> active",
+      "ip": "127.0.0.1"
+    },
+    {
+      "id": "audit-1792595461686-8003e0",
+      "timestamp": "2026-10-21T15:11:01.687Z",
+      "userId": "usr-1792595461602-8ee549",
+      "userName": "Ramesh Patel 1792595461480",
+      "userRole": "employee",
+      "action": "LOGIN_BLOCKED",
+      "entityType": "auth",
+      "entityId": "usr-1792595461602-8ee549",
+      "details": "Login blocked for pending approval account: employee-1792595461480@apexinfotech.in",
+      "ip": "127.0.0.1"
+    },
+    {
+      "id": "audit-1792595461602-07afbe",
+      "timestamp": "2026-10-21T15:11:01.602Z",
+      "userId": "usr-1792595461602-8ee549",
+      "userName": "Ramesh Patel 1792595461480",
+      "userRole": "employee",
+      "action": "USER_REGISTERED",
+      "entityType": "auth",
+      "entityId": "usr-1792595461602-8ee549",
+      "details": "New public registration: Ramesh Patel 1792595461480 (employee-1792595461480@apexinfotech.in) - Role: EMPLOYEE, Status: PENDING_APPROVAL",
+      "ip": "127.0.0.1"
+    },
+    {
+      "id": "audit-1792595461461-0ad79d",
+      "timestamp": "2026-10-21T15:11:01.461Z",
+      "userId": "usr-1792498638683",
+      "userName": "Admin",
+      "userRole": "super_admin",
+      "action": "USER_LOGIN",
+      "entityType": "auth",
+      "entityId": "usr-1792498638683",
+      "details": "User logged in: Admin (SUPER_ADMIN)",
+      "ip": "127.0.0.1"
+    },
+    {
+      "id": "audit-1792595451351-5509f9",
+      "timestamp": "2026-10-21T15:10:51.351Z",
+      "userId": "usr-1792498638683",
+      "userName": "Admin",
+      "userRole": "super_admin",
+      "action": "USER_LOGOUT",
+      "entityType": "auth",
+      "entityId": "usr-1792498638683",
+      "details": "User logged out: Admin (admin@test.com)",
+      "ip": "127.0.0.1"
+    },
+    {
+      "id": "audit-1792595451325-b8b31e",
+      "timestamp": "2026-10-21T15:10:51.325Z",
+      "userId": "usr-1792498638683",
+      "userName": "Admin",
+      "userRole": "super_admin",
+      "action": "RECOVERY_FAILED",
+      "entityType": "auth",
+      "entityId": "usr-1792498638683",
+      "details": "Failed recovery attempt for Super Admin: admin@test.com",
+      "ip": "127.0.0.1"
+    },
+    {
+      "id": "audit-1792595451301-a7dd5d",
+      "timestamp": "2026-10-21T15:10:51.301Z",
+      "userId": "system",
+      "userName": "System / Unauthenticated",
+      "userRole": "anonymous",
+      "action": "LOGIN_FAILED",
+      "entityType": "auth",
+      "details": "Failed login attempt for email: admin@test.com",
+      "ip": "127.0.0.1"
+    },
+    {
+      "id": "audit-1792595451221-172dc0",
+      "timestamp": "2026-10-21T15:10:51.221Z",
+      "userId": "system",
+      "userName": "System / Unauthenticated",
+      "userRole": "anonymous",
+      "action": "LOGIN_FAILED",
+      "entityType": "auth",
+      "details": "Failed login attempt for email: admin@test.com",
+      "ip": "127.0.0.1"
+    },
+    {
+      "id": "audit-1792595451110-caee16",
+      "timestamp": "2026-10-21T15:10:51.110Z",
+      "userId": "usr-1792498638683",
+      "userName": "Admin",
+      "userRole": "super_admin",
+      "action": "USER_LOGIN",
+      "entityType": "auth",
+      "entityId": "usr-1792498638683",
+      "details": "User logged in: Admin (SUPER_ADMIN)",
+      "ip": "127.0.0.1"
+    },
+    {
+      "id": "audit-1792595438857-768390",
+      "timestamp": "2026-10-21T15:10:38.857Z",
+      "userId": "usr-1792595405898",
+      "userName": "Elango Harikumar",
+      "userRole": "super_admin",
+      "action": "USER_LOGIN",
+      "entityType": "auth",
+      "entityId": "usr-1792595405898",
+      "details": "User logged in: Elango Harikumar (SUPER_ADMIN)",
+      "ip": "127.0.0.1"
+    },
+    {
+      "id": "audit-1792595432681-6159c2",
+      "timestamp": "2026-10-21T15:10:32.681Z",
+      "userId": "usr-1792595405898",
+      "userName": "Elango Harikumar",
+      "userRole": "super_admin",
+      "action": "SUPER_ADMIN_RECOVERED",
+      "entityType": "auth",
+      "entityId": "usr-1792595405898",
+      "details": "Super Admin credentials successfully recovered for: elangoharikumar@gmail.com",
+      "ip": "127.0.0.1"
+    },
+    {
+      "id": "audit-1792595432602-4008aa",
+      "timestamp": "2026-10-21T15:10:32.602Z",
+      "userId": "usr-1792595405898",
+      "userName": "Elango Harikumar",
+      "userRole": "super_admin",
+      "action": "RECOVERY_FAILED",
+      "entityType": "auth",
+      "entityId": "usr-1792595405898",
+      "details": "Failed recovery attempt for Super Admin: elangoharikumar@gmail.com",
+      "ip": "127.0.0.1"
+    },
+    {
+      "id": "audit-1792595424813-bba53f",
+      "timestamp": "2026-10-21T15:10:24.813Z",
+      "userId": "usr-1792595405898",
+      "userName": "Elango Harikumar",
+      "userRole": "super_admin",
+      "action": "USER_LOGIN",
+      "entityType": "auth",
+      "entityId": "usr-1792595405898",
+      "details": "User logged in: Elango Harikumar (SUPER_ADMIN)",
+      "ip": "127.0.0.1"
+    },
+    {
+      "id": "audit-1792595405898-87fa9e",
+      "timestamp": "2026-10-21T15:10:05.898Z",
+      "userId": "usr-1792595405898",
+      "userName": "Elango Harikumar",
+      "userRole": "super_admin",
+      "action": "SUPER_ADMIN_BOOTSTRAP_CREATED_CLI",
+      "entityType": "auth",
+      "entityId": "usr-1792595405898",
+      "details": "Super Admin account created via CLI bootstrap tool for: elangoharikumar@gmail.com",
+      "ip": "127.0.0.1 (CLI)"
+    },
     {
       "id": "audit-1792592034852-573e5e",
       "timestamp": "2026-10-21T14:13:54.852Z",

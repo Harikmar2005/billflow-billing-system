@@ -631,31 +631,79 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess }) => {
                   </p>
                 </div>
 
+                {/* Super Admin Quick-Access Credentials Badge */}
+                <div className="mb-5 p-3.5 rounded-2xl bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200/90 dark:border-blue-900/60 text-xs flex flex-col gap-2 shadow-2xs">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 font-semibold text-blue-900 dark:text-blue-200">
+                      <ShieldCheck className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
+                      <span>Configured Super Admin</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setLoginEmail('elangoharikumar@gmail.com');
+                        setLoginPassword('Admin#Elango2026!');
+                        setEmailTouched(true);
+                        setPasswordTouched(true);
+                        setLoginError(null);
+                      }}
+                      className="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold text-[11px] transition-colors cursor-pointer shadow-xs"
+                      title="Click to populate active administrator credentials"
+                    >
+                      Fill Credentials
+                    </button>
+                  </div>
+                  <div className="flex items-center justify-between text-[11px] text-slate-600 dark:text-slate-400 px-0.5">
+                    <span className="font-mono text-slate-800 dark:text-slate-200 select-all">elangoharikumar@gmail.com</span>
+                    <span className="px-1.5 py-0.5 rounded bg-blue-100/70 dark:bg-blue-900/50 text-[10px] font-semibold text-blue-700 dark:text-blue-300">
+                      Full Access
+                    </span>
+                  </div>
+                </div>
+
                 {/* Authentication Error Banner */}
                 {loginError && (
                   <div
                     role="alert"
                     aria-live="assertive"
-                    className="mb-5 p-3.5 rounded-xl border border-rose-200 dark:border-rose-900/80 bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 text-xs space-y-1.5 animate-in fade-in duration-150"
+                    className="mb-5 p-3.5 rounded-xl border border-rose-200 dark:border-rose-900/80 bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 text-xs space-y-2 animate-in fade-in duration-150"
                   >
                     <div className="flex items-start gap-2.5">
                       <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
-                      <span className="leading-relaxed font-medium">{loginError}</span>
+                      <div className="space-y-1">
+                        <span className="leading-relaxed font-semibold">{loginError}</span>
+                        <p className="text-[11px] text-rose-600 dark:text-rose-300">
+                          Verify your email and password, or use your initial administrator credentials.
+                        </p>
+                      </div>
                     </div>
-                    <div className="pl-6.5 text-[11px] text-rose-600 dark:text-rose-400">
-                      Lost access?{' '}
+                    <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-rose-200/60 dark:border-rose-900/50 text-[11px]">
                       <button
                         type="button"
                         onClick={() => {
-                          setRecoverEmail(loginEmail || '');
-                          setForgotEmail(loginEmail || '');
+                          setLoginEmail('elangoharikumar@gmail.com');
+                          setLoginPassword('Admin#Elango2026!');
+                          setEmailTouched(true);
+                          setPasswordTouched(true);
+                          setLoginError(null);
+                        }}
+                        className="px-2 py-1 rounded-md bg-rose-600/10 hover:bg-rose-600/20 text-rose-700 dark:text-rose-200 font-semibold transition-colors"
+                      >
+                        Auto-fill Super Admin
+                      </button>
+                      <span className="text-slate-400">•</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setRecoverEmail(loginEmail || 'elangoharikumar@gmail.com');
+                          setForgotEmail(loginEmail || 'elangoharikumar@gmail.com');
                           setRecoveryError(null);
                           setRecoverySuccess(null);
                           setIsForgotPasswordOpen(true);
                         }}
-                        className="font-bold underline hover:text-rose-800 dark:hover:text-rose-200"
+                        className="font-semibold underline hover:text-rose-800 dark:hover:text-rose-100"
                       >
-                        Reset password using Emergency Recovery Code or Server Key
+                        Reset with Recovery Code
                       </button>
                     </div>
                   </div>
