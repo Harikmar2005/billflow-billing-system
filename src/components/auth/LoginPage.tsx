@@ -23,6 +23,8 @@ import {
   FileText,
   User,
   Shield,
+  UserPlus,
+  Clock,
 } from 'lucide-react';
 
 interface LoginPageProps {
@@ -35,6 +37,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess }) => {
     toggleTheme,
     loginUser,
     registerSuperAdmin,
+    registerUser,
     verifyMfa,
     authStatus,
     checkAuthStatus,
@@ -43,8 +46,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess }) => {
     recoverSuperAdmin,
   } = useBilling();
 
-  // Mode: 'login' | 'setup' | 'mfa'
-  const [mode, setMode] = useState<'login' | 'setup' | 'mfa'>(() => {
+  // Mode: 'login' | 'register' | 'setup' | 'mfa'
+  const [mode, setMode] = useState<'login' | 'register' | 'setup' | 'mfa'>(() => {
     return authStatus === 'setup_required' ? 'setup' : 'login';
   });
 
@@ -130,9 +133,115 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess }) => {
   const [copiedCodes, setCopiedCodes] = useState(false);
   const [copiedSecret, setCopiedSecret] = useState(false);
 
+  // Registration Form State
+  const [registerName, setRegisterName] = useState('');
+  const [registerEmail, setRegisterEmail] = useState('');
+  const [registerPassword, setRegisterPassword] = useState('');
+  const [registerConfirmPassword, setRegisterConfirmPassword] = useState('');
+  const [showRegisterPassword, setShowRegisterPassword] = useState(false);
+  const [showRegisterConfirmPassword, setShowRegisterConfirmPassword] = useState(false);
+  const [registerNameTouched, setRegisterNameTouched] = useState(false);
+  const [registerEmailTouched, setRegisterEmailTouched] = useState(false);
+  const [registerPasswordTouched, setRegisterPasswordTouched] = useState(false);
+  const [registerConfirmTouched, setRegisterConfirmTouched] = useState(false);
+  const [registerError, setRegisterError] = useState<string | null>(null);
+  const [isRegisterSubmitting, setIsRegisterSubmitting] = useState(false);
+  const [registerSuccess, setRegisterSuccess] = useState<{
+    approvalRequired: boolean;
+    message: string;
+    email: string;
+    name: string;
+  } | null>(null);
+
   // Email validation regex (standard RFC 5322 compatible format)
   const isValidEmail = (emailStr: string) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailStr.trim());
+  };
+
+  const registerNameError =
+    registerNameTouched && (!registerName.trim() || registerName.trim().length < 2)
+      ? 'Full name is required (minimum 2 characters).'
+      : null;
+
+  const registerEmailError =
+    registerEmailTouched && !registerEmail.trim()
+      ? 'Email address is required.'
+      : registerEmailTouched && !isValidEmail(registerEmail)
+      ? 'Please enter a valid work or corporate email address.'
+      : null;
+
+  const registerPasswordError =
+    registerPasswordTouched && !registerPassword
+      ? 'Password is required.'
+      : registerPasswordTouched && registerPassword.length < 8
+      ? 'Password must be at least 8 characters long.'
+      : null;
+
+  const registerConfirmError =
+    registerConfirmTouched && !registerConfirmPassword
+      ? 'Please confirm your password.'
+      : registerConfirmTouched && registerConfirmPassword !== registerPassword
+      ? 'Passwords do not match.'
+      : null;
+
+  const handleRegisterSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setRegisterNameTouched(true);
+    setRegisterEmailTouched(true);
+    setRegisterPasswordTouched(true);
+    setRegisterConfirmTouched(true);
+    setRegisterError(null);
+
+    const trimmedName = registerName.trim();
+    const trimmedEmail = registerEmail.trim();
+
+    if (!trimmedName || trimmedName.length < 2) {
+      setRegisterError('Please enter your full name (minimum 2 characters).');
+      return;
+    }
+
+    if (!trimmedEmail || !isValidEmail(trimmedEmail)) {
+      setRegisterError('Please enter a valid work or corporate email address.');
+      return;
+    }
+
+    if (!registerPassword || registerPassword.length < 8) {
+      setRegisterError('Password must be at least 8 characters long (12+ characters recommended).');
+      return;
+    }
+
+    if (registerPassword !== registerConfirmPassword) {
+      setRegisterError('Passwords do not match. Please verify your confirmation password.');
+      return;
+    }
+
+    try {
+      setIsRegisterSubmitting(true);
+      const res = await registerUser({
+        name: trimmedName,
+        email: trimmedEmail,
+        password: registerPassword,
+      });
+
+      setRegisterSuccess({
+        approvalRequired: Boolean(res.approvalRequired),
+        message:
+          res.message ||
+          (res.approvalRequired
+            ? 'Registration successful — awaiting administrator approval.'
+            : 'Registration successful! Your account is active.'),
+        email: trimmedEmail,
+        name: trimmedName,
+      });
+
+      if (!res.approvalRequired && onSuccess) {
+        onSuccess();
+      }
+    } catch (err: any) {
+      setRegisterError(err.message || 'Registration failed. Please check your information and try again.');
+    } finally {
+      setIsRegisterSubmitting(false);
+    }
   };
 
   const emailError =
@@ -163,6 +272,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess }) => {
   };
 
   const setupStrength = getPasswordStrength(setupPassword);
+  const registerStrength = getPasswordStrength(registerPassword);
 
   // Handle Login Submit
   const handleLoginSubmit = async (e: React.FormEvent) => {
@@ -323,23 +433,27 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess }) => {
     }
 
     try {
-      setForgotStatus({ loading: true });
+      setForgotStatus({ loading: true, error: undefined, info: undefined, details: undefined });
       const res = await api.forgotPassword(emailToQuery);
-      setForgotStatus({
-        loading: false,
-        info: res.message || 'Password reset request processed.',
-      });
+
+      if (res && res.configured === false) {
+        setForgotStatus({
+          loading: false,
+          error: 'Self-service email recovery is unconfigured on this server.',
+          details:
+            res.message ||
+            'Outbound SMTP mail gateway is not enabled. If you are an Employee or Manager, your company Super Administrator can reset passwords instantly in Settings > Team & Access Control. If you are a Super Administrator, use the Emergency Recovery Code tab or server CLI.',
+        });
+      } else {
+        setForgotStatus({
+          loading: false,
+          info: res?.message || 'Password reset request processed. If an account matches, instructions have been dispatched.',
+        });
+      }
     } catch (err: any) {
-      // Backend returns 501 SMTP_NOT_CONFIGURED if mailer is absent
-      const isUnconfigured = err?.status === 501 || err?.code === 'SMTP_NOT_CONFIGURED';
       setForgotStatus({
         loading: false,
-        error: isUnconfigured
-          ? 'Self-service email recovery is unconfigured on this server.'
-          : err?.message || 'Unable to process password reset request.',
-        details: isUnconfigured
-          ? 'Outbound SMTP mail gateway is not configured in this self-hosted environment. Contact your company Super Administrator, who can reset passwords instantly in Settings > User Management.'
-          : undefined,
+        error: err?.message || 'Unable to process password reset request.',
       });
     }
   };
@@ -684,21 +798,446 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess }) => {
                   </button>
                 </form>
 
+                {/* Don't have an account? Create account */}
+                <div className="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800/80 text-center">
+                  <p className="text-xs text-slate-600 dark:text-slate-400">
+                    Don't have an account?{' '}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setRegisterError(null);
+                        setRegisterSuccess(null);
+                        setMode('register');
+                      }}
+                      className="font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:underline transition-colors cursor-pointer"
+                    >
+                      Create account
+                    </button>
+                  </p>
+                </div>
+
                 {/* First-time Setup Link if applicable */}
                 {authStatus === 'setup_required' && (
-                  <div className="mt-6 pt-5 border-t border-slate-100 dark:border-slate-800/80 text-center">
+                  <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/80 text-center">
                     <p className="text-xs text-slate-500 dark:text-slate-400">
                       First time using BillFlow?{' '}
                       <button
                         type="button"
                         onClick={() => setMode('setup')}
-                        className="font-semibold text-blue-600 dark:text-blue-400 hover:underline"
+                        className="font-semibold text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
                       >
                         Initialize Super Admin
                       </button>
                     </p>
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* ------------------------------------------------------------- */}
+            {/* MODE: REGISTRATION FORM                                       */}
+            {/* ------------------------------------------------------------- */}
+            {mode === 'register' && (
+              <div>
+                {/* Branding & Header */}
+                <div className="text-center mb-6">
+                  <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/25 mb-3">
+                    <UserPlus className="w-6 h-6" />
+                  </div>
+                  <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+                    Create account
+                  </h1>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                    Sign up to join your team on BillFlow
+                  </p>
+                </div>
+
+                {/* SUCCESS NOTICE */}
+                {registerSuccess ? (
+                  <div className="space-y-5 animate-in fade-in duration-200">
+                    <div className="p-5 rounded-2xl border border-emerald-200 dark:border-emerald-900/60 bg-emerald-50/70 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-200 text-xs space-y-3">
+                      <div className="flex items-start gap-3">
+                        <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+                        <div className="space-y-1">
+                          <h3 className="font-bold text-sm text-emerald-800 dark:text-emerald-200">
+                            {registerSuccess.approvalRequired
+                              ? 'Registration successful — awaiting administrator approval.'
+                              : 'Registration successful!'}
+                          </h3>
+                          <p className="text-xs text-emerald-700 dark:text-emerald-300 leading-relaxed">
+                            {registerSuccess.approvalRequired ? (
+                              <>
+                                Account registered for <strong className="font-semibold">{registerSuccess.email}</strong>. For security and confidential financial data protection, new team accounts require Super Administrator review before accessing business records.
+                              </>
+                            ) : (
+                              <>
+                                Your employee account has been created for <strong className="font-semibold">{registerSuccess.email}</strong> and is active.
+                              </>
+                            )}
+                          </p>
+                        </div>
+                      </div>
+
+                      {registerSuccess.approvalRequired && (
+                        <div className="pt-2 border-t border-emerald-200/80 dark:border-emerald-900/60 text-[11px] text-emerald-700 dark:text-emerald-400 space-y-1">
+                          <p>
+                            • A registration record has been added to the Super Admin's Team Management console.
+                          </p>
+                          <p>
+                            • Once approved by the administrator, you can sign in directly with your email and password.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setLoginEmail(registerSuccess.email);
+                          setLoginPassword('');
+                          setRegisterSuccess(null);
+                          setMode('login');
+                        }}
+                        className="w-full py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold text-sm shadow-md shadow-blue-500/25 hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
+                      >
+                        <span>Sign in to BillFlow</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setRegisterSuccess(null);
+                          setRegisterName('');
+                          setRegisterEmail('');
+                          setRegisterPassword('');
+                          setRegisterConfirmPassword('');
+                          setRegisterNameTouched(false);
+                          setRegisterEmailTouched(false);
+                          setRegisterPasswordTouched(false);
+                          setRegisterConfirmTouched(false);
+                        }}
+                        className="w-full py-2.5 px-4 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer"
+                      >
+                        Register another account
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  /* REGISTRATION FORM */
+                  <form onSubmit={handleRegisterSubmit} noValidate className="space-y-4">
+                    {/* Error Banner */}
+                    {registerError && (
+                      <div
+                        role="alert"
+                        aria-live="assertive"
+                        className="p-3.5 rounded-xl border border-rose-200 dark:border-rose-900/80 bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 text-xs flex items-start gap-2.5 animate-in fade-in duration-150"
+                      >
+                        <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
+                        <span className="leading-relaxed font-medium">{registerError}</span>
+                      </div>
+                    )}
+
+                    {/* Full Name Field */}
+                    <div className="space-y-1.5">
+                      <label
+                        htmlFor="register-name"
+                        className="block text-xs font-semibold text-slate-700 dark:text-slate-300"
+                      >
+                        Full name *
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
+                          <User className="w-4 h-4" />
+                        </div>
+                        <input
+                          id="register-name"
+                          name="name"
+                          type="text"
+                          autoComplete="name"
+                          required
+                          value={registerName}
+                          onChange={(e) => {
+                            setRegisterName(e.target.value);
+                            if (registerError) setRegisterError(null);
+                          }}
+                          onBlur={() => setRegisterNameTouched(true)}
+                          placeholder="e.g. Ramesh Kumar"
+                          className={`w-full pl-10 pr-3.5 py-2.5 text-sm rounded-xl border bg-white dark:bg-[#0A0F1D] text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 transition-all ${
+                            registerNameError
+                              ? 'border-rose-500 focus:ring-rose-500/20'
+                              : 'border-slate-300 dark:border-slate-700/80 focus:border-blue-600 focus:ring-blue-500/20'
+                          }`}
+                        />
+                      </div>
+                      {registerNameError && (
+                        <p className="text-[11px] text-rose-600 dark:text-rose-400 font-medium pl-1">
+                          {registerNameError}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Email Field */}
+                    <div className="space-y-1.5">
+                      <label
+                        htmlFor="register-email"
+                        className="block text-xs font-semibold text-slate-700 dark:text-slate-300"
+                      >
+                        Email address *
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
+                          <Mail className="w-4 h-4" />
+                        </div>
+                        <input
+                          id="register-email"
+                          name="email"
+                          type="email"
+                          autoComplete="email"
+                          required
+                          value={registerEmail}
+                          onChange={(e) => {
+                            setRegisterEmail(e.target.value);
+                            if (registerError) setRegisterError(null);
+                          }}
+                          onBlur={() => setRegisterEmailTouched(true)}
+                          placeholder="name@company.com"
+                          className={`w-full pl-10 pr-3.5 py-2.5 text-sm rounded-xl border bg-white dark:bg-[#0A0F1D] text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 transition-all ${
+                            registerEmailError
+                              ? 'border-rose-500 focus:ring-rose-500/20'
+                              : 'border-slate-300 dark:border-slate-700/80 focus:border-blue-600 focus:ring-blue-500/20'
+                          }`}
+                        />
+                      </div>
+                      {registerEmailError && (
+                        <p className="text-[11px] text-rose-600 dark:text-rose-400 font-medium pl-1">
+                          {registerEmailError}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Password Field */}
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <label
+                          htmlFor="register-password"
+                          className="block text-xs font-semibold text-slate-700 dark:text-slate-300"
+                        >
+                          Password *
+                        </label>
+                        <span className="text-[11px] text-slate-400 dark:text-slate-500">
+                          12+ chars recommended
+                        </span>
+                      </div>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
+                          <Lock className="w-4 h-4" />
+                        </div>
+                        <input
+                          id="register-password"
+                          name="password"
+                          type={showRegisterPassword ? 'text' : 'password'}
+                          autoComplete="new-password"
+                          required
+                          value={registerPassword}
+                          onChange={(e) => {
+                            setRegisterPassword(e.target.value);
+                            if (registerError) setRegisterError(null);
+                          }}
+                          onBlur={() => setRegisterPasswordTouched(true)}
+                          placeholder="Create a strong password"
+                          className={`w-full pl-10 pr-11 py-2.5 text-sm rounded-xl border bg-white dark:bg-[#0A0F1D] text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 transition-all ${
+                            registerPasswordError
+                              ? 'border-rose-500 focus:ring-rose-500/20'
+                              : 'border-slate-300 dark:border-slate-700/80 focus:border-blue-600 focus:ring-blue-500/20'
+                          }`}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowRegisterPassword(!showRegisterPassword)}
+                          className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors cursor-pointer"
+                          aria-label={showRegisterPassword ? 'Hide password' : 'Show password'}
+                          tabIndex={0}
+                        >
+                          {showRegisterPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
+
+                      {/* Password Strength Indicator */}
+                      {registerPassword && (
+                        <div className="space-y-1.5 pt-1">
+                          <div className="flex items-center justify-between text-[11px]">
+                            <span className="text-slate-500">Password strength:</span>
+                            <span
+                              className={`font-semibold ${
+                                registerStrength.score <= 1
+                                  ? 'text-rose-500'
+                                  : registerStrength.score === 2
+                                  ? 'text-amber-500'
+                                  : 'text-emerald-500'
+                              }`}
+                            >
+                              {registerStrength.label}
+                            </span>
+                          </div>
+                          <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden flex gap-1">
+                            <div
+                              className={`h-full rounded-full transition-all duration-300 ${
+                                registerStrength.score >= 1 ? registerStrength.color : 'bg-transparent'
+                              }`}
+                              style={{ width: '33.3%' }}
+                            />
+                            <div
+                              className={`h-full rounded-full transition-all duration-300 ${
+                                registerStrength.score >= 2 ? registerStrength.color : 'bg-transparent'
+                              }`}
+                              style={{ width: '33.3%' }}
+                            />
+                            <div
+                              className={`h-full rounded-full transition-all duration-300 ${
+                                registerStrength.score >= 3 ? registerStrength.color : 'bg-transparent'
+                              }`}
+                              style={{ width: '33.4%' }}
+                            />
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-1 text-[10px] text-slate-500 pt-1">
+                            <span className={registerPassword.length >= 8 ? 'text-emerald-600 dark:text-emerald-400 flex items-center gap-1 font-medium' : 'flex items-center gap-1'}>
+                              ✓ At least 8 chars
+                            </span>
+                            <span className={registerPassword.length >= 12 ? 'text-emerald-600 dark:text-emerald-400 flex items-center gap-1 font-medium' : 'flex items-center gap-1'}>
+                              ✓ 12+ recommended
+                            </span>
+                            <span className={/[A-Z]/.test(registerPassword) && /[a-z]/.test(registerPassword) ? 'text-emerald-600 dark:text-emerald-400 flex items-center gap-1 font-medium' : 'flex items-center gap-1'}>
+                              ✓ Upper &amp; lower case
+                            </span>
+                            <span className={/[0-9]/.test(registerPassword) && /[^A-Za-z0-9]/.test(registerPassword) ? 'text-emerald-600 dark:text-emerald-400 flex items-center gap-1 font-medium' : 'flex items-center gap-1'}>
+                              ✓ Numbers &amp; symbols
+                            </span>
+                          </div>
+                        </div>
+                      )}
+
+                      {registerPasswordError && (
+                        <p className="text-[11px] text-rose-600 dark:text-rose-400 font-medium pl-1">
+                          {registerPasswordError}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Confirm Password Field */}
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <label
+                          htmlFor="register-confirm-password"
+                          className="block text-xs font-semibold text-slate-700 dark:text-slate-300"
+                        >
+                          Confirm password *
+                        </label>
+                        {registerConfirmPassword && (
+                          <span
+                            className={`text-[11px] font-semibold flex items-center gap-1 ${
+                              registerConfirmPassword === registerPassword
+                                ? 'text-emerald-600 dark:text-emerald-400'
+                                : 'text-rose-500'
+                            }`}
+                          >
+                            {registerConfirmPassword === registerPassword ? (
+                              <>
+                                <Check className="w-3.5 h-3.5" /> Passwords match
+                              </>
+                            ) : (
+                              'Passwords do not match'
+                            )}
+                          </span>
+                        )}
+                      </div>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
+                          <Lock className="w-4 h-4" />
+                        </div>
+                        <input
+                          id="register-confirm-password"
+                          name="confirmPassword"
+                          type={showRegisterConfirmPassword ? 'text' : 'password'}
+                          autoComplete="new-password"
+                          required
+                          value={registerConfirmPassword}
+                          onChange={(e) => {
+                            setRegisterConfirmPassword(e.target.value);
+                            if (registerError) setRegisterError(null);
+                          }}
+                          onBlur={() => setRegisterConfirmTouched(true)}
+                          placeholder="Re-enter your chosen password"
+                          className={`w-full pl-10 pr-11 py-2.5 text-sm rounded-xl border bg-white dark:bg-[#0A0F1D] text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 transition-all ${
+                            registerConfirmError
+                              ? 'border-rose-500 focus:ring-rose-500/20'
+                              : 'border-slate-300 dark:border-slate-700/80 focus:border-blue-600 focus:ring-blue-500/20'
+                          }`}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowRegisterConfirmPassword(!showRegisterConfirmPassword)}
+                          className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors cursor-pointer"
+                          aria-label={showRegisterConfirmPassword ? 'Hide password' : 'Show password'}
+                          tabIndex={0}
+                        >
+                          {showRegisterConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
+                      {registerConfirmError && (
+                        <p className="text-[11px] text-rose-600 dark:text-rose-400 font-medium pl-1">
+                          {registerConfirmError}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Role & Access Notice */}
+                    <div className="p-3 rounded-xl border border-blue-100 dark:border-blue-900/40 bg-blue-50/50 dark:bg-blue-950/20 text-[11px] text-slate-600 dark:text-slate-400 flex items-start gap-2">
+                      <Shield className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
+                      <span>
+                        Registrations receive standard Employee permissions. Access to financial data, GST ledgers, and invoice creation is governed by your organization's Super Administrator.
+                      </span>
+                    </div>
+
+                    {/* Submit Button */}
+                    <button
+                      type="submit"
+                      disabled={isRegisterSubmitting}
+                      className="w-full mt-2 py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold text-sm shadow-md shadow-blue-500/25 hover:shadow-lg hover:shadow-blue-500/30 transition-all flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-[#0F172A]"
+                    >
+                      {isRegisterSubmitting ? (
+                        <>
+                          <RefreshCw className="w-4 h-4 animate-spin" />
+                          <span>Creating account...</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>Create account</span>
+                          <ArrowRight className="w-4 h-4" />
+                        </>
+                      )}
+                    </button>
+                  </form>
+                )}
+
+                {/* Already have an account? Sign in */}
+                <div className="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800/80 text-center">
+                  <p className="text-xs text-slate-600 dark:text-slate-400">
+                    Already have an account?{' '}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setLoginError(null);
+                        setMode('login');
+                      }}
+                      className="font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:underline transition-colors cursor-pointer"
+                    >
+                      Sign in
+                    </button>
+                  </p>
+                </div>
               </div>
             )}
 

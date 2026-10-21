@@ -133,6 +133,18 @@ interface BillingContextType {
     password: string;
     mfaEnabled?: boolean;
   }) => Promise<AuthSessionResponse & { message?: string; mfaSecret?: string; recoveryCodes?: string[] }>;
+  registerUser: (data: {
+    name: string;
+    email: string;
+    password: string;
+  }) => Promise<{
+    success: boolean;
+    approvalRequired: boolean;
+    token?: string;
+    user: AppUser;
+    expiresAt?: string;
+    message: string;
+  }>;
   loginUser: (credentials: {
     email: string;
     password: string;
@@ -517,6 +529,36 @@ export const BillingProvider: React.FC<{ children: ReactNode }> = ({ children })
       } else {
         addToast(err.message || 'Failed to initialize Super Admin account', 'error');
       }
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Public User Registration
+  const registerUser = async (data: { name: string; email: string; password: string }) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await api.register(data);
+      if (res.approvalRequired) {
+        addToast(res.message || 'Registration successful — awaiting administrator approval.', 'info');
+      } else if (res.token && res.user) {
+        setCurrentUser(res.user);
+        const profile = await api.getMe().catch(() => null);
+        if (profile) setUserPermissions(profile.permissions);
+        setAuthStatus('authenticated');
+        setIsAuthModalOpen(false);
+        if (currentView === 'login') {
+          setCurrentView('dashboard');
+        }
+        addToast(`Welcome to BillFlow, ${res.user.name}!`, 'success');
+        await refreshAllData();
+      }
+      return res;
+    } catch (err: any) {
+      console.error('Registration failed:', err);
+      addToast(err.message || 'Registration failed', 'error');
       throw err;
     } finally {
       setLoading(false);
@@ -985,6 +1027,7 @@ export const BillingProvider: React.FC<{ children: ReactNode }> = ({ children })
         setAuthMode,
         checkAuthStatus,
         registerSuperAdmin,
+        registerUser,
         loginUser,
         verifyMfa,
         recoverSuperAdmin,

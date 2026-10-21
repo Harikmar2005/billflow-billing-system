@@ -1,8 +1,8 @@
 {
-  "id": "backup-1792497663286",
-  "timestamp": "2026-10-20T12:01:03.286Z",
+  "id": "backup-1792590112987",
+  "timestamp": "2026-10-21T13:41:52.987Z",
   "note": "Import user catalog after clearing defaults",
-  "productCount": 15,
+  "productCount": 16,
   "products": [
     {
       "id": "prod-1",
@@ -18,10 +18,10 @@
       "stockQuantity": 32,
       "lowStockThreshold": 5,
       "createdAt": "2026-08-12T10:40:44.390Z",
-      "updatedAt": "2026-10-20T12:01:03.208Z",
+      "updatedAt": "2026-10-21T13:41:52.937Z",
       "status": "archived",
       "isHistoricalInvoiceReference": true,
-      "archivedAt": "2026-10-20T12:01:03.208Z"
+      "archivedAt": "2026-10-21T13:41:52.937Z"
     },
     {
       "id": "prod-2",
@@ -37,10 +37,10 @@
       "stockQuantity": 18,
       "lowStockThreshold": 4,
       "createdAt": "2026-08-22T10:40:44.390Z",
-      "updatedAt": "2026-10-20T12:01:03.208Z",
+      "updatedAt": "2026-10-21T13:41:52.937Z",
       "status": "archived",
       "isHistoricalInvoiceReference": true,
-      "archivedAt": "2026-10-20T12:01:03.208Z"
+      "archivedAt": "2026-10-21T13:41:52.937Z"
     },
     {
       "id": "prod-3",
@@ -56,10 +56,10 @@
       "stockQuantity": 3,
       "lowStockThreshold": 5,
       "createdAt": "2026-09-01T10:40:44.390Z",
-      "updatedAt": "2026-10-20T12:01:03.208Z",
+      "updatedAt": "2026-10-21T13:41:52.937Z",
       "status": "archived",
       "isHistoricalInvoiceReference": true,
-      "archivedAt": "2026-10-20T12:01:03.208Z"
+      "archivedAt": "2026-10-21T13:41:52.937Z"
     },
     {
       "id": "prod-4",
@@ -75,10 +75,10 @@
       "stockQuantity": 14,
       "lowStockThreshold": 3,
       "createdAt": "2026-09-01T10:40:44.390Z",
-      "updatedAt": "2026-10-20T12:01:03.208Z",
+      "updatedAt": "2026-10-21T13:41:52.937Z",
       "status": "archived",
       "isHistoricalInvoiceReference": true,
-      "archivedAt": "2026-10-20T12:01:03.208Z"
+      "archivedAt": "2026-10-21T13:41:52.937Z"
     },
     {
       "id": "prod-5",
@@ -94,10 +94,10 @@
       "stockQuantity": 0,
       "lowStockThreshold": 0,
       "createdAt": "2026-09-01T10:40:44.390Z",
-      "updatedAt": "2026-10-20T12:01:03.208Z",
+      "updatedAt": "2026-10-21T13:41:52.937Z",
       "status": "archived",
       "isHistoricalInvoiceReference": true,
-      "archivedAt": "2026-10-20T12:01:03.208Z"
+      "archivedAt": "2026-10-21T13:41:52.937Z"
     },
     {
       "id": "prod-seed-61",
@@ -123,9 +123,9 @@
         }
       ],
       "createdAt": "2026-08-13T13:03:20.209Z",
-      "updatedAt": "2026-10-20T12:01:03.208Z",
+      "updatedAt": "2026-10-21T13:41:52.937Z",
       "isHistoricalInvoiceReference": true,
-      "archivedAt": "2026-10-20T12:01:03.208Z"
+      "archivedAt": "2026-10-21T13:41:52.937Z"
     },
     {
       "id": "prod-seed-95",
@@ -151,9 +151,9 @@
         }
       ],
       "createdAt": "2026-08-13T13:03:20.209Z",
-      "updatedAt": "2026-10-20T12:01:03.208Z",
+      "updatedAt": "2026-10-21T13:41:52.937Z",
       "isHistoricalInvoiceReference": true,
-      "archivedAt": "2026-10-20T12:01:03.208Z"
+      "archivedAt": "2026-10-21T13:41:52.937Z"
     },
     {
       "id": "prod-seed-128",
@@ -179,9 +179,9 @@
         }
       ],
       "createdAt": "2026-08-13T13:03:20.209Z",
-      "updatedAt": "2026-10-20T12:01:03.208Z",
+      "updatedAt": "2026-10-21T13:41:52.937Z",
       "isHistoricalInvoiceReference": true,
-      "archivedAt": "2026-10-20T12:01:03.208Z"
+      "archivedAt": "2026-10-21T13:41:52.937Z"
     },
     {
       "id": "prod-seed-135",
@@ -207,9 +207,9 @@
         }
       ],
       "createdAt": "2026-08-13T13:03:20.209Z",
-      "updatedAt": "2026-10-20T12:01:03.208Z",
+      "updatedAt": "2026-10-21T13:41:52.937Z",
       "isHistoricalInvoiceReference": true,
-      "archivedAt": "2026-10-20T12:01:03.208Z"
+      "archivedAt": "2026-10-21T13:41:52.937Z"
     },
     {
       "id": "prod-seed-136",
@@ -235,9 +235,9 @@
         }
       ],
       "createdAt": "2026-08-13T13:03:20.209Z",
-      "updatedAt": "2026-10-20T12:01:03.208Z",
+      "updatedAt": "2026-10-21T13:41:52.937Z",
       "isHistoricalInvoiceReference": true,
-      "archivedAt": "2026-10-20T12:01:03.208Z"
+      "archivedAt": "2026-10-21T13:41:52.937Z"
     },
     {
       "id": "prod-imp-0002",
@@ -266,9 +266,9 @@
         }
       ],
       "createdAt": "2026-10-19T10:30:14.250Z",
-      "updatedAt": "2026-10-20T12:01:03.208Z",
+      "updatedAt": "2026-10-21T13:41:52.937Z",
       "isHistoricalInvoiceReference": true,
-      "archivedAt": "2026-10-20T12:01:03.208Z"
+      "archivedAt": "2026-10-21T13:41:52.937Z"
     },
     {
       "id": "prod-imp-0002",
@@ -297,9 +297,9 @@
         }
       ],
       "createdAt": "2026-10-19T10:36:13.578Z",
-      "updatedAt": "2026-10-20T12:01:03.208Z",
+      "updatedAt": "2026-10-21T13:41:52.937Z",
       "isHistoricalInvoiceReference": true,
-      "archivedAt": "2026-10-20T12:01:03.208Z"
+      "archivedAt": "2026-10-21T13:41:52.937Z"
     },
     {
       "id": "prod-imp-0002",
@@ -328,9 +328,9 @@
         }
       ],
       "createdAt": "2026-10-19T11:20:09.928Z",
-      "updatedAt": "2026-10-20T12:01:03.208Z",
+      "updatedAt": "2026-10-21T13:41:52.937Z",
       "isHistoricalInvoiceReference": true,
-      "archivedAt": "2026-10-20T12:01:03.208Z"
+      "archivedAt": "2026-10-21T13:41:52.937Z"
     },
     {
       "id": "prod-imp-0002",
@@ -359,9 +359,9 @@
         }
       ],
       "createdAt": "2026-10-19T11:44:13.148Z",
-      "updatedAt": "2026-10-20T12:01:03.208Z",
+      "updatedAt": "2026-10-21T13:41:52.937Z",
       "isHistoricalInvoiceReference": true,
-      "archivedAt": "2026-10-20T12:01:03.208Z"
+      "archivedAt": "2026-10-21T13:41:52.937Z"
     },
     {
       "id": "prod-imp-0002",
@@ -390,9 +390,40 @@
         }
       ],
       "createdAt": "2026-10-20T11:53:18.396Z",
-      "updatedAt": "2026-10-20T12:01:03.208Z",
+      "updatedAt": "2026-10-21T13:41:52.937Z",
       "isHistoricalInvoiceReference": true,
-      "archivedAt": "2026-10-20T12:01:03.208Z"
+      "archivedAt": "2026-10-21T13:41:52.937Z"
+    },
+    {
+      "id": "prod-imp-0002",
+      "sno": 2,
+      "name": "Nylon Lock Nut SS 304 M8 DIN 985",
+      "description": "Nylon Lock Nut SS 304 M8 DIN 985",
+      "type": "product",
+      "sku": "SKU-0002",
+      "hsnSacCode": "8517",
+      "unit": "Pcs",
+      "sellingPrice": 6.2,
+      "purchasePrice": 4.34,
+      "gstRate": 18,
+      "category": "General",
+      "stockQuantity": 100,
+      "lowStockThreshold": 10,
+      "status": "archived",
+      "requiresManualRateVerification": false,
+      "isIncomplete": false,
+      "rateHistory": [
+        {
+          "oldPrice": 6.2,
+          "newPrice": 6.2,
+          "changedAt": "2026-10-20T12:01:03.287Z",
+          "reason": "Imported via replacement catalog"
+        }
+      ],
+      "createdAt": "2026-10-20T12:01:03.287Z",
+      "updatedAt": "2026-10-21T13:41:52.937Z",
+      "isHistoricalInvoiceReference": true,
+      "archivedAt": "2026-10-21T13:41:52.937Z"
     }
   ]
 }

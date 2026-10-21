@@ -170,6 +170,35 @@ class ApiService {
     }
   }
 
+  async register(data: {
+    name: string;
+    email: string;
+    password: string;
+  }): Promise<{
+    success: boolean;
+    approvalRequired: boolean;
+    token?: string;
+    user: AppUser;
+    expiresAt?: string;
+    message: string;
+  }> {
+    const res = await this.request<{
+      success: boolean;
+      approvalRequired: boolean;
+      token?: string;
+      user: AppUser;
+      expiresAt?: string;
+      message: string;
+    }>('/auth/register', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+    if (res && res.token && !res.approvalRequired) {
+      this.setAuthToken(res.token);
+    }
+    return res;
+  }
+
   async login(credentials: {
     email: string;
     password: string;
@@ -258,6 +287,7 @@ class ApiService {
     role: string;
     password: string;
     mfaEnabled?: boolean;
+    customPermissions?: Partial<import('../types').UserPermissions>;
   }): Promise<AppUser> {
     return this.request('/users', {
       method: 'POST',

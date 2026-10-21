@@ -25,6 +25,7 @@ export interface BusinessSettings {
   defaultTerms: string;
   termsOfDelivery?: string;
   isConfigured: boolean;
+  requireRegistrationApproval?: boolean;
 }
 
 export interface Customer {
@@ -376,7 +377,7 @@ export interface SampleCustomerBill {
 // ==========================================
 
 export type UserRole = 'super_admin' | 'manager' | 'employee';
-export type UserStatus = 'active' | 'deactivated';
+export type UserStatus = 'active' | 'deactivated' | 'pending_approval';
 
 export interface AppUser {
   id: string;
@@ -385,6 +386,7 @@ export interface AppUser {
   role: UserRole;
   status: UserStatus;
   mfaEnabled: boolean;
+  customPermissions?: Partial<UserPermissions>;
   lastLoginAt?: string;
   createdAt: string;
   updatedAt?: string;

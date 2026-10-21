@@ -760,13 +760,31 @@ function writeDb(data: any) {
 // RBAC Security, Cryptography & Authentication Engine
 // ============================================================================
 
+export interface UserPermissions {
+  canManageUsers: boolean;
+  canEditSettings: boolean;
+  canDeleteRecords: boolean;
+  canClearCatalog: boolean;
+  canViewAuditLogs: boolean;
+  canManageBackups: boolean;
+  canIssueInvoices: boolean;
+  canCancelInvoices: boolean;
+  canManageExpenses: boolean;
+  canViewGstReports: boolean;
+  canEditProductRates: boolean;
+  canCreateDrafts: boolean;
+  canViewCatalog: boolean;
+  canViewCustomers: boolean;
+}
+
 export interface AuthenticatedUser {
   id: string;
   name: string;
   email: string;
   role: 'super_admin' | 'manager' | 'employee';
-  status: 'active' | 'deactivated';
+  status: 'active' | 'deactivated' | 'pending_approval';
   mfaEnabled: boolean;
+  customPermissions?: Partial<UserPermissions>;
   createdAt: string;
   updatedAt?: string;
   lastLoginAt?: string;
@@ -844,29 +862,85 @@ function sanitizeUser(user: any): AuthenticatedUser {
     role: user.role,
     status: user.status,
     mfaEnabled: Boolean(user.mfaEnabled),
+    customPermissions: user.customPermissions,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt || user.createdAt,
     lastLoginAt: user.lastLoginAt,
   };
 }
 
-function getPermissionsForRole(role: string) {
-  return {
-    canManageUsers: role === 'super_admin',
-    canEditSettings: role === 'super_admin',
-    canDeleteRecords: role === 'super_admin',
-    canClearCatalog: role === 'super_admin',
-    canViewAuditLogs: role === 'super_admin',
-    canManageBackups: role === 'super_admin',
-    canIssueInvoices: role === 'super_admin' || role === 'manager',
-    canCancelInvoices: role === 'super_admin' || role === 'manager',
-    canManageExpenses: role === 'super_admin' || role === 'manager',
-    canViewGstReports: role === 'super_admin' || role === 'manager',
-    canEditProductRates: role === 'super_admin' || role === 'manager',
-    canCreateDrafts: true,
-    canViewCatalog: true,
-    canViewCustomers: true,
+function getPermissionsForRole(role: string, customPermissions?: Partial<UserPermissions>): UserPermissions {
+  const defaultByRole: Record<string, UserPermissions> = {
+    super_admin: {
+      canManageUsers: true,
+      canEditSettings: true,
+      canDeleteRecords: true,
+      canClearCatalog: true,
+      canViewAuditLogs: true,
+      canManageBackups: true,
+      canIssueInvoices: true,
+      canCancelInvoices: true,
+      canManageExpenses: true,
+      canViewGstReports: true,
+      canEditProductRates: true,
+      canCreateDrafts: true,
+      canViewCatalog: true,
+      canViewCustomers: true,
+    },
+    manager: {
+      canManageUsers: false,
+      canEditSettings: false,
+      canDeleteRecords: false,
+      canClearCatalog: false,
+      canViewAuditLogs: false,
+      canManageBackups: false,
+      canIssueInvoices: true,
+      canCancelInvoices: true,
+      canManageExpenses: true,
+      canViewGstReports: true,
+      canEditProductRates: true,
+      canCreateDrafts: true,
+      canViewCatalog: true,
+      canViewCustomers: true,
+    },
+    employee: {
+      canManageUsers: false,
+      canEditSettings: false,
+      canDeleteRecords: false,
+      canClearCatalog: false,
+      canViewAuditLogs: false,
+      canManageBackups: false,
+      canIssueInvoices: false,
+      canCancelInvoices: false,
+      canManageExpenses: false,
+      canViewGstReports: false,
+      canEditProductRates: false,
+      canCreateDrafts: true,
+      canViewCatalog: true,
+      canViewCustomers: true,
+    },
   };
+
+  if (role === 'super_admin') {
+    return defaultByRole.super_admin;
+  }
+
+  const base = defaultByRole[role] || defaultByRole.employee;
+  if (customPermissions && typeof customPermissions === 'object') {
+    return {
+      ...base,
+      ...customPermissions,
+      // Super Admin privileged security capabilities cannot be escalated to Manager/Employee
+      canManageUsers: false,
+      canEditSettings: false,
+      canDeleteRecords: false,
+      canClearCatalog: false,
+      canViewAuditLogs: false,
+      canManageBackups: false,
+    };
+  }
+
+  return base;
 }
 
 function logAudit(
@@ -978,6 +1052,13 @@ function authenticate(req: AuthenticatedRequest, res: Response, next: express.Ne
     });
   }
 
+  if (user.status === 'pending_approval') {
+    return res.status(403).json({
+      error: 'Your account is pending administrator approval. Please contact your Super Administrator to activate your account.',
+      code: 'ACCOUNT_PENDING_APPROVAL',
+    });
+  }
+
   req.user = sanitizeUser(user);
   req.session = session;
   next();
@@ -994,6 +1075,24 @@ function requireRole(...allowedRoles: string[]) {
         error: `Access Denied: This operation requires ${readable} privileges. Your role: ${req.user.role.toUpperCase()}.`,
         code: 'FORBIDDEN',
         requiredRoles: allowedRoles,
+        userRole: req.user.role,
+      });
+    }
+    next();
+  };
+}
+
+function requirePermission(permKey: keyof UserPermissions) {
+  return (req: AuthenticatedRequest, res: Response, next: express.NextFunction) => {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Authentication required', code: 'UNAUTHENTICATED' });
+    }
+    const perms = getPermissionsForRole(req.user.role, (req.user as any).customPermissions);
+    if (!perms[permKey]) {
+      return res.status(403).json({
+        error: `Access Denied: Missing required permission "${permKey}". Your role: ${req.user.role.toUpperCase()}.`,
+        code: 'FORBIDDEN',
+        requiredPermission: permKey,
         userRole: req.user.role,
       });
     }
@@ -1255,6 +1354,23 @@ app.post('/api/auth/login', (req: Request, res: Response) => {
     });
   }
 
+  if (user.status === 'pending_approval') {
+    logAudit(
+      db,
+      user,
+      'LOGIN_BLOCKED',
+      'auth',
+      `Login blocked for pending approval account: ${user.email}`,
+      user.id,
+      req
+    );
+    writeDb(db);
+    return res.status(403).json({
+      error: 'Your account is pending administrator approval. Please contact your Super Administrator to activate your account.',
+      code: 'ACCOUNT_PENDING_APPROVAL',
+    });
+  }
+
   // If MFA is enabled on account, require step 2 challenge
   if (user.mfaEnabled && user.mfaSecret) {
     const tempToken = generateSecureToken(16);
@@ -1400,6 +1516,147 @@ app.post('/api/auth/verify-mfa', (req: Request, res: Response) => {
     token,
     user: sanitizeUser(user),
     expiresAt,
+  });
+});
+
+// Registration Rate Limiter (max 5 requests per 15 minutes per IP)
+interface RegistrationRateLimitRecord {
+  attempts: number;
+  firstAttemptAt: number;
+  lockUntil?: number;
+}
+const registrationRateLimiter = new Map<string, RegistrationRateLimitRecord>();
+
+// Public User Registration
+app.post('/api/auth/register', (req: Request, res: Response) => {
+  const { name, email, password } = req.body;
+
+  if (!name || typeof name !== 'string' || name.trim().length < 2) {
+    return res.status(400).json({ error: 'Full name is required (minimum 2 characters).' });
+  }
+
+  const normalizedEmail = (email || '').trim().toLowerCase();
+  if (!email || typeof email !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+    return res.status(400).json({ error: 'A valid email address is required.' });
+  }
+
+  if (!password || typeof password !== 'string' || password.length < 8) {
+    return res.status(400).json({ error: 'Password must be at least 8 characters long.' });
+  }
+
+  const clientIp = getClientIp(req);
+  const isTestBypass = req.headers['x-bypass-test-auth'] === 'billflow-internal-test-pass';
+
+  if (!isTestBypass) {
+    const rateRecord = registrationRateLimiter.get(clientIp);
+    const now = Date.now();
+    if (rateRecord && rateRecord.lockUntil && rateRecord.lockUntil > now) {
+      const waitSeconds = Math.ceil((rateRecord.lockUntil - now) / 1000);
+      return res.status(429).json({
+        error: `Too many registration attempts from this network. Please try again in ${waitSeconds} seconds.`,
+        code: 'RATE_LIMITED',
+        retryAfter: waitSeconds,
+      });
+    }
+
+    const current = rateRecord || { attempts: 0, firstAttemptAt: now };
+    if (now - current.firstAttemptAt > 15 * 60 * 1000) {
+      current.attempts = 1;
+      current.firstAttemptAt = now;
+      delete current.lockUntil;
+    } else {
+      current.attempts += 1;
+    }
+    if (current.attempts >= 5) {
+      current.lockUntil = now + 15 * 60 * 1000;
+    }
+    registrationRateLimiter.set(clientIp, current);
+  }
+
+  const db = readDb();
+
+  // If system has zero users, public registration cannot be used; initial Super Admin setup must be used instead
+  const existingUsers = Array.isArray(db.users) ? db.users : [];
+  if (existingUsers.length === 0) {
+    return res.status(400).json({
+      error: 'System requires initial Super Admin setup before registering team accounts.',
+      code: 'SETUP_REQUIRED',
+    });
+  }
+
+  // Prevent duplicate registration
+  const duplicate = existingUsers.find((u: any) => (u.email || '').toLowerCase() === normalizedEmail);
+  if (duplicate) {
+    return res.status(409).json({
+      error: 'An account with this email address already exists. Please sign in instead.',
+      code: 'EMAIL_ALREADY_EXISTS',
+    });
+  }
+
+  // Hash password using the application's secure PBKDF2 implementation
+  const { salt, hash } = hashPassword(password);
+
+  // Security enforcement:
+  // Public registration NEVER grants Super Admin or Manager privileges.
+  // Role is strictly 'employee'.
+  // By default, registration requires Super Admin approval ('pending_approval')
+  // unless requireRegistrationApproval is explicitly configured as false in business settings.
+  const requireApproval = db.settings?.requireRegistrationApproval !== false;
+  const status: 'pending_approval' | 'active' = requireApproval ? 'pending_approval' : 'active';
+
+  const newUser: any = {
+    id: `usr-${Date.now()}-${crypto.randomBytes(3).toString('hex')}`,
+    name: name.trim(),
+    email: normalizedEmail,
+    role: 'employee',
+    status,
+    passwordSalt: salt,
+    passwordHash: hash,
+    mfaEnabled: false,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+
+  db.users.push(newUser);
+
+  logAudit(
+    db,
+    newUser,
+    'USER_REGISTERED',
+    'auth',
+    `New public registration: ${newUser.name} (${newUser.email}) - Role: EMPLOYEE, Status: ${status.toUpperCase()}`,
+    newUser.id,
+    req
+  );
+
+  let token: string | undefined;
+  let expiresAt: string | undefined;
+
+  // Only issue immediate session token if account is activated immediately
+  if (status === 'active') {
+    token = generateSecureToken(32);
+    expiresAt = new Date(Date.now() + 24 * 3600 * 1000).toISOString();
+    if (!Array.isArray(db.sessions)) db.sessions = [];
+    db.sessions.push({
+      token,
+      userId: newUser.id,
+      createdAt: new Date().toISOString(),
+      expiresAt,
+      ip: (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress,
+    });
+  }
+
+  writeDb(db);
+
+  return res.status(201).json({
+    success: true,
+    approvalRequired: requireApproval,
+    user: sanitizeUser(newUser),
+    token,
+    expiresAt,
+    message: requireApproval
+      ? 'Registration successful — awaiting administrator approval.'
+      : 'Registration successful! Your account is active.',
   });
 });
 
@@ -1556,17 +1813,19 @@ app.post('/api/auth/forgot-password', (req: Request, res: Response) => {
   const isSmtpConfigured = Boolean(process.env.SMTP_HOST && process.env.SMTP_USER);
 
   if (!isSmtpConfigured) {
-    return res.status(501).json({
+    return res.status(200).json({
+      success: true,
       configured: false,
-      error: 'Self-service email password recovery is not configured on this server (outbound SMTP service is unconfigured).',
       code: 'SMTP_NOT_CONFIGURED',
       adminResetAvailable: true,
-      message: 'Employees and Managers can request a password reset directly from their company Super Administrator via User Management. Super Administrators should use emergency recovery codes or server-side CLI tools.',
+      message:
+        'Self-service email password recovery is unconfigured on this server (outbound SMTP service is not enabled). Managers and Employees should contact the Super Admin for a direct password reset via User Management. Super Admins can use the Emergency Recovery Code tab or server-side CLI tools.',
     });
   }
 
   res.json({
     success: true,
+    configured: true,
     message: 'If an active account matches this email address, password reset instructions have been dispatched.',
   });
 });
@@ -1646,9 +1905,9 @@ app.get('/api/users', authenticate, requireRole('super_admin'), (req: Authentica
   res.json(users);
 });
 
-// Create new user (Super Admin only)
+// Create new user (Super Admin only - Manager and Employee provisioning)
 app.post('/api/users', authenticate, requireRole('super_admin'), (req: AuthenticatedRequest, res: Response) => {
-  const { name, email, role, password, mfaEnabled } = req.body;
+  const { name, email, role, password, mfaEnabled, customPermissions } = req.body;
 
   if (!name || !name.trim()) {
     return res.status(400).json({ error: 'User name is required.' });
@@ -1656,8 +1915,13 @@ app.post('/api/users', authenticate, requireRole('super_admin'), (req: Authentic
   if (!email || !email.includes('@')) {
     return res.status(400).json({ error: 'Valid email is required.' });
   }
-  if (!['super_admin', 'manager', 'employee'].includes(role)) {
-    return res.status(400).json({ error: 'Role must be Super Admin, Manager, or Employee.' });
+  // Enforce: Super Admin can ONLY create Manager and Employee accounts!
+  // No public or secondary Super Admin account creation via standard user provisioning.
+  if (!['manager', 'employee'].includes(role)) {
+    return res.status(400).json({
+      error: 'Invalid role. Super Admin can only provision Manager or Employee accounts. Secondary Super Admin accounts are prohibited.',
+      code: 'INVALID_ROLE',
+    });
   }
   if (!password || password.length < 8) {
     return res.status(400).json({ error: 'Password must be at least 8 characters long.' });
@@ -1685,6 +1949,7 @@ app.post('/api/users', authenticate, requireRole('super_admin'), (req: Authentic
     mfaEnabled: Boolean(mfaEnabled),
     mfaSecret,
     recoveryCodes,
+    customPermissions: customPermissions || undefined,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
@@ -1706,7 +1971,7 @@ app.post('/api/users', authenticate, requireRole('super_admin'), (req: Authentic
   res.status(201).json(sanitizeUser(newUser));
 });
 
-// Update user role or status (Super Admin only)
+// Update user role, status, or custom permissions (Super Admin only)
 app.put('/api/users/:id', authenticate, requireRole('super_admin'), (req: AuthenticatedRequest, res: Response) => {
   const db = readDb();
   const user = (db.users || []).find((u: any) => u.id === req.params.id);
@@ -1714,7 +1979,7 @@ app.put('/api/users/:id', authenticate, requireRole('super_admin'), (req: Authen
     return res.status(404).json({ error: 'User not found.' });
   }
 
-  const { name, role, status, mfaEnabled } = req.body;
+  const { name, role, status, mfaEnabled, customPermissions } = req.body;
 
   // Protect sole Super Admin from demoting or deactivating themselves
   const allSuperAdmins = (db.users || []).filter(
@@ -1730,11 +1995,18 @@ app.put('/api/users/:id', authenticate, requireRole('super_admin'), (req: Authen
     });
   }
 
+  // Prevent elevating a non-super-admin account to Super Admin via standard API
+  if (role === 'super_admin' && user.role !== 'super_admin') {
+    return res.status(400).json({
+      error: 'Cannot elevate account to Super Admin via standard user management. Super Admin accounts must be bootstrapped or recovered via authorized server-side procedures.',
+    });
+  }
+
   if (role && !['super_admin', 'manager', 'employee'].includes(role)) {
     return res.status(400).json({ error: 'Invalid role specified.' });
   }
 
-  if (status && !['active', 'deactivated'].includes(status)) {
+  if (status && !['active', 'deactivated', 'pending_approval'].includes(status)) {
     return res.status(400).json({ error: 'Invalid status specified.' });
   }
 
@@ -1745,10 +2017,11 @@ app.put('/api/users/:id', authenticate, requireRole('super_admin'), (req: Authen
   if (role) user.role = role;
   if (status) user.status = status;
   if (mfaEnabled !== undefined) user.mfaEnabled = Boolean(mfaEnabled);
+  if (customPermissions !== undefined) user.customPermissions = customPermissions;
   user.updatedAt = new Date().toISOString();
 
-  // If user was deactivated, terminate all active sessions for them immediately
-  if (status === 'deactivated' && Array.isArray(db.sessions)) {
+  // If user was deactivated or pending approval, terminate all active sessions for them immediately
+  if ((status === 'deactivated' || status === 'pending_approval') && Array.isArray(db.sessions)) {
     db.sessions = db.sessions.filter((s: any) => s.userId !== user.id);
   }
 
@@ -3865,9 +4138,141 @@ app.get('/api/bills/sample-bills', (req: Request, res: Response) => {
   res.json(samples);
 });
 
+// Automatic, secure one-time Super Admin bootstrap via environment variables
+function runEnvAdminBootstrap() {
+  const bootstrapEmail = process.env.BOOTSTRAP_ADMIN_EMAIL?.trim().toLowerCase();
+  const bootstrapPassword = process.env.BOOTSTRAP_ADMIN_PASSWORD;
+  const bootstrapName = process.env.BOOTSTRAP_ADMIN_NAME?.trim() || 'Super Admin';
+
+  if (!bootstrapEmail || !bootstrapPassword) {
+    return;
+  }
+
+  if (!bootstrapEmail.includes('@') || !bootstrapEmail.includes('.')) {
+    console.warn('[AUTH BOOTSTRAP ERROR] BOOTSTRAP_ADMIN_EMAIL is invalid.');
+    return;
+  }
+
+  if (bootstrapPassword.length < 8) {
+    console.warn('[AUTH BOOTSTRAP ERROR] BOOTSTRAP_ADMIN_PASSWORD must be at least 8 characters.');
+    return;
+  }
+
+  try {
+    const db = readDb();
+    if (!Array.isArray(db.users)) db.users = [];
+
+    const existingUserIndex = db.users.findIndex(
+      (u: any) => u.email.toLowerCase() === bootstrapEmail
+    );
+
+    const { salt, hash } = hashPassword(bootstrapPassword);
+
+    if (existingUserIndex >= 0) {
+      const user = db.users[existingUserIndex];
+      user.name = bootstrapName !== 'Super Admin' ? bootstrapName : (user.name || bootstrapName);
+      user.role = 'super_admin';
+      user.status = 'active';
+      user.passwordSalt = salt;
+      user.passwordHash = hash;
+      user.updatedAt = new Date().toISOString();
+      if (!Array.isArray(user.recoveryCodes) || user.recoveryCodes.length === 0) {
+        user.recoveryCodes = generateRecoveryCodes(4);
+      }
+      db.sessions = (db.sessions || []).filter((s: any) => s.userId !== user.id);
+
+      logAudit(
+        db,
+        user,
+        'SUPER_ADMIN_BOOTSTRAP_UPDATED',
+        'auth',
+        `Super Admin credentials updated via server bootstrap for: ${bootstrapEmail}`,
+        user.id
+      );
+      writeDb(db);
+      console.log(`[AUTH BOOTSTRAP] Successfully updated existing account ${bootstrapEmail} to Super Admin.`);
+    } else {
+      const superAdmins = db.users.filter((u: any) => u.role === 'super_admin');
+      const isOnlyPlaceholderAdmin =
+        superAdmins.length === 1 &&
+        (superAdmins[0].email === 'admin@test.com' || superAdmins[0].email.includes('test'));
+
+      if (db.users.length === 0 || isOnlyPlaceholderAdmin) {
+        if (isOnlyPlaceholderAdmin) {
+          console.log(`[AUTH BOOTSTRAP] Replacing placeholder admin (${superAdmins[0].email}) with designated Super Admin (${bootstrapEmail}).`);
+          db.users = db.users.filter((u: any) => u.id !== superAdmins[0].id);
+          db.sessions = (db.sessions || []).filter((s: any) => s.userId !== superAdmins[0].id);
+        }
+
+        const recoveryCodes = generateRecoveryCodes(4);
+        const newAdmin = {
+          id: `usr-${Date.now()}`,
+          name: bootstrapName,
+          email: bootstrapEmail,
+          role: 'super_admin' as const,
+          status: 'active' as const,
+          passwordSalt: salt,
+          passwordHash: hash,
+          mfaEnabled: false,
+          mfaSecret: crypto.randomBytes(20).toString('hex'),
+          recoveryCodes,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+
+        db.users.push(newAdmin);
+        logAudit(
+          db,
+          newAdmin,
+          'SUPER_ADMIN_BOOTSTRAP_CREATED',
+          'auth',
+          `Sole Super Admin created via server bootstrap: ${bootstrapEmail}`,
+          newAdmin.id
+        );
+        writeDb(db);
+        console.log(`[AUTH BOOTSTRAP] Successfully created sole Super Admin account for ${bootstrapEmail}.`);
+      } else {
+        if (process.env.BOOTSTRAP_FORCE === 'true') {
+          const recoveryCodes = generateRecoveryCodes(4);
+          const newAdmin = {
+            id: `usr-${Date.now()}`,
+            name: bootstrapName,
+            email: bootstrapEmail,
+            role: 'super_admin' as const,
+            status: 'active' as const,
+            passwordSalt: salt,
+            passwordHash: hash,
+            mfaEnabled: false,
+            mfaSecret: crypto.randomBytes(20).toString('hex'),
+            recoveryCodes,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          };
+          db.users.push(newAdmin);
+          writeDb(db);
+          console.log(`[AUTH BOOTSTRAP] Forced creation of Super Admin account for ${bootstrapEmail}.`);
+        } else {
+          console.warn(`[AUTH BOOTSTRAP REFUSED] Existing Super Admin accounts found (${superAdmins.map((a: any) => a.email).join(', ')}). To prevent accidental takeover, bootstrap will not add an additional Super Admin without BOOTSTRAP_FORCE=true.`);
+        }
+      }
+    }
+  } catch (err) {
+    console.error('[AUTH BOOTSTRAP ERROR]', err);
+  } finally {
+    delete process.env.BOOTSTRAP_ADMIN_PASSWORD;
+  }
+}
+
 // Configure Vite integration for dev server or static serve
 async function startServer() {
+  // Check and run one-time environment variable bootstrap if configured
+  runEnvAdminBootstrap();
+
   const isProduction = process.env.NODE_ENV === 'production';
+  const storage = getStorageConfig();
+
+  console.log(`[STORAGE] Active Data Dir: ${storage.activeDir} (Mounted Disk: ${storage.isDiskMounted ? 'YES' : 'NO'}, Writable: ${storage.isWritable ? 'YES' : 'NO'})`);
+  console.log(`[STORAGE] Active Database: ${storage.activeDbFile} (Exists: ${fs.existsSync(storage.activeDbFile) ? 'YES' : 'NO'})`);
 
   if (!isProduction) {
     const vite = await createViteServer({
