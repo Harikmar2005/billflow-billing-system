@@ -202,7 +202,7 @@ export const SettingsView: React.FC = () => {
       setLoadingAudit(true);
       const [logs, healthRes] = await Promise.all([
         api.getAuditLogs({ limit: 50 }),
-        fetch('/api/health').then((r) => r.json()).catch(() => null),
+        api.getHealth().catch(() => null),
       ]);
       setAuditLogs(logs || []);
       if (healthRes?.storage) {

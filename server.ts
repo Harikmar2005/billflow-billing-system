@@ -48,6 +48,14 @@ app.get('/sitemap.xml', (req, res) => {
 app.use(express.json({ limit: '25mb' }));
 app.use(express.urlencoded({ extended: true, limit: '25mb' }));
 
+// Body Parser Error Handler (Ensures malformed JSON in requests returns clean JSON error instead of Express HTML)
+app.use((err: any, req: Request, res: Response, next: any) => {
+  if (err instanceof SyntaxError && 'body' in err) {
+    return res.status(400).json({ error: 'Malformed JSON payload in request body.', code: 'INVALID_JSON' });
+  }
+  next(err);
+});
+
 // Bot & Spam Protection Shield
 app.use((req, res, next) => {
   if (req.method === 'POST') {
@@ -4274,6 +4282,24 @@ async function startServer() {
   console.log(`[STORAGE] Active Data Dir: ${storage.activeDir} (Mounted Disk: ${storage.isDiskMounted ? 'YES' : 'NO'}, Writable: ${storage.isWritable ? 'YES' : 'NO'})`);
   console.log(`[STORAGE] Active Database: ${storage.activeDbFile} (Exists: ${fs.existsSync(storage.activeDbFile) ? 'YES' : 'NO'})`);
 
+  // API 404 handler (prevents API route misses from returning index.html in both dev & prod)
+  app.all('/api/*', (req: Request, res: Response) => {
+    res.status(404).json({ error: 'API endpoint not found', path: req.path });
+  });
+
+  // Centralized API error handler for unhandled errors in /api routes
+  app.use('/api', (err: any, req: Request, res: Response, next: any) => {
+    if (err) {
+      console.error(`[API ERROR] ${req.method} ${req.path}:`, err?.message || err);
+      const status = typeof err.status === 'number' ? err.status : (typeof err.statusCode === 'number' ? err.statusCode : 500);
+      return res.status(status).json({
+        error: err.message || 'An unexpected server error occurred.',
+        code: err.code || 'SERVER_ERROR',
+      });
+    }
+    next();
+  });
+
   if (!isProduction) {
     const vite = await createViteServer({
       server: { middlewareMode: true },
@@ -4283,11 +4309,6 @@ async function startServer() {
   } else {
     const distPath = path.join(__dirname, 'dist');
     app.use(express.static(distPath));
-
-    // API 404 handler (prevents API route misses from returning index.html)
-    app.all('/api/*', (req: Request, res: Response) => {
-      res.status(404).json({ error: 'API endpoint not found', path: req.path });
-    });
 
     app.get('*', (req: Request, res: Response) => {
       res.sendFile(path.join(distPath, 'index.html'));

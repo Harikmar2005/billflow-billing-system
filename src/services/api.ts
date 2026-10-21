@@ -18,9 +18,28 @@ import {
   DatabaseBackup,
 } from '../types';
 
-const API_BASE = '/api';
+const getApiBase = (): string => {
+  if (typeof import.meta !== 'undefined' && (import.meta as any)?.env) {
+    const customBase = (import.meta.env as any).VITE_API_URL || (import.meta.env as any).VITE_API_BASE_URL;
+    if (customBase) {
+      return customBase.endsWith('/api') ? customBase : `${customBase.replace(/\/+$/, '')}/api`;
+    }
+  }
+  if (typeof window === 'undefined' && typeof process !== 'undefined' && process.env) {
+    if (process.env.API_BASE_URL) {
+      const base = process.env.API_BASE_URL;
+      return base.endsWith('/api') ? base : `${base.replace(/\/+$/, '')}/api`;
+    }
+    if (process.env.TEST_BASE_URL) {
+      const base = process.env.TEST_BASE_URL;
+      return base.endsWith('/api') ? base : `${base.replace(/\/+$/, '')}/api`;
+    }
+  }
+  return '/api';
+};
 
 class ApiService {
+  private apiBase: string = getApiBase();
   private token: string | null = null;
 
   constructor() {
@@ -31,6 +50,15 @@ class ApiService {
         this.token = null;
       }
     }
+  }
+
+  setBaseUrl(url: string): void {
+    if (!url) return;
+    this.apiBase = url.endsWith('/api') ? url : `${url.replace(/\/+$/, '')}/api`;
+  }
+
+  getBaseUrl(): string {
+    return this.apiBase;
   }
 
   setAuthToken(token: string | null): void {
@@ -60,7 +88,7 @@ class ApiService {
   }
 
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-    const url = `${API_BASE}${endpoint}`;
+    const url = `${this.apiBase}${endpoint}`;
     const token = this.getAuthToken();
 
     const headers: Record<string, string> = {
@@ -75,36 +103,80 @@ class ApiService {
 
     try {
       const response = await fetch(url, { ...options, headers });
+
+      // Read the body stream ONCE as text to prevent multiple stream consumptions
+      let rawText = '';
+      try {
+        rawText = await response.text();
+      } catch {
+        rawText = '';
+      }
+
+      // Safely parse JSON if response body is non-empty
+      let parsedData: any = null;
+      if (rawText && rawText.trim().length > 0) {
+        try {
+          parsedData = JSON.parse(rawText);
+        } catch {
+          parsedData = null;
+        }
+      }
+
       if (!response.ok) {
         let errorMsg = `Server error ${response.status}`;
-        let errData: any = null;
-        try {
-          errData = await response.json();
-          if (errData && errData.error) {
-            errorMsg = errData.error;
-          } else if (errData && errData.message) {
-            errorMsg = errData.message;
-          } else if (errData && errData.detail) {
-            errorMsg = typeof errData.detail === 'string' ? errData.detail : JSON.stringify(errData.detail);
+        if (parsedData && typeof parsedData === 'object') {
+          if (typeof parsedData.error === 'string' && parsedData.error.trim()) {
+            errorMsg = parsedData.error.trim();
+          } else if (typeof parsedData.message === 'string' && parsedData.message.trim()) {
+            errorMsg = parsedData.message.trim();
+          } else if (parsedData.detail) {
+            errorMsg = typeof parsedData.detail === 'string' ? parsedData.detail : JSON.stringify(parsedData.detail);
           }
-        } catch {
-          errorMsg = (await response.text()) || errorMsg;
+        } else if (rawText && rawText.trim().length > 0) {
+          const trimmed = rawText.trim();
+          if (trimmed.startsWith('<')) {
+            const titleMatch = trimmed.match(/<title>([^<]+)<\/title>/i);
+            if (titleMatch && titleMatch[1]) {
+              errorMsg = `${titleMatch[1].trim()} (${response.status})`;
+            } else {
+              errorMsg = `Server error ${response.status} (${response.statusText || 'Request failed'})`;
+            }
+          } else {
+            errorMsg = trimmed.length > 300 ? trimmed.substring(0, 300) + '...' : trimmed;
+          }
+        } else if (response.statusText) {
+          errorMsg = `${response.statusText} (${response.status})`;
         }
+
         const errorObj: any = new Error(errorMsg);
         errorObj.status = response.status;
-        errorObj.code = errData?.code;
-        errorObj.data = errData;
+        errorObj.code = parsedData?.code;
+        errorObj.data = parsedData;
+        errorObj.rawBody = rawText;
         throw errorObj;
       }
-      return (await response.json()) as T;
+
+      // Successful response
+      if (parsedData !== null) {
+        return parsedData as T;
+      }
+      return (rawText as unknown) as T;
     } catch (err: any) {
-      console.error(`API Error [${endpoint}]:`, err);
+      console.error(`API Error [${endpoint}]:`, err?.message || err);
       throw err;
     }
   }
 
   // Health
-  async getHealth(): Promise<{ status: string; engine: string; gemini_configured: boolean; timestamp: string }> {
+  async getHealth(): Promise<{
+    status: string;
+    engine: string;
+    gemini_configured: boolean;
+    storage?: any;
+    timestamp: string;
+    locale?: string;
+    currency?: string;
+  }> {
     return this.request('/health');
   }
 

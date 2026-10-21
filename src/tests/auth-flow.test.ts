@@ -1,5 +1,8 @@
+import { api } from '../services/api';
+
 const PORT = process.env.PORT || 8080;
 const BASE_URL = process.env.TEST_BASE_URL || `http://localhost:${PORT}`;
+api.setBaseUrl(`${BASE_URL}/api`);
 
 function assert(condition: boolean, message: string) {
   if (!condition) {
@@ -125,6 +128,50 @@ async function runAuthFlowTests() {
   });
   assertEqual(badLoginRes.status, 401, 'Invalid password must return 401');
   console.log('   ✓ Invalid credentials rejected with HTTP 401');
+
+  // Direct api.login service test with invalid credentials
+  console.log('   Testing api.login service directly with invalid credentials...');
+  try {
+    await api.login({ email: activeAdminEmail, password: 'WrongPassword999!' });
+    assert(false, 'api.login should reject invalid credentials');
+  } catch (err: any) {
+    assert(!err.message.includes('body stream already read'), 'Must NOT throw body stream already read');
+    assertEqual(err.message, 'Invalid email or password.', 'Must preserve server error message');
+    assertEqual(err.status, 401, 'Must have status 401');
+    console.log('   ✓ api.login safely caught 401 without body stream error:', err.message);
+  }
+
+  // Missing credentials validation
+  console.log('   Testing login with missing credentials...');
+  const missingCredsRes = await fetch(`${BASE_URL}/api/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: '' }),
+  });
+  assertEqual(missingCredsRes.status, 400, 'Missing credentials must return 400');
+  const missingData = await missingCredsRes.json();
+  assertEqual(missingData.error, 'Email and password are required.', 'Must return required fields message');
+  console.log('   ✓ Missing credentials rejected with 400 JSON');
+
+  // Malformed JSON payload validation
+  console.log('   Testing malformed JSON payload handling on server...');
+  const malformedRes = await fetch(`${BASE_URL}/api/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: '{"email": "broken',
+  });
+  assertEqual(malformedRes.status, 400, 'Malformed JSON must return 400');
+  const malformedData = await malformedRes.json();
+  assertEqual(malformedData.code, 'INVALID_JSON', 'Must return INVALID_JSON code');
+  console.log('   ✓ Malformed JSON handled cleanly by server returning 400 JSON');
+
+  // Unhandled /api/* 404 handler validation
+  console.log('   Testing API 404 endpoint returns JSON (not HTML)...');
+  const notFoundRes = await fetch(`${BASE_URL}/api/nonexistent-auth-route-test`);
+  assertEqual(notFoundRes.status, 404, 'Non-existent API route must return 404');
+  const notFoundData = await notFoundRes.json();
+  assertEqual(notFoundData.error, 'API endpoint not found', 'Must return JSON 404 error');
+  console.log('   ✓ API route 404 returns JSON');
 
   // Step 7: Test Emergency Super Admin Recovery endpoint (/api/auth/recover-admin)
   console.log('\n7. Testing Emergency Super Admin Recovery endpoint (/api/auth/recover-admin)...');
